@@ -1,5 +1,7 @@
 import * as Assert from "assert";
-import * as Util from "./../src/index";
+import { Retry } from "./../src/retry";
+import { ApplicationException } from "n-exception";
+
 
 suite("makeRetry", () =>
 {
@@ -12,10 +14,10 @@ suite("makeRetry", () =>
             console.log("num", num);
             numAttempts++;
             // let result = num * num;
-            return Promise.reject(new Error("not working"));
+            return Promise.reject(new ApplicationException("not working"));
         };
         
-        let modifiedFunc = Util.makeRetry(testFunc, 4);
+        let modifiedFunc = Retry.make(testFunc, 4, [Error]);
         
         let failure = false;
         try 
@@ -28,6 +30,6 @@ suite("makeRetry", () =>
         }
         
         Assert.strictEqual(failure, true);
-        Assert.strictEqual(numAttempts, 4);
+        Assert.strictEqual(numAttempts, 5);
     });
 });

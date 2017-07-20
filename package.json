@@ -42,6 +42,8 @@
     "typescript": "2.2.1"
   },
   "dependencies": {
+    "n-defensive": "git+https://github.com/nivinjoseph/n-defensive.git",
+    "n-exception": "git+https://github.com/nivinjoseph/n-exception.git",
     "n-ext": "git+https://github.com/nivinjoseph/n-ext.git"
   }
 }
