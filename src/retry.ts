@@ -104,7 +104,7 @@ export abstract class Retry // static class
         return result;
     }
 
-    public static makeWithExponentialBackOff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static makeWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);

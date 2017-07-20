@@ -82,7 +82,7 @@ class Retry // static class
         };
         return result;
     }
-    static makeWithExponentialBackOff(func, numberOfRetries, onErrors) {
+    static makeWithExponentialBackoff(func, numberOfRetries, onErrors) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
         n_defensive_1.given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
