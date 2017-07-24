@@ -17,21 +17,20 @@ suite("Retry", () =>
     
     suite("make", () =>
     {    
-        // TODO: add test to track function input
-        test("should retry and not alter function input parameter", async () =>
+        test("should retry and not alter input parameter", async () =>
         {
-            numAttempts = 0;  
-            testInput = 1;
+            numAttempts = 0;   
+            let value = null;
             
-            let testFunc = (testInput: number) =>
-            {
-                testInput++;
+            let testFunc = (val: number) =>
+            {                                
                 numAttempts++;
-
+                value = ++val;
                 return Promise.reject(new ApplicationException("not working"));
             };
             
             let modifiedFunc = Retry.make(testFunc, 4, [ApplicationException]);
+            testInput = 1;
             
             try 
             {
@@ -44,7 +43,7 @@ suite("Retry", () =>
 
             Assert.strictEqual(failure, true);
             Assert.strictEqual(numAttempts, 5);
-            Assert.strictEqual(testInput, 1);
+            Assert.strictEqual(value, 2);
         });
         
         test("should retry if exception is not specified with one type of exception", async () =>
@@ -189,22 +188,22 @@ suite("Retry", () =>
     {              
         failure = true;
         
-        test("should retry with delay and not alter function input parameter", async () =>
+        test("should retry with delay and not alter input parameter", async () =>
         {
             numAttempts = 0;   
-            testInput = 1;
+            let value = null;
             
             time = Date.now();
             
-            let testFunc = (testInput: number) =>
-            {
-                numAttempts++;
-                testInput++;
-
+            let testFunc = (val: number) =>
+            {              
+                numAttempts++; 
+                value = ++val;
                 return Promise.reject(new ApplicationException("not working"));
             };
             
             let modifiedFunc = Retry.makeWithDelay(testFunc, 4, 300, [ApplicationException]);  
+            testInput = 1;
             
             try 
             {
@@ -219,7 +218,7 @@ suite("Retry", () =>
             
             Assert.strictEqual(failure, true);
             Assert.strictEqual(numAttempts, 5);
-            Assert.strictEqual(testInput, 1);
+            Assert.strictEqual(value, 2);
             Assert.ok(delay >= 1200 && delay < 1300);
         });
         
@@ -355,22 +354,22 @@ suite("Retry", () =>
     {
         failure = true;
         
-        test.only("should retry with exponential backoff and not alter function input parameter", async () =>
+        test("should retry with exponential backoff and not alter input parameter", async () =>
         {
             numAttempts = 0;
-            testInput = 1;
+            let value = null;
             
             time = Date.now();
             
-            let testFunc = (testInput: number) =>
+            let testFunc = (val: number) =>
             {
-                numAttempts++;
-                testInput++;
-
+                numAttempts++;                
+                value = ++val;
                 return Promise.reject(new ApplicationException("not working"));
             };          
             
             let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 3, [ApplicationException]);  
+            testInput = 1;
             
             try 
             {
@@ -385,7 +384,7 @@ suite("Retry", () =>
 
             Assert.strictEqual(failure, true);
             Assert.strictEqual(numAttempts, 4);  
-            Assert.strictEqual(testInput, 1);
+            Assert.strictEqual(value, 2);
             Assert.ok(delay < 9000);
         });
         
