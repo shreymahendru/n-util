@@ -1,9 +1,9 @@
 import * as Assert from "assert";
-import { Retry } from "./../src/retry";
+import { Make } from "./../src/make";
 import { ApplicationException, ArgumentException } from "n-exception";
 
 
-suite("Retry", () =>
+suite("Make", () =>
 {        
     let numAttempts: number;   
 
@@ -15,7 +15,7 @@ suite("Retry", () =>
     
     let testInput: number;
     
-    suite("make", () =>
+    suite("retry", () =>
     {    
         test("should retry and not alter input parameter", async () =>
         {
@@ -29,7 +29,7 @@ suite("Retry", () =>
                 return Promise.reject(new ApplicationException("not working"));
             };
             
-            let modifiedFunc = Retry.make(testFunc, 4, [ApplicationException]);
+            let modifiedFunc = Make.retry(testFunc, 4, [ApplicationException]);
             testInput = 1;
             
             try 
@@ -57,7 +57,7 @@ suite("Retry", () =>
                 return Promise.reject(new ApplicationException("not working"));
             };
 
-            let modifiedFunc = Retry.make(testFunc, 4, [Error]);
+            let modifiedFunc = Make.retry(testFunc, 4, [Error]);
 
             try 
             {
@@ -85,7 +85,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };            
             
-            let modifiedFunc = Retry.make(testFunc, 4, [Error]);
+            let modifiedFunc = Make.retry(testFunc, 4, [Error]);
 
             try 
             {
@@ -113,7 +113,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };          
             
-            let modifiedFunc = Retry.make(testFunc, 3, [ArgumentException]);
+            let modifiedFunc = Make.retry(testFunc, 3, [ArgumentException]);
 
             try 
             {
@@ -141,7 +141,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.make(testFunc, 3, [ArgumentException, ApplicationException]);
+            let modifiedFunc = Make.retry(testFunc, 3, [ArgumentException, ApplicationException]);
 
             try 
             {
@@ -166,7 +166,7 @@ suite("Retry", () =>
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Retry.make(testFunc, 4, [Error]);
+            let modifiedFunc = Make.retry(testFunc, 4, [Error]);
 
             try 
             {
@@ -184,7 +184,7 @@ suite("Retry", () =>
         
     });
 
-    suite("makeWithDelay", () =>
+    suite("retryWithDelay", () =>
     {              
         failure = true;
         
@@ -202,7 +202,7 @@ suite("Retry", () =>
                 return Promise.reject(new ApplicationException("not working"));
             };
             
-            let modifiedFunc = Retry.makeWithDelay(testFunc, 4, 300, [ApplicationException]);  
+            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, [ApplicationException]);  
             testInput = 1;
             
             try 
@@ -237,7 +237,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithDelay(testFunc, 4, 300, [Error]);
+            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, [Error]);
 
             try 
             {
@@ -270,7 +270,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithDelay(testFunc, 4, 300, [ArgumentException]);
+            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, [ArgumentException]);
 
             try 
             {
@@ -303,7 +303,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithDelay(testFunc, 3, 300, [ArgumentException, ApplicationException]);
+            let modifiedFunc = Make.retryWithDelay(testFunc, 3, 300, [ArgumentException, ApplicationException]);
 
             try 
             {
@@ -331,7 +331,7 @@ suite("Retry", () =>
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Retry.makeWithDelay(testFunc, 4, 300, [Error]);
+            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, [Error]);
 
             try 
             {
@@ -350,7 +350,7 @@ suite("Retry", () =>
         });
     });
 
-    suite("makeWithExponentialBackoff", () =>
+    suite("retryWithExponentialBackoff", () =>
     {
         failure = true;
         
@@ -368,7 +368,7 @@ suite("Retry", () =>
                 return Promise.reject(new ApplicationException("not working"));
             };          
             
-            let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 3, [ApplicationException]);  
+            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, [ApplicationException]);  
             testInput = 1;
             
             try 
@@ -403,7 +403,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 3, [Error]);
+            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, [Error]);
 
             try 
             {
@@ -436,7 +436,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 3, [ArgumentException]);
+            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, [ArgumentException]);
 
             try 
             {
@@ -469,7 +469,7 @@ suite("Retry", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 3, [ArgumentException, ApplicationException]);
+            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, [ArgumentException, ApplicationException]);
 
             try 
             {
@@ -499,7 +499,7 @@ suite("Retry", () =>
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Retry.makeWithExponentialBackoff(testFunc, 4, [Error]);
+            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 4, [Error]);
 
             try 
             {

@@ -1,4 +1,4 @@
-import { Retry } from "./retry";
+import { Make } from "./make";
 
 
-export { Retry };
+export { Make };

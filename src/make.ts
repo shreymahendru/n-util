@@ -1,12 +1,12 @@
 import { given } from "n-defensive";
 
 // public
-export abstract class Retry // static class
+export abstract class Make // static class
 {
     private constructor() { }
 
 
-    public static make<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -48,7 +48,7 @@ export abstract class Retry // static class
         return result;
     }
 
-    public static makeWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -104,7 +104,7 @@ export abstract class Retry // static class
         return result;
     }
 
-    public static makeWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -149,7 +149,7 @@ export abstract class Retry // static class
                     error = err;
                     if (onErrors && onErrors.every(t => !(error instanceof t)))
                         break;
-                    delayMS = (delayMS + Retry.getRandomInt(200, 500)) * attempts;
+                    delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
                 }
             }
 
