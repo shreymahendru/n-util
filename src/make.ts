@@ -161,6 +161,44 @@ export abstract class Make // static class
 
         return result;
     }
+    
+    public static async<T>(func: (...params: any[]) => T): (...params: any[]) => Promise<T>
+    {
+        let result = function (...p: any[]): Promise<T>
+        {
+            try 
+            {
+                let val = func(...p);
+                return Promise.resolve(val);
+            }
+            catch (error)
+            {
+                return Promise.reject(error);
+            }
+        };
+        
+        return result;
+    }
+    
+    public static promise<T>(func: (...params: any[]) => void): (...params: any[]) => Promise<T>
+    {
+        let result = function (...p: any[]): Promise<T>
+        {
+            let promise = new Promise<any>((resolve, reject) =>
+                func(...p, (err: Error, ...values: any[]) =>
+                    err
+                        ? reject(err)
+                        : values.length === 0
+                            ? resolve()
+                            : values.length === 1
+                                ? resolve(values[0])
+                                : resolve(values)));
+            
+            return promise;
+        };   
+        
+        return result;
+    }
 
     
     private static getRandomInt(min: number, max: number): number

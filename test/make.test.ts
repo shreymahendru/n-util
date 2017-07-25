@@ -517,4 +517,14 @@ suite("Make", () =>
             Assert.strictEqual(numAttempts, 1);
         });
     });
+    
+    suite("async", () =>
+    {
+        
+    });
+    
+    suite("promise", () =>
+    {
+        
+    });
 });
