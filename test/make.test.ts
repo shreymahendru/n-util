@@ -1,6 +1,8 @@
 import * as Assert from "assert";
 import { Make } from "./../src/make";
 import { ApplicationException, ArgumentException } from "n-exception";
+import * as Fs from "fs";
+import * as Path from "path";
 
 
 suite("Make", () =>
@@ -519,12 +521,74 @@ suite("Make", () =>
     });
     
     suite("async", () =>
-    {
+    { 
+        let exists: boolean;
         
-    });
+        test("should make synchronous function async and return a promise", async () =>
+        {            
+            let filePath = Path.join(process.cwd(), "package.json");
+            
+            let statPromise = Make.async<Fs.Stats>(Fs.statSync)(filePath);
+            let stat = await statPromise;
+            Assert.ok(statPromise instanceof Promise);
+            Assert.ok(stat !== null);
+            Assert.strictEqual(stat.isFile(), true);
+        });
+        
+        test("should handle error if file does not exist", async () =>
+        {
+            let filePath = Path.join(process.cwd(), "somePath");
+            
+            let statPromise = Make.async<Fs.Stats>(Fs.statSync)(filePath);
+
+            try 
+            {
+                let stat = await statPromise;                
+                console.log(stat);
+                exists = true;
+            }
+            catch (error)
+            {
+                exists = false;
+            }
+
+            Assert.strictEqual(exists, false);  
+        });
+        
+    });       
     
     suite("promise", () =>
     {
+        let exists: boolean;
+        
+        test("should make function return a promise", async () =>
+        {
+            let filePath = Path.join(process.cwd(), "package.json");
+
+            let stat = await Make.promise<Fs.Stats>(Fs.stat)(filePath);
+            Assert.ok(stat !== null);
+            Assert.strictEqual(stat.isFile(), true);
+            
+        });
+        
+        test("should handle error if file does not exist", async () =>
+        {
+            let filePath = Path.join(process.cwd(), "somePath");
+
+            let stat = Make.promise<Fs.Stats>(Fs.stat)(filePath);
+            
+            try 
+            {
+                await stat;
+                exists = true;
+            }
+            catch (error)
+            {
+                exists = false;
+            }
+          
+            Assert.strictEqual(exists, false);  
+        });        
         
     });
 });
