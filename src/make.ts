@@ -6,11 +6,11 @@ export abstract class Make // static class
     private constructor() { }
 
 
-    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof(u) === "function"));
+        given(errorPredicate, "errorPredicate").ensureIsFunction();
         
         let numberOfAttempts = numberOfRetries + 1;
         
@@ -34,7 +34,7 @@ export abstract class Make // static class
                 catch (err)
                 {
                     error = err;
-                    if (onErrors && onErrors.every(t => !(error instanceof t)))
+                    if (errorPredicate && !errorPredicate(error))
                         break;
                 }
             }
@@ -48,11 +48,11 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
+        given(errorPredicate, "errorPredicate").ensureIsFunction();
         
         let numberOfAttempts = numberOfRetries + 1;
         
@@ -90,7 +90,7 @@ export abstract class Make // static class
                 catch (err)
                 {
                     error = err;
-                    if (onErrors && onErrors.every(t => !(error instanceof t)))
+                    if (errorPredicate && !errorPredicate(error))
                         break;
                 }
             }
@@ -104,11 +104,11 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, onErrors?: Function[]): (...params: any[]) => Promise<T>
+    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
+        given(errorPredicate, "errorPredicate").ensureIsFunction();
         
         let numberOfAttempts = numberOfRetries + 1;
         
@@ -147,7 +147,7 @@ export abstract class Make // static class
                 catch (err)
                 {
                     error = err;
-                    if (onErrors && onErrors.every(t => !(error instanceof t)))
+                    if (errorPredicate && !errorPredicate(error))
                         break;
                     delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
                 }
@@ -162,7 +162,7 @@ export abstract class Make // static class
         return result;
     }
     
-    public static async<T>(func: (...params: any[]) => T): (...params: any[]) => Promise<T>
+    public static syncToAsync<T>(func: (...params: any[]) => T): (...params: any[]) => Promise<T>
     {
         let result = function (...p: any[]): Promise<T>
         {
@@ -180,7 +180,7 @@ export abstract class Make // static class
         return result;
     }
     
-    public static promise<T>(func: (...params: any[]) => void): (...params: any[]) => Promise<T>
+    public static callbackToPromise<T>(func: (...params: any[]) => void): (...params: any[]) => Promise<T>
     {
         let result = function (...p: any[]): Promise<T>
         {

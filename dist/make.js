@@ -13,10 +13,10 @@ const n_defensive_1 = require("n-defensive");
 class Make // static class
  {
     constructor() { }
-    static retry(func, numberOfRetries, onErrors) {
+    static retry(func, numberOfRetries, errorPredicate) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
+        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
         let numberOfAttempts = numberOfRetries + 1;
         let result = function (...p) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -32,7 +32,7 @@ class Make // static class
                     }
                     catch (err) {
                         error = err;
-                        if (onErrors && onErrors.every(t => !(error instanceof t)))
+                        if (errorPredicate && !errorPredicate(error))
                             break;
                     }
                 }
@@ -43,10 +43,10 @@ class Make // static class
         };
         return result;
     }
-    static retryWithDelay(func, numberOfRetries, delayMS, onErrors) {
+    static retryWithDelay(func, numberOfRetries, delayMS, errorPredicate) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
+        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
         let numberOfAttempts = numberOfRetries + 1;
         let result = function (...p) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -71,7 +71,7 @@ class Make // static class
                     }
                     catch (err) {
                         error = err;
-                        if (onErrors && onErrors.every(t => !(error instanceof t)))
+                        if (errorPredicate && !errorPredicate(error))
                             break;
                     }
                 }
@@ -82,10 +82,10 @@ class Make // static class
         };
         return result;
     }
-    static retryWithExponentialBackoff(func, numberOfRetries, onErrors) {
+    static retryWithExponentialBackoff(func, numberOfRetries, errorPredicate) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(onErrors, "onErrors").ensureIsArray().ensure(t => t.length > 0).ensure(t => t.every(u => typeof (u) === "function"));
+        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
         let numberOfAttempts = numberOfRetries + 1;
         let result = function (...p) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -111,7 +111,7 @@ class Make // static class
                     }
                     catch (err) {
                         error = err;
-                        if (onErrors && onErrors.every(t => !(error instanceof t)))
+                        if (errorPredicate && !errorPredicate(error))
                             break;
                         delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
                     }
@@ -123,7 +123,7 @@ class Make // static class
         };
         return result;
     }
-    static async(func) {
+    static syncToAsync(func) {
         let result = function (...p) {
             try {
                 let val = func(...p);
@@ -135,7 +135,7 @@ class Make // static class
         };
         return result;
     }
-    static promise(func) {
+    static callbackToPromise(func) {
         let result = function (...p) {
             let promise = new Promise((resolve, reject) => func(...p, (err, ...values) => err
                 ? reject(err)
