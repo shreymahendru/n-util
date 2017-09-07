@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":";;AAAA,iCAA8B;AAGrB,2BAAI","sourcesContent":["import { Make } from \"./make\";\n\n\nexport { Make };"]}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":";;AAAA,iCAA8B;AAGrB,eAHA,WAAI,CAGA","sourcesContent":["import { Make } from \"./make\";\n\n\nexport { Make };"]}
