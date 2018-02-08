@@ -164,6 +164,8 @@ export abstract class Make // static class
     
     public static syncToAsync<T>(func: (...params: any[]) => T): (...params: any[]) => Promise<T>
     {
+        given(func, "func").ensureHasValue().ensureIsFunction();
+        
         let result = function (...p: any[]): Promise<T>
         {
             try 

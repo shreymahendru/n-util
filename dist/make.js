@@ -124,6 +124,7 @@ class Make // static class
         return result;
     }
     static syncToAsync(func) {
+        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         let result = function (...p) {
             try {
                 let val = func(...p);
