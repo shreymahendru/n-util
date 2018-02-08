@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const n_defensive_1 = require("n-defensive");
+const n_defensive_1 = require("@nivinjoseph/n-defensive");
 // public
 class Make // static class
  {

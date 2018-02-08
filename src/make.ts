@@ -1,4 +1,4 @@
-import { given } from "n-defensive";
+import { given } from "@nivinjoseph/n-defensive";
 
 // public
 export abstract class Make // static class
