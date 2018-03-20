@@ -1,2 +1,3 @@
 import { Make } from "./make";
-export { Make };
+import { Delay } from "./delay";
+export { Make, Delay };
