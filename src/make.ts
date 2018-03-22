@@ -6,7 +6,7 @@ export abstract class Make // static class
     private constructor() { }
 
 
-    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
+    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -48,7 +48,7 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
+    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -104,7 +104,7 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (err: Error) => boolean): (...params: any[]) => Promise<T>
+    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
