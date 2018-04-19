@@ -201,6 +201,24 @@ export abstract class Make // static class
         
         return result;
     }
+    
+    public static loop(func: () => void, numberOfTimes: number): void
+    {
+        given(func, "func").ensureHasValue().ensureIsFunction();
+        given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        
+        for (let i = 0; i < numberOfTimes; i++)
+            func();  
+    }
+    
+    public static async loopAsync(asyncFunc: () => Promise<void>, numberOfTimes: number, degreesOfParallelism?: number): Promise<void>
+    {
+        given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+        given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        
+        let taskManager = new TaskManager<void>(numberOfTimes, asyncFunc, degreesOfParallelism, false);
+        await taskManager.execute();
+    }
 
     
     private static getRandomInt(min: number, max: number): number
@@ -208,5 +226,118 @@ export abstract class Make // static class
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+    }
+}
+
+
+class TaskManager<T>
+{
+    private readonly _numberOfTimes: number;
+    private readonly _taskFunc: (input: T) => Promise<any>;
+    private readonly _taskCount: number;
+    private readonly _captureResults: boolean;
+    private readonly _tasks: Task<T>[];
+    private readonly _results: any[];
+
+
+    public constructor(numberOfTimes: number, taskFunc: (input: T) => Promise<any>, taskCount: number, captureResults: boolean)
+    {
+        this._numberOfTimes = numberOfTimes;
+        this._taskFunc = taskFunc;
+        this._taskCount = !taskCount || taskCount <= 0 ? numberOfTimes : taskCount;
+        this._captureResults = captureResults;
+
+        this._tasks = [];
+        for (let i = 0; i < this._taskCount; i++)
+            this._tasks.push(new Task<T>(this, i, this._taskFunc, captureResults));
+
+        if (this._captureResults)
+            this._results = [];
+    }
+
+
+    public async execute(): Promise<void>
+    {
+        for (let i = 0; i < this._numberOfTimes; i++)
+        {
+            if (this._captureResults)
+                this._results.push(null);
+            await this.executeTaskForItem(null, i);
+        }
+
+        await this.finish();
+    }
+
+    public addResult(itemIndex: number, result: any): void
+    {
+        this._results[itemIndex] = result;
+    }
+
+    public getResults(): any[]
+    {
+        return this._results;
+    }
+
+
+    private async executeTaskForItem(item: T, itemIndex: number): Promise<void>
+    {
+        let availableTask = this._tasks.find(t => t.isFree);
+        if (!availableTask)
+        {
+            let task = await Promise.race(this._tasks.map(t => t.promise));
+            task.free();
+            availableTask = task;
+        }
+
+        availableTask.execute(item, itemIndex);
+    }
+
+    private finish(): Promise<any>
+    {
+        return Promise.all(this._tasks.filter(t => !t.isFree).map(t => t.promise));
+    }
+}
+
+class Task<T>
+{
+    private readonly _manager: TaskManager<T>;
+    private readonly _id: number;
+    private readonly _taskFunc: (input: T) => Promise<any>;
+    private readonly _captureResult: boolean;
+    private _promise: Promise<Task<T>>;
+
+
+    public get promise(): Promise<Task<T>> { return this._promise; }
+    public get isFree(): boolean { return this._promise === null; }
+
+
+    public constructor(manager: TaskManager<T>, id: number, taskFunc: (input: T) => Promise<any>, captureResult: boolean)
+    {
+        this._manager = manager;
+        this._id = id;
+        this._taskFunc = taskFunc;
+        this._captureResult = captureResult;
+        this._promise = null;
+    }
+
+
+    public execute(item: T, itemIndex: number): void
+    {
+        this._promise = new Promise((resolve, reject) =>
+        {
+            this._taskFunc(item)
+                .then((result) =>
+                {
+                    if (this._captureResult)
+                        this._manager.addResult(itemIndex, result);
+                    resolve(this);
+                })
+                .catch((err) => reject(err));
+        });
+    }
+
+    public free(): void
+    {
+        this._promise = null;
     }
 }
