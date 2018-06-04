@@ -137,6 +137,7 @@ class Make // static class
         return result;
     }
     static callbackToPromise(func) {
+        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         let result = function (...p) {
             let promise = new Promise((resolve, reject) => func(...p, (err, ...values) => err
                 ? reject(err)
@@ -162,6 +163,32 @@ class Make // static class
             let taskManager = new TaskManager(numberOfTimes, asyncFunc, degreesOfParallelism, false);
             yield taskManager.execute();
         });
+    }
+    static errorSuppressed(func, defaultValue = null) {
+        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
+            try {
+                return func(...p);
+            }
+            catch (_a) {
+                return defaultValue;
+            }
+        };
+        return result;
+    }
+    static errorSuppressedAsync(asyncFunc, defaultValue = null) {
+        n_defensive_1.given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    return yield asyncFunc(...p);
+                }
+                catch (_a) {
+                    return defaultValue;
+                }
+            });
+        };
+        return result;
     }
     static getRandomInt(min, max) {
         min = Math.ceil(min);

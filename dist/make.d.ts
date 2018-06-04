@@ -7,5 +7,7 @@ export declare abstract class Make {
     static callbackToPromise<T>(func: (...params: any[]) => void): (...params: any[]) => Promise<T>;
     static loop(func: () => void, numberOfTimes: number): void;
     static loopAsync(asyncFunc: () => Promise<void>, numberOfTimes: number, degreesOfParallelism?: number): Promise<void>;
+    static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue?: U): T;
+    static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue?: U): T;
     private static getRandomInt(min, max);
 }
