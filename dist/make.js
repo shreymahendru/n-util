@@ -164,32 +164,38 @@ class Make // static class
             yield taskManager.execute();
         });
     }
-    static errorSuppressed(func, defaultValue = null) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        const result = function (...p) {
-            try {
-                return func(...p);
-            }
-            catch (_a) {
-                return defaultValue;
-            }
-        };
-        return result;
-    }
-    static errorSuppressedAsync(asyncFunc, defaultValue = null) {
-        n_defensive_1.given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
-        const result = function (...p) {
-            return __awaiter(this, void 0, void 0, function* () {
-                try {
-                    return yield asyncFunc(...p);
-                }
-                catch (_a) {
-                    return defaultValue;
-                }
-            });
-        };
-        return result;
-    }
+    // public static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue: U = null): T
+    // {
+    //     given(func, "func").ensureHasValue().ensureIsFunction();
+    //     const result = function (...p: any[]): any
+    //     {
+    //         try 
+    //         {
+    //             return func(...p);
+    //         }
+    //         catch
+    //         {
+    //             return defaultValue;
+    //         }
+    //     };
+    //     return <any>result;
+    // }
+    // public static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue: U = null): T
+    // {
+    //     given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+    //     const result = async function (...p: any[]): Promise<any>
+    //     {
+    //         try 
+    //         {
+    //             return await asyncFunc(...p);
+    //         }
+    //         catch
+    //         {
+    //             return defaultValue;
+    //         }
+    //     };
+    //     return <any>result;
+    // }
     static getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);

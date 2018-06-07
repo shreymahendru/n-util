@@ -1,25 +1,41 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
+const delay_1 = require("./delay");
 // public
 class BackgroundProcessor {
-    constructor(intervalMilliseconds = 500) {
+    constructor(defaultErrorHandler, intervalMilliseconds = 500) {
         this._actionsToProcess = new Array();
         this._isDisposed = false;
-        n_defensive_1.given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        n_defensive_1.given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
+        n_defensive_1.given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        this._defaultErrorHandler = defaultErrorHandler;
         this._intervalMilliseconds = intervalMilliseconds;
         this.initiateBackgroundProcessing();
     }
-    processAction(action) {
+    processAction(action, errorHandler) {
         n_defensive_1.given(action, "action").ensureHasValue().ensureIsFunction();
-        this._actionsToProcess.push(new Action(action));
-    }
-    processAsyncAction(asyncAction) {
-        n_defensive_1.given(asyncAction, "asyncAction").ensureHasValue().ensureIsFunction();
-        this._actionsToProcess.push(new Action(asyncAction, true));
+        n_defensive_1.given(errorHandler, "errorHandler").ensureIsFunction();
+        this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
     }
     dispose() {
-        this._isDisposed = true;
+        return __awaiter(this, void 0, void 0, function* () {
+            this._isDisposed = true;
+            let numActions = this._actionsToProcess.length;
+            while (this._actionsToProcess.length > 0) {
+                const action = this._actionsToProcess.shift();
+                action.execute(() => { });
+            }
+            yield delay_1.Delay.seconds(numActions * 2);
+        });
     }
     initiateBackgroundProcessing() {
         if (this._isDisposed)
@@ -39,37 +55,47 @@ class BackgroundProcessor {
 }
 exports.BackgroundProcessor = BackgroundProcessor;
 class Action {
-    constructor(action, isAsync = false) {
+    constructor(action, errorHandler) {
         n_defensive_1.given(action, "action").ensureHasValue().ensureIsFunction();
+        n_defensive_1.given(errorHandler, "errorHandler").ensureHasValue().ensureIsFunction();
         this._action = action;
-        this._isAsync = !!isAsync;
+        this._errorHandler = errorHandler;
     }
     execute(postExecuteCallback) {
         n_defensive_1.given(postExecuteCallback, "postExecuteCallback").ensureHasValue().ensureIsFunction();
-        if (this._isAsync) {
-            try {
-                this._action()
-                    .then(() => {
+        try {
+            this._action()
+                .then(() => {
+                postExecuteCallback();
+            })
+                .catch((error) => {
+                try {
+                    this._errorHandler(error)
+                        .then(() => postExecuteCallback())
+                        .catch((error) => {
+                        console.error(error);
+                        postExecuteCallback();
+                    });
+                }
+                catch (error) {
+                    console.error(error);
                     postExecuteCallback();
-                })
+                }
+            });
+        }
+        catch (error) {
+            try {
+                this._errorHandler(error)
+                    .then(() => postExecuteCallback())
                     .catch((error) => {
-                    console.log(error);
+                    console.error(error);
                     postExecuteCallback();
                 });
             }
             catch (error) {
-                console.log(error);
+                console.error(error);
                 postExecuteCallback();
             }
-        }
-        else {
-            try {
-                this._action();
-            }
-            catch (error) {
-                console.log(error);
-            }
-            postExecuteCallback();
         }
     }
 }
