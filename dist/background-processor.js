@@ -12,13 +12,15 @@ const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const delay_1 = require("./delay");
 // public
 class BackgroundProcessor {
-    constructor(defaultErrorHandler, intervalMilliseconds) {
+    constructor(defaultErrorHandler, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true) {
         this._actionsToProcess = new Array();
         this._isDisposed = false;
         n_defensive_1.given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(intervalMilliseconds, "intervalMilliseconds").ensureIsNumber().ensure(t => t >= 0);
+        n_defensive_1.given(breakIntervalMilliseconds, "breakIntervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        n_defensive_1.given(breakOnlyWhenNoWork, "breakOnlyWhenNoWork").ensureHasValue().ensureIsBoolean();
         this._defaultErrorHandler = defaultErrorHandler;
-        this._intervalMilliseconds = intervalMilliseconds || 0;
+        this._breakIntervalMilliseconds = breakIntervalMilliseconds || 0;
+        this._breakOnlyWhenNoWork = breakOnlyWhenNoWork;
         this.initiateBackgroundProcessing();
     }
     processAction(action, errorHandler) {
@@ -40,6 +42,9 @@ class BackgroundProcessor {
     initiateBackgroundProcessing() {
         if (this._isDisposed)
             return;
+        let timeout = this._breakIntervalMilliseconds;
+        if (this._breakOnlyWhenNoWork && this._actionsToProcess.length > 0)
+            timeout = 0;
         setTimeout(() => {
             if (this._actionsToProcess.length > 0) {
                 const action = this._actionsToProcess.shift();
@@ -50,7 +55,7 @@ class BackgroundProcessor {
             else {
                 this.initiateBackgroundProcessing();
             }
-        }, this._intervalMilliseconds);
+        }, timeout);
     }
 }
 exports.BackgroundProcessor = BackgroundProcessor;
