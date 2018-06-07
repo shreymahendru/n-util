@@ -10,13 +10,13 @@ export class BackgroundProcessor
     private _isDisposed: boolean = false;
 
 
-    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, intervalMilliseconds: number = 500)
+    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, intervalMilliseconds?: number)
     {
         given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
-        given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        given(intervalMilliseconds, "intervalMilliseconds").ensureIsNumber().ensure(t => t >= 0);
 
         this._defaultErrorHandler = defaultErrorHandler;
-        this._intervalMilliseconds = intervalMilliseconds;
+        this._intervalMilliseconds = intervalMilliseconds || 0;
 
         this.initiateBackgroundProcessing();
     }

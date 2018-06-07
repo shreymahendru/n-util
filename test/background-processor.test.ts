@@ -12,7 +12,7 @@ suite("BackgroundProcessor tests", () =>
                 throw new Error("4 is bad");
             console.log(e, "default error handler");
             return Promise.resolve();
-        }, 1000);
+        });
 
 
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach((t) =>
