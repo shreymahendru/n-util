@@ -31,12 +31,12 @@ class BackgroundProcessor {
     dispose() {
         return __awaiter(this, void 0, void 0, function* () {
             this._isDisposed = true;
-            let numActions = this._actionsToProcess.length;
+            // let numActions = this._actionsToProcess.length;
             while (this._actionsToProcess.length > 0) {
                 const action = this._actionsToProcess.shift();
                 action.execute(() => { });
             }
-            yield delay_1.Delay.seconds(numActions * 2);
+            yield delay_1.Delay.seconds(5);
         });
     }
     initiateBackgroundProcessing() {
