@@ -12,13 +12,13 @@ const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const delay_1 = require("./delay");
 // public
 class BackgroundProcessor {
-    constructor(defaultErrorHandler, intervalMilliseconds = 500) {
+    constructor(defaultErrorHandler, intervalMilliseconds) {
         this._actionsToProcess = new Array();
         this._isDisposed = false;
         n_defensive_1.given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        n_defensive_1.given(intervalMilliseconds, "intervalMilliseconds").ensureIsNumber().ensure(t => t >= 0);
         this._defaultErrorHandler = defaultErrorHandler;
-        this._intervalMilliseconds = intervalMilliseconds;
+        this._intervalMilliseconds = intervalMilliseconds || 0;
         this.initiateBackgroundProcessing();
     }
     processAction(action, errorHandler) {
