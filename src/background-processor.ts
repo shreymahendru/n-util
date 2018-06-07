@@ -5,18 +5,21 @@ import { Delay } from "./delay";
 export class BackgroundProcessor
 {
     private readonly _defaultErrorHandler: (e: Error) => Promise<void>;
-    private readonly _intervalMilliseconds: number;
+    private readonly _breakIntervalMilliseconds: number;
+    private readonly _breakOnlyWhenNoWork: boolean;
     private readonly _actionsToProcess: Array<Action> = new Array<Action>();
     private _isDisposed: boolean = false;
 
 
-    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, intervalMilliseconds?: number)
+    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, breakIntervalMilliseconds: number = 1000, breakOnlyWhenNoWork = true)
     {
         given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
-        given(intervalMilliseconds, "intervalMilliseconds").ensureIsNumber().ensure(t => t >= 0);
+        given(breakIntervalMilliseconds, "breakIntervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        given(breakOnlyWhenNoWork, "breakOnlyWhenNoWork").ensureHasValue().ensureIsBoolean();
 
         this._defaultErrorHandler = defaultErrorHandler;
-        this._intervalMilliseconds = intervalMilliseconds || 0;
+        this._breakIntervalMilliseconds = breakIntervalMilliseconds || 0;
+        this._breakOnlyWhenNoWork = breakOnlyWhenNoWork;
 
         this.initiateBackgroundProcessing();
     }
@@ -51,6 +54,10 @@ export class BackgroundProcessor
         if (this._isDisposed)
             return;
 
+        let timeout = this._breakIntervalMilliseconds;
+        if (this._breakOnlyWhenNoWork && this._actionsToProcess.length > 0)
+            timeout = 0;
+        
         setTimeout(() =>
         {
             if (this._actionsToProcess.length > 0)
@@ -65,7 +72,7 @@ export class BackgroundProcessor
             {
                 this.initiateBackgroundProcessing();
             }
-        }, this._intervalMilliseconds);
+        }, timeout);
     }
 }
 
