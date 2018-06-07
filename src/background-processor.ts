@@ -37,7 +37,7 @@ export class BackgroundProcessor
     {
         this._isDisposed = true;
         
-        let numActions = this._actionsToProcess.length;
+        // let numActions = this._actionsToProcess.length;
         
         while (this._actionsToProcess.length > 0)
         {
@@ -45,7 +45,7 @@ export class BackgroundProcessor
             action.execute(() => {});
         }
         
-        await Delay.seconds(numActions * 2);
+        await Delay.seconds(5);
     }
 
 
