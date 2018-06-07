@@ -1,41 +1,48 @@
 import { given } from "@nivinjoseph/n-defensive";
+import { Delay } from "./delay";
 
 // public
 export class BackgroundProcessor
 {
+    private readonly _defaultErrorHandler: (e: Error) => Promise<void>;
     private readonly _intervalMilliseconds: number;
     private readonly _actionsToProcess: Array<Action> = new Array<Action>();
     private _isDisposed: boolean = false;
 
 
-    public constructor(intervalMilliseconds: number = 500)
+    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, intervalMilliseconds: number = 500)
     {
-        given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
+        given(intervalMilliseconds, "intervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
 
+        this._defaultErrorHandler = defaultErrorHandler;
         this._intervalMilliseconds = intervalMilliseconds;
 
         this.initiateBackgroundProcessing();
     }
 
 
-    public processAction(action: () => void): void
+    public processAction(action: () => Promise<void>, errorHandler?: (e: Error) => Promise<void>): void
     {
         given(action, "action").ensureHasValue().ensureIsFunction();
+        given(errorHandler, "errorHandler").ensureIsFunction();
 
-        this._actionsToProcess.push(new Action(action));
+        this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
     }
 
-
-    public processAsyncAction(asyncAction: () => Promise<void>): void
-    {
-        given(asyncAction, "asyncAction").ensureHasValue().ensureIsFunction();
-
-        this._actionsToProcess.push(new Action(asyncAction, true));
-    }
-
-    public dispose(): void
+    public async dispose(): Promise<void>
     {
         this._isDisposed = true;
+        
+        let numActions = this._actionsToProcess.length;
+        
+        while (this._actionsToProcess.length > 0)
+        {
+            const action = this._actionsToProcess.shift();
+            action.execute(() => {});
+        }
+        
+        await Delay.seconds(numActions * 2);
     }
 
 
@@ -65,16 +72,17 @@ export class BackgroundProcessor
 
 class Action
 {
-    private readonly _action: Function;
-    private readonly _isAsync: boolean;
+    private readonly _action: () => Promise<void>;
+    private readonly _errorHandler: (e: Error) => Promise<void>;
 
 
-    public constructor(action: Function, isAsync: boolean = false)
+    public constructor(action: () => Promise<void>, errorHandler: (e: Error) => Promise<void>)
     {
         given(action, "action").ensureHasValue().ensureIsFunction();
+        given(errorHandler, "errorHandler").ensureHasValue().ensureIsFunction();
 
         this._action = action;
-        this._isAsync = !!isAsync;
+        this._errorHandler = errorHandler;
     }
 
 
@@ -82,39 +90,49 @@ class Action
     {
         given(postExecuteCallback, "postExecuteCallback").ensureHasValue().ensureIsFunction();
 
-        if (this._isAsync)
+        try 
+        {
+            this._action()
+                .then(() =>
+                {
+                    postExecuteCallback();
+                })
+                .catch((error) =>
+                {
+                    try 
+                    {
+                        this._errorHandler(error)
+                            .then(() => postExecuteCallback())
+                            .catch((error) =>
+                            {
+                                console.error(error);
+                                postExecuteCallback();
+                            });
+                    }
+                    catch (error)
+                    {
+                        console.error(error);
+                        postExecuteCallback();
+                    }
+                });
+        }
+        catch (error)
         {
             try 
             {
-                this._action()
-                    .then(() =>
+                this._errorHandler(error)
+                    .then(() => postExecuteCallback())
+                    .catch((error) =>
                     {
-                        postExecuteCallback();
-                    })
-                    .catch((error: any) =>
-                    {
-                        console.log(error);
+                        console.error(error);
                         postExecuteCallback();
                     });
             }
             catch (error)
             {
-                console.log(error);
+                console.error(error);
                 postExecuteCallback();
             }
-        }
-        else
-        {
-            try 
-            {
-                this._action();
-            }
-            catch (error)
-            {
-                console.log(error);
-            }
-
-            postExecuteCallback();
         }
     }
 }
