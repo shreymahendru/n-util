@@ -1,4 +1,5 @@
-export declare class BackgroundProcessor {
+import { Disposable } from "./disposable";
+export declare class BackgroundProcessor implements Disposable {
     private readonly _defaultErrorHandler;
     private readonly _breakIntervalMilliseconds;
     private readonly _breakOnlyWhenNoWork;
