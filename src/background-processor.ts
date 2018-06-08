@@ -1,8 +1,9 @@
 import { given } from "@nivinjoseph/n-defensive";
 import { Delay } from "./delay";
+import { Disposable } from "./disposable";
 
 // public
-export class BackgroundProcessor
+export class BackgroundProcessor implements Disposable
 {
     private readonly _defaultErrorHandler: (e: Error) => Promise<void>;
     private readonly _breakIntervalMilliseconds: number;
