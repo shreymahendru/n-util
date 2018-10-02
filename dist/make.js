@@ -9,9 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
-// public
-class Make // static class
- {
+class Make {
     constructor() { }
     static retry(func, numberOfRetries, errorPredicate) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
@@ -164,42 +162,10 @@ class Make // static class
             yield taskManager.execute();
         });
     }
-    // public static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue: U = null): T
-    // {
-    //     given(func, "func").ensureHasValue().ensureIsFunction();
-    //     const result = function (...p: any[]): any
-    //     {
-    //         try 
-    //         {
-    //             return func(...p);
-    //         }
-    //         catch
-    //         {
-    //             return defaultValue;
-    //         }
-    //     };
-    //     return <any>result;
-    // }
-    // public static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue: U = null): T
-    // {
-    //     given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
-    //     const result = async function (...p: any[]): Promise<any>
-    //     {
-    //         try 
-    //         {
-    //             return await asyncFunc(...p);
-    //         }
-    //         catch
-    //         {
-    //             return defaultValue;
-    //         }
-    //     };
-    //     return <any>result;
-    // }
     static getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+        return Math.floor(Math.random() * (max - min)) + min;
     }
 }
 exports.Make = Make;

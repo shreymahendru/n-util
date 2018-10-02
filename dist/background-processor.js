@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const delay_1 = require("./delay");
-// public
 class BackgroundProcessor {
     constructor(defaultErrorHandler, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true) {
         this._actionsToProcess = new Array();
@@ -31,7 +30,6 @@ class BackgroundProcessor {
     dispose() {
         return __awaiter(this, void 0, void 0, function* () {
             this._isDisposed = true;
-            // let numActions = this._actionsToProcess.length;
             while (this._actionsToProcess.length > 0) {
                 const action = this._actionsToProcess.shift();
                 action.execute(() => { });
