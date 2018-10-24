@@ -22,6 +22,7 @@ class BackgroundProcessor {
         this._breakOnlyWhenNoWork = breakOnlyWhenNoWork;
         this.initiateBackgroundProcessing();
     }
+    get queueLength() { return this._actionsToProcess.length; }
     processAction(action, errorHandler) {
         n_defensive_1.given(action, "action").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(errorHandler, "errorHandler").ensureIsFunction();
