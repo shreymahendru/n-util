@@ -12,6 +12,9 @@ export class BackgroundProcessor implements Disposable
     private _isDisposed: boolean = false;
 
 
+    public get queueLength(): number { return this._actionsToProcess.length; }
+
+
     public constructor(defaultErrorHandler: (e: Error) => Promise<void>, breakIntervalMilliseconds: number = 1000, breakOnlyWhenNoWork = true)
     {
         given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
