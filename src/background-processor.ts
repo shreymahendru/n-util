@@ -9,6 +9,7 @@ export class BackgroundProcessor implements Disposable
     private readonly _breakIntervalMilliseconds: number;
     private readonly _breakOnlyWhenNoWork: boolean;
     private readonly _actionsToProcess: Array<Action> = new Array<Action>();
+    private readonly _actionsExecuting: Array<Action> = new Array<Action>();
     private _isDisposed: boolean = false;
 
 
@@ -37,19 +38,22 @@ export class BackgroundProcessor implements Disposable
         this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
     }
 
-    public async dispose(): Promise<void>
+    public async dispose(killQueue = false): Promise<void>
     {
         this._isDisposed = true;
-        
-        // let numActions = this._actionsToProcess.length;
-        
-        while (this._actionsToProcess.length > 0)
+
+        if (!killQueue)
         {
-            const action = this._actionsToProcess.shift();
-            action.execute(() => {});
+            while (this._actionsToProcess.length > 0)
+            {
+                const action = this._actionsToProcess.shift();
+                this._actionsExecuting.push(action);
+                action.execute(() => this._actionsExecuting.remove(action));
+            }
         }
-        
-        await Delay.seconds(5);
+
+        while (this._actionsExecuting.length > 0)
+            await Delay.seconds(3);
     }
 
 
@@ -61,14 +65,16 @@ export class BackgroundProcessor implements Disposable
         let timeout = this._breakIntervalMilliseconds;
         if (this._breakOnlyWhenNoWork && this._actionsToProcess.length > 0)
             timeout = 0;
-        
+
         setTimeout(() =>
         {
             if (this._actionsToProcess.length > 0)
             {
                 const action = this._actionsToProcess.shift();
+                this._actionsExecuting.push(action);
                 action.execute(() =>
                 {
+                    this._actionsExecuting.remove(action);
                     this.initiateBackgroundProcessing();
                 });
             }
