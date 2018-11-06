@@ -13,6 +13,7 @@ const delay_1 = require("./delay");
 class BackgroundProcessor {
     constructor(defaultErrorHandler, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true) {
         this._actionsToProcess = new Array();
+        this._actionsExecuting = new Array();
         this._isDisposed = false;
         n_defensive_1.given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(breakIntervalMilliseconds, "breakIntervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
@@ -28,14 +29,18 @@ class BackgroundProcessor {
         n_defensive_1.given(errorHandler, "errorHandler").ensureIsFunction();
         this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
     }
-    dispose() {
+    dispose(killQueue = false) {
         return __awaiter(this, void 0, void 0, function* () {
             this._isDisposed = true;
-            while (this._actionsToProcess.length > 0) {
-                const action = this._actionsToProcess.shift();
-                action.execute(() => { });
+            if (!killQueue) {
+                while (this._actionsToProcess.length > 0) {
+                    const action = this._actionsToProcess.shift();
+                    this._actionsExecuting.push(action);
+                    action.execute(() => this._actionsExecuting.remove(action));
+                }
             }
-            yield delay_1.Delay.seconds(5);
+            while (this._actionsExecuting.length > 0)
+                yield delay_1.Delay.seconds(3);
         });
     }
     initiateBackgroundProcessing() {
@@ -47,7 +52,9 @@ class BackgroundProcessor {
         setTimeout(() => {
             if (this._actionsToProcess.length > 0) {
                 const action = this._actionsToProcess.shift();
+                this._actionsExecuting.push(action);
                 action.execute(() => {
+                    this._actionsExecuting.remove(action);
                     this.initiateBackgroundProcessing();
                 });
             }
