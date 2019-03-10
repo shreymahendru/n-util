@@ -40,6 +40,9 @@ export class BackgroundProcessor implements Disposable
 
     public async dispose(killQueue = false): Promise<void>
     {
+        if (this._isDisposed)
+            return;
+        
         this._isDisposed = true;
 
         if (!killQueue)
