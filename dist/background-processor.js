@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const delay_1 = require("./delay");
+const n_exception_1 = require("@nivinjoseph/n-exception");
 class BackgroundProcessor {
     constructor(defaultErrorHandler, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true) {
         this._actionsToProcess = new Array();
@@ -25,6 +26,8 @@ class BackgroundProcessor {
     }
     get queueLength() { return this._actionsToProcess.length; }
     processAction(action, errorHandler) {
+        if (this._isDisposed)
+            throw new n_exception_1.ObjectDisposedException(this);
         n_defensive_1.given(action, "action").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(errorHandler, "errorHandler").ensureIsFunction();
         this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
