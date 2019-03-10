@@ -31,6 +31,8 @@ class BackgroundProcessor {
     }
     dispose(killQueue = false) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (this._isDisposed)
+                return;
             this._isDisposed = true;
             if (!killQueue) {
                 while (this._actionsToProcess.length > 0) {
