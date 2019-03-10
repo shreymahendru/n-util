@@ -1,6 +1,7 @@
 import { given } from "@nivinjoseph/n-defensive";
 import { Delay } from "./delay";
 import { Disposable } from "./disposable";
+import { ObjectDisposedException } from "@nivinjoseph/n-exception";
 
 // public
 export class BackgroundProcessor implements Disposable
@@ -32,6 +33,9 @@ export class BackgroundProcessor implements Disposable
 
     public processAction(action: () => Promise<void>, errorHandler?: (e: Error) => Promise<void>): void
     {
+        if (this._isDisposed)
+            throw new ObjectDisposedException(this);
+        
         given(action, "action").ensureHasValue().ensureIsFunction();
         given(errorHandler, "errorHandler").ensureIsFunction();
 
