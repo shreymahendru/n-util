@@ -3,4 +3,5 @@ import { Delay } from "./delay";
 import { Disposable } from "./disposable";
 import { BackgroundProcessor } from "./background-processor";
 import { Uuid } from "./uuid";
-export { Make, Delay, Disposable, BackgroundProcessor, Uuid };
+import { Helper } from "./helper";
+export { Make, Delay, Disposable, BackgroundProcessor, Uuid, Helper };

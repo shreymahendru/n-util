@@ -8,4 +8,6 @@ const background_processor_1 = require("./background-processor");
 exports.BackgroundProcessor = background_processor_1.BackgroundProcessor;
 const uuid_1 = require("./uuid");
 exports.Uuid = uuid_1.Uuid;
+const helper_1 = require("./helper");
+exports.Helper = helper_1.Helper;
 //# sourceMappingURL=index.js.map
