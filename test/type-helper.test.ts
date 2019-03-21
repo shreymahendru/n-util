@@ -1,6 +1,6 @@
 import * as Assert from "assert";
 import "@nivinjoseph/n-ext";
-import { Helper } from "../src/helper";
+import { TypeHelper } from "../src/type-helper";
 
 
 suite("Helper", () =>
@@ -24,7 +24,7 @@ suite("Helper", () =>
 
         test("Should work for number enums", () =>
         {
-            const tuples = Helper.enumTypeToTuples<number>(Foo);
+            const tuples = TypeHelper.enumTypeToTuples<number>(Foo);
             console.log(tuples);
 
             Assert.strictEqual(tuples.length, 3);
@@ -44,7 +44,7 @@ suite("Helper", () =>
 
         test("Should work for string enums", () =>
         {
-            const tuples = Helper.enumTypeToTuples<string>(Bar);
+            const tuples = TypeHelper.enumTypeToTuples<string>(Bar);
             console.log(tuples);
 
             Assert.strictEqual(tuples.length, 2);
@@ -67,47 +67,47 @@ suite("Helper", () =>
             let value: any;
             let parsed: any;
             
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);
             
             value = null;
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);
             
             value = "foo";
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);    
             
             value = "1";
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);    
             
             value = 0;
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);    
             
             value = 1;
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);    
             
             value = {};
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, null);    
             
             value = " true  ";
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, true);
             
             value = "  false ";
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, false);
             
             value = true;
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, true);
             
             value = false;
-            parsed = Helper.parseBoolean(value);
+            parsed = TypeHelper.parseBoolean(value);
             Assert.strictEqual(parsed, false);    
         });
     });
@@ -119,55 +119,55 @@ suite("Helper", () =>
             let value: any;
             let parsed: any;
 
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = null;
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = "foo";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = " true  ";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = "  false ";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = true;
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = false;
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = {};
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, null);
 
             value = " 010  ";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, 10);
             
             value = " 1  ";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, 1);
             
             value = " 100.56  ";
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, 100.56);
             
             value = 0;
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, 0);
             
             value = 10.6;
-            parsed = Helper.parseNumber(value);
+            parsed = TypeHelper.parseNumber(value);
             Assert.strictEqual(parsed, 10.6);
         });
     });

@@ -1,5 +1,6 @@
 import { given } from "@nivinjoseph/n-defensive";
 
+
 export class Duration
 {
     /**

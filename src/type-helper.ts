@@ -1,6 +1,7 @@
 import { given } from "@nivinjoseph/n-defensive";
 
-export class Helper
+
+export class TypeHelper
 {
     /**
      * @static
@@ -53,7 +54,6 @@ export class Helper
         
         return this.getEnumTuples(enumClass) as any;
     }
-    
     
     private static getEnumTuples(enumType: object): ReadonlyArray<[string, string | number]>
     {
