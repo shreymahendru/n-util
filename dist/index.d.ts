@@ -5,4 +5,5 @@ import { BackgroundProcessor } from "./background-processor";
 import { Uuid } from "./uuid";
 import { TypeHelper } from "./type-helper";
 import { Duration } from "./duration";
-export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration };
+import { Time } from "./time";
+export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time };

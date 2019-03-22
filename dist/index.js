@@ -12,4 +12,6 @@ const type_helper_1 = require("./type-helper");
 exports.TypeHelper = type_helper_1.TypeHelper;
 const duration_1 = require("./duration");
 exports.Duration = duration_1.Duration;
+const time_1 = require("./time");
+exports.Time = time_1.Time;
 //# sourceMappingURL=index.js.map
