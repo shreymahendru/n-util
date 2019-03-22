@@ -1,11 +1,10 @@
 import { given } from "@nivinjoseph/n-defensive";
 
-
+/**
+ * @static
+ */
 export class Duration
 {
-    /**
-     * @static
-     */
     private constructor() { }
     
     
