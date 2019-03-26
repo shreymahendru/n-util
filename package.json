@@ -42,6 +42,8 @@
     "dependencies": {
         "@nivinjoseph/n-defensive": "^1.0.26",
         "@nivinjoseph/n-exception": "^1.0.17",
+        "@nivinjoseph/n-ext": "^1.1.5",
+        "buffer": "^5.2.1",
         "uuid": "^3.3.2"
     }
 }
