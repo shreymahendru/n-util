@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("@nivinjoseph/n-ext");
 const make_1 = require("./make");
 exports.Make = make_1.Make;
 const delay_1 = require("./delay");
@@ -14,4 +15,6 @@ const duration_1 = require("./duration");
 exports.Duration = duration_1.Duration;
 const time_1 = require("./time");
 exports.Time = time_1.Time;
+const image_helper_1 = require("./image-helper");
+exports.ImageHelper = image_helper_1.ImageHelper;
 //# sourceMappingURL=index.js.map

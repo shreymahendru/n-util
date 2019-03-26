@@ -1,3 +1,4 @@
+import "@nivinjoseph/n-ext";
 import { Make } from "./make";
 import { Delay } from "./delay";
 import { Disposable } from "./disposable";
@@ -6,4 +7,5 @@ import { Uuid } from "./uuid";
 import { TypeHelper } from "./type-helper";
 import { Duration } from "./duration";
 import { Time } from "./time";
-export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time };
+import { ImageHelper } from "./image-helper";
+export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper };
