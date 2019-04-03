@@ -1,1 +1,1 @@
-{"version":3,"file":"disposable.js","sourceRoot":"","sources":["../src/disposable.ts"],"names":[],"mappings":"","sourcesContent":["// public\nexport interface Disposable\n{\n    dispose(): Promise<void>;\n}"]}
+{"version":3,"file":"disposable.js","sourceRoot":"","sources":["../src/disposable.ts"],"names":[],"mappings":""}
