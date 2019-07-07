@@ -8,6 +8,8 @@ import { TypeHelper } from "./type-helper";
 import { Duration } from "./duration";
 import { Time } from "./time";
 import { ImageHelper } from "./image-helper";
+import { Deferred } from "./deferred";
+import { Mutex } from "./mutex";
 
 
-export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper };
+export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex };
