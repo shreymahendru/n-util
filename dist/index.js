@@ -21,4 +21,6 @@ const deferred_1 = require("./deferred");
 exports.Deferred = deferred_1.Deferred;
 const mutex_1 = require("./mutex");
 exports.Mutex = mutex_1.Mutex;
+const profiler_1 = require("./profiler");
+exports.Profiler = profiler_1.Profiler;
 //# sourceMappingURL=index.js.map
