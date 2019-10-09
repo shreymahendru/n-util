@@ -23,4 +23,6 @@ const mutex_1 = require("./mutex");
 exports.Mutex = mutex_1.Mutex;
 const profiler_1 = require("./profiler");
 exports.Profiler = profiler_1.Profiler;
+const templator_1 = require("./templator");
+exports.Templator = templator_1.Templator;
 //# sourceMappingURL=index.js.map
