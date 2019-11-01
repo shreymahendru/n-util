@@ -10,13 +10,14 @@ import { Time } from "./time";
 import { ImageHelper } from "./image-helper";
 import { Deferred } from "./deferred";
 import { Mutex } from "./mutex";
+import { Version } from "./version";
 import { Profiler, ProfilerTrace } from "./profiler";
 import { Templator } from "./templator";
 
 
 export
 {
-    Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex,
+    Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version,
     
     Profiler, ProfilerTrace,
     
