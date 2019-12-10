@@ -13,6 +13,7 @@ import { Mutex } from "./mutex";
 import { Version } from "./version";
 import { Profiler, ProfilerTrace } from "./profiler";
 import { Templator } from "./templator";
+import { HtmlSanitizer } from "./html-sanitizer";
 
 
 export
@@ -21,5 +22,5 @@ export
     
     Profiler, ProfilerTrace,
     
-    Templator
+    Templator, HtmlSanitizer
 };
