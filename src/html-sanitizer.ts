@@ -24,7 +24,7 @@ export class HtmlSanitizer
         return {
             allowedTags: SanitizeHtml.defaults.allowedTags.concat(["img", "span", "h1", "h2"]),
             allowedAttributes: Object.assign(SanitizeHtml.defaults.allowedAttributes, {
-                "*": ["style"]
+                "*": ["style", "class"]
             }),
             allowedSchemesByTag: {
                 "img": ["http", "https", "data"]
