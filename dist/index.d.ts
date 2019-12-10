@@ -13,4 +13,5 @@ import { Mutex } from "./mutex";
 import { Version } from "./version";
 import { Profiler, ProfilerTrace } from "./profiler";
 import { Templator } from "./templator";
-export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version, Profiler, ProfilerTrace, Templator };
+import { HtmlSanitizer } from "./html-sanitizer";
+export { Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version, Profiler, ProfilerTrace, Templator, HtmlSanitizer };

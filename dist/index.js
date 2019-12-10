@@ -27,4 +27,6 @@ const profiler_1 = require("./profiler");
 exports.Profiler = profiler_1.Profiler;
 const templator_1 = require("./templator");
 exports.Templator = templator_1.Templator;
+const html_sanitizer_1 = require("./html-sanitizer");
+exports.HtmlSanitizer = html_sanitizer_1.HtmlSanitizer;
 //# sourceMappingURL=index.js.map
