@@ -1,8 +1,8 @@
 export declare class Profiler {
     private readonly _id;
     private readonly _traces;
-    readonly id: string;
-    readonly traces: ReadonlyArray<ProfilerTrace>;
+    get id(): string;
+    get traces(): ReadonlyArray<ProfilerTrace>;
     constructor();
     trace(message: string): void;
 }

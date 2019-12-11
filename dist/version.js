@@ -4,10 +4,6 @@ const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const n_exception_1 = require("@nivinjoseph/n-exception");
 const type_helper_1 = require("./type-helper");
 class Version {
-    get major() { return this._major; }
-    get minor() { return this._minor; }
-    get patch() { return this._patch; }
-    get full() { return `${this._major}.${this._minor}.${this._patch}`; }
     constructor(semanticVersion) {
         n_defensive_1.given(semanticVersion, "semanticVersion").ensureHasValue().ensureIsString();
         semanticVersion = semanticVersion.trim();
@@ -27,6 +23,10 @@ class Version {
             throw new n_exception_1.ArgumentException("semanticVersion", "invalid patch");
         this._patch = patch;
     }
+    get major() { return this._major; }
+    get minor() { return this._minor; }
+    get patch() { return this._patch; }
+    get full() { return `${this._major}.${this._minor}.${this._patch}`; }
     equals(version) {
         n_defensive_1.given(version, "version").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Version);
         return version.major === this.major && version.minor === this.minor && version.patch === this.patch;

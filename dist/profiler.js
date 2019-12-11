@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const uuid_1 = require("./uuid");
 class Profiler {
-    get id() { return this._id; }
-    get traces() { return this._traces; }
     constructor() {
         this._id = uuid_1.Uuid.create();
         this._traces = [{
@@ -13,6 +11,8 @@ class Profiler {
                 diffMs: 0
             }];
     }
+    get id() { return this._id; }
+    get traces() { return this._traces; }
     trace(message) {
         n_defensive_1.given(message, "message").ensureHasValue().ensureIsString();
         const now = Date.now();
