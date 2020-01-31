@@ -17,6 +17,7 @@ class BackgroundProcessor {
         this._actionsToProcess = new Array();
         this._actionsExecuting = new Array();
         this._isDisposed = false;
+        this._timeout = null;
         n_defensive_1.given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(breakIntervalMilliseconds, "breakIntervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
         n_defensive_1.given(breakOnlyWhenNoWork, "breakOnlyWhenNoWork").ensureHasValue().ensureIsBoolean();
@@ -38,6 +39,8 @@ class BackgroundProcessor {
             if (this._isDisposed)
                 return;
             this._isDisposed = true;
+            if (this._timeout)
+                clearTimeout(this._timeout);
             if (!killQueue) {
                 while (this._actionsToProcess.length > 0) {
                     const action = this._actionsToProcess.shift();
@@ -55,7 +58,7 @@ class BackgroundProcessor {
         let timeout = this._breakIntervalMilliseconds;
         if (this._breakOnlyWhenNoWork && this._actionsToProcess.length > 0)
             timeout = 0;
-        setTimeout(() => {
+        this._timeout = setTimeout(() => {
             if (this._actionsToProcess.length > 0) {
                 const action = this._actionsToProcess.shift();
                 this._actionsExecuting.push(action);
