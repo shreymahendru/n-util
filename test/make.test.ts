@@ -1,6 +1,6 @@
 // import * as Assert from "assert";
 // import { Make } from "./../src/make";
-// import { ApplicationException, ArgumentException } from "n-exception";
+// import { ApplicationException, ArgumentException } from "@nivinjoseph/n-exception";
 // import * as Fs from "fs";
 // import * as Path from "path";
 

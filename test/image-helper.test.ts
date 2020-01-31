@@ -1,6 +1,6 @@
 import * as Assert from "assert";
 import "@nivinjoseph/n-ext";
-import { ImageHelper } from "../src/image-helper";
+import { ImageHelper } from "../src";
 
 
 suite("ImageHelper", () =>

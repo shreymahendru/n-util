@@ -12,6 +12,7 @@ export class BackgroundProcessor implements Disposable
     private readonly _actionsToProcess: Array<Action> = new Array<Action>();
     private readonly _actionsExecuting: Array<Action> = new Array<Action>();
     private _isDisposed: boolean = false;
+    private _timeout: any = null;
 
 
     public get queueLength(): number { return this._actionsToProcess.length; }
@@ -48,6 +49,9 @@ export class BackgroundProcessor implements Disposable
             return;
         
         this._isDisposed = true;
+        
+        if (this._timeout)
+            clearTimeout(this._timeout);
 
         if (!killQueue)
         {
@@ -73,7 +77,7 @@ export class BackgroundProcessor implements Disposable
         if (this._breakOnlyWhenNoWork && this._actionsToProcess.length > 0)
             timeout = 0;
 
-        setTimeout(() =>
+        this._timeout = setTimeout(() =>
         {
             if (this._actionsToProcess.length > 0)
             {
