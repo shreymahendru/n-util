@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Templator = void 0;
 const Mustache = require("mustache");
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class Templator {

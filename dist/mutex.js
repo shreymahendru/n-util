@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Mutex = void 0;
 const deferred_1 = require("./deferred");
 class Mutex {
     constructor() {
