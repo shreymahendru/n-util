@@ -16,8 +16,17 @@ class Serializable {
             }
             if (typeof val === "object") {
                 if (Array.isArray(val))
-                    acc[propInfo.serializationKey] = val.map((v) => v instanceof Serializable
-                        ? v.serialize() : JSON.parse(JSON.stringify(v)));
+                    acc[propInfo.serializationKey] = val.map((v) => {
+                        if (v == null)
+                            return null;
+                        if (typeof v === "object") {
+                            if (v instanceof Serializable)
+                                return v.serialize();
+                            else
+                                return JSON.parse(JSON.stringify(v));
+                        }
+                        return v;
+                    });
                 else
                     acc[propInfo.serializationKey] = val instanceof Serializable
                         ? val.serialize() : JSON.parse(JSON.stringify(val));
@@ -49,10 +58,15 @@ class Serializable {
             if (typeof val === "object") {
                 if (Array.isArray(val)) {
                     acc[key] = val.map((v) => {
-                        if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
-                            return Serializable.deserialize(v);
-                        else
-                            return JSON.parse(JSON.stringify(v));
+                        if (v == null)
+                            return null;
+                        if (typeof v === "object") {
+                            if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
+                                return Serializable.deserialize(v);
+                            else
+                                return JSON.parse(JSON.stringify(v));
+                        }
+                        return v;
                     });
                 }
                 else {
