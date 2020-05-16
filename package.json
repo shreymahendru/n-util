@@ -31,24 +31,24 @@
     },
     "homepage": "https://github.com/nivinjoseph/n-util#readme",
     "devDependencies": {
-        "@types/mocha": "^5.2.7",
+        "@types/mocha": "^7.0.2",
         "@types/mustache": "^0.8.32",
         "@types/node": "^12.12.17",
-        "@types/sanitize-html": "^1.20.2",
-        "@types/uuid": "^3.4.6",
-        "mocha": "^6.2.2",
-        "ts-node": "^8.5.4",
-        "tslint": "^5.20.1",
-        "typescript": "^3.7.3",
+        "@types/sanitize-html": "^1.23.0",
+        "@types/uuid": "^7.0.3",
+        "mocha": "^7.1.2",
+        "ts-node": "^8.10.1",
+        "tslint": "^6.1.2",
+        "typescript": "^3.9.2",
         "typescript-tslint-plugin": "^0.5.5"
     },
     "dependencies": {
-        "@nivinjoseph/n-defensive": "^1.0.28",
+        "@nivinjoseph/n-defensive": "^1.0.32",
         "@nivinjoseph/n-exception": "^1.0.19",
-        "@nivinjoseph/n-ext": "^1.1.10",
-        "buffer": "^5.4.3",
+        "@nivinjoseph/n-ext": "^1.1.19",
+        "buffer": "^5.6.0",
         "mustache": "^3.1.0",
-        "sanitize-html": "^1.20.1",
-        "uuid": "^3.3.3"
+        "sanitize-html": "^1.23.0",
+        "uuid": "^8.0.0"
     }
 }
