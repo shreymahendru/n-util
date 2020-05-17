@@ -16,7 +16,7 @@ export { Version } from "./version";
 export { Profiler, ProfilerTrace } from "./profiler";
 export { Templator } from "./templator";
 export { HtmlSanitizer } from "./html-sanitizer";
-export { Serializable, serialize } from "./serializable";
+export { Serializable, serialize, deserialize, Deserializer } from "./serializable";
 
 
 // export
