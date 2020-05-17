@@ -47,7 +47,6 @@ let Deserializer = (() => {
         static registerType(type) {
             n_defensive_1.given(type, "type").ensureHasValue();
             const typeName = type.getTypeName();
-            console.log("Calling register type", typeName);
             if (!this._typeCache.has(typeName))
                 this._typeCache.set(typeName, type);
         }
