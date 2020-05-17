@@ -1,5 +1,5 @@
 import * as Assert from "assert";
-import { Serializable, serialize } from "../src/serializable";
+import { Serializable, serialize, Deserializer, deserialize } from "../src/serializable";
 import { given } from "@nivinjoseph/n-defensive";
 
 
@@ -32,6 +32,13 @@ class Address extends Serializable
         given(city, "city").ensureHasValue().ensureIsString();
         this._city = city;
     }
+    
+    public static deserialize({ street, city }: AddressSchema): Address
+    {
+        console.log("Calling custom address deserialize");
+        
+        return new Address({ street, city });
+    }
 }
 
 interface FullName
@@ -40,11 +47,26 @@ interface FullName
     lastName: string;
 }
 
+@deserialize
+class Dummy extends Serializable
+{
+    public constructor()
+    {
+        super();
+    }
+    
+    public foo(): void
+    {
+        console.log("I am foo");
+    }
+}
+
 class Employee extends Serializable
 {
     private readonly _id: string;
     private readonly _name: FullName;
     private readonly _address: Address;
+    private readonly _dummy: Dummy;
     
     @serialize()
     public get id(): string { return this._id; }
@@ -55,8 +77,11 @@ class Employee extends Serializable
     @serialize()
     public get address(): Address { return this._address; }
     
+    @serialize()
+    public get dummy(): Dummy { return this._dummy; }
     
-    public constructor({id, name, address }: Pick<Employee, "id" | "name" | "address">)
+    
+    public constructor({id, name, address, dummy }: Pick<Employee, "id" | "name" | "address" | "dummy">)
     {
         super();
         
@@ -68,16 +93,21 @@ class Employee extends Serializable
         
         given(address, "address").ensureHasValue().ensureIsObject().ensureIsType(Address);
         this._address = address;
+        
+        given(dummy, "dummy").ensureHasValue().ensureIsObject().ensureIsType(Dummy);
+        this._dummy = dummy;
     }
 }
 
 
-suite("Serializable", () =>
+suite.only("Serializable", () =>
 {
     suite("serialize", () =>
     {
         test("basic", () =>
         {
+            // console.log(typeof Employee);
+            
             const testObj = new Employee({
                 id: "1",
                 name: {
@@ -87,7 +117,8 @@ suite("Serializable", () =>
                 address: new Address({
                     street: "911 Roger rd",
                     city: "Waterloo"
-                })
+                }),
+                dummy: new Dummy()
             });
 
             Assert.strictEqual(testObj.name.firstName, "niv");
@@ -102,13 +133,32 @@ suite("Serializable", () =>
             
             // console.log(serialized);
             
-            const serialized2 = testObj.serialize();
+            const testObj2 = new Employee({
+                id: "1",
+                name: {
+                    firstName: "niv",
+                    lastName: "jo"
+                },
+                address: new Address({
+                    street: "911 Roger rd",
+                    city: "Waterloo"
+                }),
+                dummy: new Dummy()
+            });
+            
+            const serialized2 = testObj2.serialize();
             
             Assert.deepStrictEqual(serialized2, serialized);
             
-            const deserialized = Serializable.deserialize<Employee>(serialized);
+            const deserialized = Deserializer.deserialize<Employee>(serialized);
             // console.log(deserialized);
             Assert.ok(deserialized instanceof Employee);
+            
+            const deserialized2 = Deserializer.deserialize<Employee>(serialized2);
+            
+            Assert.ok(deserialized2 instanceof Employee);
+            
+            Assert.deepStrictEqual(deserialized2, deserialized);
             
         });
     });

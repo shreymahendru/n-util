@@ -56,71 +56,11 @@ export abstract class Serializable
         
         return serialized;
     }
-    
-    public static deserialize<T>(serialized: object): T
-    {
-        given(serialized, "serialized").ensureHasValue().ensureIsObject()
-            .ensure(t => (<any>t).$typename && typeof (<any>t).$typename === "string"
-                && !(<any>t).$typename.isEmptyOrWhiteSpace(), "$typename property is missing on object");
-        
-        const typeName = (<any>serialized).$typename;
-        const type = SerializationRegistry.getType(typeName) as any;
-        if (type == null)
-            throw new ApplicationException(`Cannot deserialize unregistered type '${typeName}'.`);
-        
-        if (type.deserialize && typeof type.deserialize === "function")
-            return type.deserialize(serialized);
-        
-        serialized = Object.keys(serialized).reduce((acc, key) =>
-        {
-            const val = (serialized as any)[key];
-            if (val == null)
-            {
-                acc[key] = null;
-                return acc;
-            }
-            
-            if (typeof val === "object")
-            {
-                if (Array.isArray(val))
-                {
-                    acc[key] = val.map((v) =>
-                    {
-                        if (v == null)
-                            return null;
-                        
-                        if (typeof v === "object")
-                        {
-                            if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
-                                return Serializable.deserialize(v);
-                            else
-                                return JSON.parse(JSON.stringify(v));
-                        }
-                        
-                        return v;
-                    });
-                }
-                else
-                {
-                    if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
-                        acc[key] = Serializable.deserialize(val);
-                    else
-                        acc[key] = JSON.parse(JSON.stringify(val));
-                }
-            }
-            else
-            {
-                acc[key] = val;
-            }
-            
-            return acc;
-        }, {} as any);
-        
-        return new (type.constructor as any)(serialized);
-    }
 }
 
-class SerializationRegistry
+
+
+export class Deserializer
 {
     private static _typeCache = new Map<string, object>();
     
@@ -130,20 +70,84 @@ class SerializationRegistry
     private constructor() { }
 
 
-    public static registerType(type: object): void
+    public static registerType(type: object | Function): void
     {
         // console.log(typeof type);
         
-        given(type, "type").ensureHasValue().ensureIsObject()
-            .ensure(t => t instanceof Serializable,
-                "serialize decorator must only be used in subclasses of Serializable");
+        given(type, "type").ensureHasValue();
         
         const typeName = (type as Object).getTypeName();
+        console.log("Calling register type", typeName);
         if (!this._typeCache.has(typeName))
             this._typeCache.set(typeName, type);
     }
     
-    public static getType(typeName: string): object | null
+    public static deserialize<T>(serialized: object): T
+    {
+        given(serialized, "serialized").ensureHasValue().ensureIsObject()
+            .ensure(t => (<any>t).$typename && typeof (<any>t).$typename === "string"
+                && !(<any>t).$typename.isEmptyOrWhiteSpace(), "$typename property is missing on object");
+
+        const typeName = (<any>serialized).$typename;
+        let type = Deserializer.getType(typeName) as any;
+        if (type == null)
+            throw new ApplicationException(`Cannot deserialize unregistered type '${typeName}'.`);
+
+        if (typeof type === "object")
+            type = type.constructor;
+        
+        if (type.deserialize && typeof type.deserialize === "function")
+            return type.deserialize(serialized);
+
+        serialized = Object.keys(serialized).reduce((acc, key) =>
+        {
+            const val = (serialized as any)[key];
+            if (val == null)
+            {
+                acc[key] = null;
+                return acc;
+            }
+
+            if (typeof val === "object")
+            {
+                if (Array.isArray(val))
+                {
+                    acc[key] = val.map((v) =>
+                    {
+                        if (v == null)
+                            return null;
+
+                        if (typeof v === "object")
+                        {
+                            if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
+                                return Deserializer.deserialize(v);
+                            else
+                                return JSON.parse(JSON.stringify(v));
+                        }
+
+                        return v;
+                    });
+                }
+                else
+                {
+                    if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
+                        acc[key] = Deserializer.deserialize(val);
+                    else
+                        acc[key] = JSON.parse(JSON.stringify(val));
+                }
+            }
+            else
+            {
+                acc[key] = val;
+            }
+
+            return acc;
+        }, {} as any);
+
+        return new (type as any)(serialized);
+    }
+    
+    private static getType(typeName: string): object | null
     {
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         typeName = typeName.trim();
@@ -159,14 +163,13 @@ export function serialize(key?: string): Function
 {
     given(key, "key").ensureIsString();
 
-    // @ts-ignore
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
     { 
-        // if (!(target instanceof Serializable))
-        //     throw new ArgumentException((target as Object).getTypeName(),
-        //         "serialize decorator must only be used in subclasses of Serializable");
+        given(target, "target").ensureHasValue().ensureIsObject()
+            .ensure(t => t instanceof Serializable,
+                "serialize decorator must only be used on properties in subclasses of Serializable");
         
-        SerializationRegistry.registerType(target);
+        Deserializer.registerType(target);
 
         if (!descriptor.get)
             throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
@@ -175,6 +178,13 @@ export function serialize(key?: string): Function
         if (key && !key.isEmptyOrWhiteSpace())
             (descriptor.get as any).serializationKey = key.trim();
     };
+}
+
+export function deserialize(target: Function): void
+{
+    given(target, "target").ensureHasValue().ensureIsFunction();
+    
+    Deserializer.registerType(target);
 }
 
 
