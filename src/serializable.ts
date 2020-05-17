@@ -72,12 +72,9 @@ export class Deserializer
 
     public static registerType(type: object | Function): void
     {
-        // console.log(typeof type);
-        
         given(type, "type").ensureHasValue();
         
         const typeName = (type as Object).getTypeName();
-        console.log("Calling register type", typeName);
         if (!this._typeCache.has(typeName))
             this._typeCache.set(typeName, type);
     }
