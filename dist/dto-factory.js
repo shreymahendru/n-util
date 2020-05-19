@@ -6,8 +6,10 @@ const serializable_1 = require("./serializable");
 class DtoFactory {
     constructor() { }
     static create(value, keys) {
+        var _a;
         n_defensive_1.given(value, "value").ensureHasValue().ensureIsObject();
         n_defensive_1.given(keys, "keys").ensureHasValue().ensureIsArray();
+        const typename = (_a = value.$typename) !== null && _a !== void 0 ? _a : value.getTypeName();
         let dto;
         if (value instanceof serializable_1.Serializable) {
             const serialized = value.serialize();
@@ -57,7 +59,7 @@ class DtoFactory {
                 return acc;
             }, {});
         }
-        dto.$typename = value.getTypeName();
+        dto.$typename = typename;
         return dto;
     }
 }
