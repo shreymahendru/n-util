@@ -10,7 +10,7 @@ export class DtoFactory
     private constructor() { }
 
 
-    public static create<T extends object>(value: T, keys: Array<keyof T | { [key: string]: keyof T | ((val: T) => any) }>): Partial<T>
+    public static create<T extends object, TDto extends {} = {}>(value: T, keys: Array<keyof T | { [key: string]: keyof T | ((val: T) => any) }>): TDto
     {
         given(value, "value").ensureHasValue().ensureIsObject();
         given(keys, "keys").ensureHasValue().ensureIsArray();
