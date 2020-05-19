@@ -16,3 +16,4 @@ export { Profiler, ProfilerTrace } from "./profiler";
 export { Templator } from "./templator";
 export { HtmlSanitizer } from "./html-sanitizer";
 export { Serializable, serialize, deserialize, Deserializer } from "./serializable";
+export { DtoFactory } from "./dto-factory";
