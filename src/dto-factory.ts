@@ -15,6 +15,8 @@ export class DtoFactory
         given(value, "value").ensureHasValue().ensureIsObject();
         given(keys, "keys").ensureHasValue().ensureIsArray();
 
+        const typename = (value as any).$typename ?? (<Object>value).getTypeName();
+        
         let dto;
 
         if (value instanceof Serializable)
@@ -79,7 +81,7 @@ export class DtoFactory
             }, {} as any);
         }
 
-        dto.$typename = (<Object>value).getTypeName();
+        dto.$typename = typename;
 
         return dto;
     }
