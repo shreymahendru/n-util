@@ -44,6 +44,12 @@ exports.Serializable = Serializable;
 let Deserializer = (() => {
     class Deserializer {
         constructor() { }
+        static hasType(typeName) {
+            if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
+                || !this._typeCache.has(typeName.trim()))
+                return false;
+            return true;
+        }
         static registerType(type) {
             n_defensive_1.given(type, "type").ensureHasValue();
             const typeName = type.getTypeName();
