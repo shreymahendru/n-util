@@ -69,6 +69,16 @@ export class Deserializer
      */
     private constructor() { }
 
+    
+    public static hasType(typeName: string): boolean
+    {
+        // this is postel's law compliant
+        if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
+            || !this._typeCache.has(typeName.trim()))
+            return false;
+        
+        return true;
+    }
 
     public static registerType(type: object | Function): void
     {
