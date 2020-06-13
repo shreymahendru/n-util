@@ -2,13 +2,15 @@ import { ApplicationException, ArgumentException } from "@nivinjoseph/n-exceptio
 import { given } from "@nivinjoseph/n-defensive";
 
 
-
-export abstract class Serializable
+export abstract class Serializable<TData extends object = {}>
 {
-    protected constructor() { }
+    public constructor(data: TData)
+    {
+        given(data, "data").ensureHasValue().ensureIsObject();
+    }
     
     
-    public serialize(): object
+    public serialize(): TData
     {
         const typeName = (<Object>this).getTypeName();
         const propertyInfos = Utilities.getPropertyInfos(this, typeName);

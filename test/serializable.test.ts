@@ -3,12 +3,14 @@ import { Serializable, serialize, Deserializer, deserialize } from "../src/seria
 import { given } from "@nivinjoseph/n-defensive";
 
 
+
+
 type AddressSchema = {
     street: string;
     city: string;
 };
 
-class Address extends Serializable
+class Address extends Serializable<AddressSchema>
 {
     private readonly _street: string;
     private readonly _city: string;
@@ -22,9 +24,11 @@ class Address extends Serializable
     public get fullAddress(): string { return `${this._street}, ${this._city}`; }
 
 
-    public constructor({ street, city }: AddressSchema)
+    public constructor(data: AddressSchema)
     {
-        super();
+        super(data);
+        
+        const { street, city } = data;
 
         given(street, "street").ensureHasValue().ensureIsString();
         this._street = street;
@@ -52,7 +56,7 @@ class Dummy extends Serializable
 {
     public constructor()
     {
-        super();
+        super({});
     }
     
     public foo(): void
@@ -81,9 +85,11 @@ class Employee extends Serializable
     public get dummy(): Dummy { return this._dummy; }
     
     
-    public constructor({id, name, address, dummy }: Pick<Employee, "id" | "name" | "address" | "dummy">)
+    public constructor(data: Pick<Employee, "id" | "name" | "address" | "dummy">)
     {
-        super();
+        super(data);
+        
+        const { id, name, address, dummy } = data;
         
         given(id, "id").ensureHasValue().ensureIsString();
         this._id = id;
@@ -100,7 +106,7 @@ class Employee extends Serializable
 }
 
 
-suite.only("Serializable", () =>
+suite("Serializable", () =>
 {
     suite("serialize", () =>
     {
