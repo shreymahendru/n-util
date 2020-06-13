@@ -1,6 +1,6 @@
-export declare abstract class Serializable {
-    protected constructor();
-    serialize(): object;
+export declare abstract class Serializable<TData extends object = {}> {
+    constructor(data: TData);
+    serialize(): TData;
 }
 export declare class Deserializer {
     private static _typeCache;

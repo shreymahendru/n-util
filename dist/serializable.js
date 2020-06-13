@@ -4,7 +4,9 @@ exports.deserialize = exports.serialize = exports.Deserializer = exports.Seriali
 const n_exception_1 = require("@nivinjoseph/n-exception");
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class Serializable {
-    constructor() { }
+    constructor(data) {
+        n_defensive_1.given(data, "data").ensureHasValue().ensureIsObject();
+    }
     serialize() {
         const typeName = this.getTypeName();
         const propertyInfos = Utilities.getPropertyInfos(this, typeName);
