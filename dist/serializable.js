@@ -84,8 +84,6 @@ let Deserializer = (() => {
                             if (typeof v === "object") {
                                 if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
                                     return Deserializer.deserialize(v);
-                                else
-                                    return JSON.parse(JSON.stringify(v));
                             }
                             return v;
                         });
@@ -94,7 +92,7 @@ let Deserializer = (() => {
                         if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
                             acc[key] = Deserializer.deserialize(val);
                         else
-                            acc[key] = JSON.parse(JSON.stringify(val));
+                            acc[key] = val;
                     }
                 }
                 else {
