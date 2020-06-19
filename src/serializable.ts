@@ -130,8 +130,8 @@ export class Deserializer
                         {
                             if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
                                 return Deserializer.deserialize(v);
-                            else
-                                return JSON.parse(JSON.stringify(v));
+                            // else
+                            //     return JSON.parse(JSON.stringify(v));
                         }
 
                         return v;
@@ -142,7 +142,7 @@ export class Deserializer
                     if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
                         acc[key] = Deserializer.deserialize(val);
                     else
-                        acc[key] = JSON.parse(JSON.stringify(val));
+                        acc[key] = val; // JSON.parse(JSON.stringify(val));
                 }
             }
             else
