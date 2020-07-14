@@ -17,7 +17,7 @@ export class Templator
         given(template, "template").ensureHasValue().ensureIsString();
         this._template = template;
         
-        const tokens = Mustache.parse(this._template) as Array<[string, string]>;
+        const tokens = Mustache.parse(this._template);
         this._tokens = tokens.filter(t => t[0] === "name").map(t => t[1]);
     }
     
