@@ -3,11 +3,9 @@ import { Serializable, serialize, Deserializer, deserialize } from "../src/seria
 import { given } from "@nivinjoseph/n-defensive";
 
 
-
-
 type AddressSchema = {
     street: string;
-    city: string;
+    locality: string;
 };
 
 class Address extends Serializable<AddressSchema>
@@ -15,10 +13,10 @@ class Address extends Serializable<AddressSchema>
     private readonly _street: string;
     private readonly _city: string;
 
-    @serialize()
+    @serialize
     public get street(): string { return this._street; }
 
-    @serialize()
+    @serialize("locality")
     public get city(): string { return this._city; }
 
     public get fullAddress(): string { return `${this._street}, ${this._city}`; }
@@ -28,7 +26,7 @@ class Address extends Serializable<AddressSchema>
     {
         super(data);
         
-        const { street, city } = data;
+        const { street, locality: city } = data;
 
         given(street, "street").ensureHasValue().ensureIsString();
         this._street = street;
@@ -37,11 +35,11 @@ class Address extends Serializable<AddressSchema>
         this._city = city;
     }
     
-    public static deserialize({ street, city }: AddressSchema): Address
+    public static deserialize({ street, locality: city }: AddressSchema): Address
     {
         console.log("Calling custom address deserialize");
         
-        return new Address({ street, city });
+        return new Address({ street, locality: city });
     }
 }
 
@@ -72,16 +70,16 @@ class Employee extends Serializable
     private readonly _address: Address;
     private readonly _dummy: Dummy;
     
-    @serialize()
+    @serialize
     public get id(): string { return this._id; }
     
-    @serialize()
+    @serialize
     public get name(): FullName { return this._name; }
     
-    @serialize()
+    @serialize
     public get address(): Address { return this._address; }
     
-    @serialize()
+    @serialize
     public get dummy(): Dummy { return this._dummy; }
     
     
@@ -122,7 +120,7 @@ suite("Serializable", () =>
                 },
                 address: new Address({
                     street: "911 Roger rd",
-                    city: "Waterloo"
+                    locality: "Waterloo"
                 }),
                 dummy: new Dummy()
             });
@@ -147,7 +145,7 @@ suite("Serializable", () =>
                 },
                 address: new Address({
                     street: "911 Roger rd",
-                    city: "Waterloo"
+                    locality: "Waterloo"
                 }),
                 dummy: new Dummy()
             });

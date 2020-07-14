@@ -168,25 +168,66 @@ export class Deserializer
     }
 }
 
-export function serialize(key?: string): Function
-{
-    given(key, "key").ensureIsString();
+// export function serialize(key?: string): Function
+// {
+//     given(key, "key").ensureIsString();
 
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-    { 
+//     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+//     { 
+//         given(target, "target").ensureHasValue().ensureIsObject()
+//             .ensure(t => t instanceof Serializable,
+//                 "serialize decorator must only be used on properties in subclasses of Serializable");
+        
+//         Deserializer.registerType(target);
+
+//         if (!descriptor.get)
+//             throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
+
+//         (descriptor.get as any).serializable = true;
+//         if (key && !key.isEmptyOrWhiteSpace())
+//             (descriptor.get as any).serializationKey = key.trim();
+//     };
+// }
+
+export function serialize(key: string): Function;
+export function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
+export function serialize(keyOrTarget?: any, propertyKey?: string, descriptor?: PropertyDescriptor): any
+{
+    if (keyOrTarget != null && typeof keyOrTarget === "object")
+    {
+        const target = keyOrTarget as object;
         given(target, "target").ensureHasValue().ensureIsObject()
             .ensure(t => t instanceof Serializable,
                 "serialize decorator must only be used on properties in subclasses of Serializable");
-        
+
         Deserializer.registerType(target);
 
         if (!descriptor.get)
             throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
 
         (descriptor.get as any).serializable = true;
-        if (key && !key.isEmptyOrWhiteSpace())
-            (descriptor.get as any).serializationKey = key.trim();
-    };
+    }
+    else
+    {
+        const key = keyOrTarget as string;
+        given(key, "key").ensureIsString();
+        
+        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+        {
+            given(target, "target").ensureHasValue().ensureIsObject()
+                .ensure(t => t instanceof Serializable,
+                    "serialize decorator must only be used on properties in subclasses of Serializable");
+
+            Deserializer.registerType(target);
+
+            if (!descriptor.get)
+                throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
+
+            (descriptor.get as any).serializable = true;
+            if (key != null && key.isNotEmptyOrWhiteSpace())
+                (descriptor.get as any).serializationKey = key.trim();
+        };
+    }
 }
 
 export function deserialize(target: Function): void
