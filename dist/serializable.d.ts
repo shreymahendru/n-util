@@ -10,5 +10,6 @@ export declare class Deserializer {
     static deserialize<T>(serialized: object): T;
     private static getType;
 }
-export declare function serialize(key?: string): Function;
+export declare function serialize(key: string): Function;
+export declare function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
 export declare function deserialize(target: Function): void;
