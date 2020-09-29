@@ -22,7 +22,7 @@ export class HtmlSanitizer
     private static createOptions(): SanitizeHtml.IOptions
     {
         return {
-            allowedTags: SanitizeHtml.defaults.allowedTags.concat(["img", "span", "h1", "h2"]),
+            allowedTags: SanitizeHtml.defaults.allowedTags.concat(["img"]),
             allowedAttributes: Object.assign(SanitizeHtml.defaults.allowedAttributes, {
                 "*": ["style", "class"]
             }),
