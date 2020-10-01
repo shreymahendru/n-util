@@ -222,43 +222,45 @@ export abstract class Make // static class
         await taskManager.execute();
     }
     
-    // public static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue: U = null): T
-    // {
-    //     given(func, "func").ensureHasValue().ensureIsFunction();
+    public static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue: U = null): T
+    {
+        given(func, "func").ensureHasValue().ensureIsFunction();
         
-    //     const result = function (...p: any[]): any
-    //     {
-    //         try 
-    //         {
-    //             return func(...p);
-    //         }
-    //         catch
-    //         {
-    //             return defaultValue;
-    //         }
-    //     };
+        const result = function (...p: any[]): any
+        {
+            try 
+            {
+                return func(...p);
+            }
+            catch (e)
+            {
+                console.error(e);
+                return defaultValue;
+            }
+        };
         
-    //     return <any>result;
-    // }
+        return <any>result;
+    }
     
-    // public static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue: U = null): T
-    // {
-    //     given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+    public static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue: U = null): T
+    {
+        given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
 
-    //     const result = async function (...p: any[]): Promise<any>
-    //     {
-    //         try 
-    //         {
-    //             return await asyncFunc(...p);
-    //         }
-    //         catch
-    //         {
-    //             return defaultValue;
-    //         }
-    //     };
+        const result = async function (...p: any[]): Promise<any>
+        {
+            try 
+            {
+                return await asyncFunc(...p);
+            }
+            catch (e)
+            {
+                console.error(e);
+                return defaultValue;
+            }
+        };
 
-    //     return <any>result;
-    // }
+        return <any>result;
+    }
 
     
     private static getRandomInt(min: number, max: number): number
