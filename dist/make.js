@@ -164,6 +164,34 @@ class Make {
             yield taskManager.execute();
         });
     }
+    static errorSuppressed(func, defaultValue = null) {
+        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
+            try {
+                return func(...p);
+            }
+            catch (e) {
+                console.error(e);
+                return defaultValue;
+            }
+        };
+        return result;
+    }
+    static errorSuppressedAsync(asyncFunc, defaultValue = null) {
+        n_defensive_1.given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    return yield asyncFunc(...p);
+                }
+                catch (e) {
+                    console.error(e);
+                    return defaultValue;
+                }
+            });
+        };
+        return result;
+    }
     static getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
