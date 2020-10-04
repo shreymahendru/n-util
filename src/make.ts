@@ -150,7 +150,8 @@ export abstract class Make // static class
                     if (errorPredicate && !errorPredicate(error))
                         break;
                     // delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
-                    delayMS = delayMS + (500 * attempts);
+                    delayMS = delayMS + (1000 * attempts);
+                    // delayMS = 1000 * attempts;
                 }
             }
 
