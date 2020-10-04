@@ -149,7 +149,8 @@ export abstract class Make // static class
                     error = err;
                     if (errorPredicate && !errorPredicate(error))
                         break;
-                    delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
+                    // delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
+                    delayMS = delayMS + (500 * attempts);
                 }
             }
 
@@ -263,12 +264,12 @@ export abstract class Make // static class
     }
 
     
-    private static getRandomInt(min: number, max: number): number
-    {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
-    }
+    // private static getRandomInt(min: number, max: number): number
+    // {
+    //     min = Math.ceil(min);
+    //     max = Math.floor(max);
+    //     return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+    // }
 }
 
 
