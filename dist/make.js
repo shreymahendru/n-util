@@ -113,7 +113,7 @@ class Make {
                         error = err;
                         if (errorPredicate && !errorPredicate(error))
                             break;
-                        delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
+                        delayMS = delayMS + (500 * attempts);
                     }
                 }
                 if (successful)
@@ -191,11 +191,6 @@ class Make {
             });
         };
         return result;
-    }
-    static getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min)) + min;
     }
 }
 exports.Make = Make;
