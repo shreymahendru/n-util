@@ -113,7 +113,7 @@ class Make {
                         error = err;
                         if (errorPredicate && !errorPredicate(error))
                             break;
-                        delayMS = delayMS + (500 * attempts);
+                        delayMS = delayMS + (1000 * attempts);
                     }
                 }
                 if (successful)
