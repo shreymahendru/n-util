@@ -206,13 +206,13 @@ export abstract class Make // static class
         return result;
     }
     
-    public static loop(func: () => void, numberOfTimes: number): void
+    public static loop(func: (index: number) => void, numberOfTimes: number): void
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
         
         for (let i = 0; i < numberOfTimes; i++)
-            func();  
+            func(i);  
     }
     
     public static async loopAsync(asyncFunc: () => Promise<void>, numberOfTimes: number, degreesOfParallelism?: number): Promise<void>
@@ -271,9 +271,95 @@ export abstract class Make // static class
      */
     public static randomInt(min: number, max: number): number
     {
+        given(min, "min").ensureHasValue().ensureIsNumber();
+        given(max, "max").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > min, "value has to be greater than min");
+        
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+    }
+    
+    public static randomCode(numChars: number): string
+    {
+        given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+        
+        let allowedChars = "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ~".split("");
+        
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(7, 17);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)],
+            shuffleTimes);
+        
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+        
+        const result: string[] = [];
+        
+        Make.loop(() =>
+        {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+        
+        return result.join("");
+    }
+    
+    public static randomTextCode(numChars: number, caseInsensitive: boolean = false): string
+    {
+        given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+        
+        given(caseInsensitive, "caseInsensitive").ensureHasValue().ensureIsBoolean();
+
+        let allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        if (caseInsensitive)
+            allowedChars = "abcdefghijklmnopqrstuvwxyz".split("");
+        
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(7, 11);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)],
+            shuffleTimes);
+        
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+
+        const result: string[] = [];
+
+        Make.loop(() =>
+        {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+
+        return result.join("");
+    }
+    
+    public static randomNumericCode(numChars: number): string
+    {
+        given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+
+        let allowedChars = "0123456789".split("");
+
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(3, 7);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)],
+            shuffleTimes);
+
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+
+        const result: string[] = [];
+
+        Make.loop(() =>
+        {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+
+        return result.join("");
     }
 }
 

@@ -526,7 +526,7 @@ suite.only("Make", () =>
     
     suite("randomInt", () =>
     { 
-        test("should should be within range", () =>
+        test("should be within range", () =>
         {       
             let hasError = false;
             try 
@@ -543,6 +543,57 @@ suite.only("Make", () =>
             }
             
             Assert.strictEqual(hasError, false);
+        });
+    });
+    
+    suite("randomCode", () =>
+    {
+        test("should generate unique values", () =>
+        {
+            const results: string[] = [];
+            
+            Make.loop(() =>
+            {
+                const val = Make.randomCode(6);
+                console.log(val);
+                results.push(val);
+            }, 100000);
+
+            Assert.strictEqual(results.distinct().length, results.length);
+        });
+    });
+    
+    suite("randomTextCode", () =>
+    {
+        test("should generate unique values", () =>
+        {
+            const results: string[] = [];
+
+            Make.loop(() =>
+            {
+                const val = Make.randomTextCode(5, true);
+                console.log(val);
+                results.push(val);
+            }, 10000);
+
+            Assert.strictEqual(results.distinct().length, results.length);
+        });
+    });
+    
+    suite("randomNumericCode", () =>
+    {
+        test("should generate unique values", () =>
+        {
+            const results: string[] = [];
+
+            Make.loop(() =>
+            {
+                const val = Make.randomNumericCode(4);
+                console.log(val);
+                results.push(val);
+            }, 1000);
+
+            Assert.strictEqual(results.distinct().length, results.length);
         });
     });
     
