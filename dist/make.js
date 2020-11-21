@@ -154,7 +154,7 @@ class Make {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
         n_defensive_1.given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
         for (let i = 0; i < numberOfTimes; i++)
-            func();
+            func(i);
     }
     static loopAsync(asyncFunc, numberOfTimes, degreesOfParallelism) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -193,9 +193,63 @@ class Make {
         return result;
     }
     static randomInt(min, max) {
+        n_defensive_1.given(min, "min").ensureHasValue().ensureIsNumber();
+        n_defensive_1.given(max, "max").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > min, "value has to be greater than min");
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min;
+    }
+    static randomCode(numChars) {
+        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+        let allowedChars = "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ~".split("");
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(7, 17);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)], shuffleTimes);
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+        const result = [];
+        Make.loop(() => {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+        return result.join("");
+    }
+    static randomTextCode(numChars, caseInsensitive = false) {
+        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+        n_defensive_1.given(caseInsensitive, "caseInsensitive").ensureHasValue().ensureIsBoolean();
+        let allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        if (caseInsensitive)
+            allowedChars = "abcdefghijklmnopqrstuvwxyz".split("");
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(7, 11);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)], shuffleTimes);
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+        const result = [];
+        Make.loop(() => {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+        return result.join("");
+    }
+    static randomNumericCode(numChars) {
+        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+            .ensure(t => t > 0, "value has to be greater than 0");
+        let allowedChars = "0123456789".split("");
+        const shuffleTimes = Make.randomInt(1, 10);
+        const shuffleAmount = Make.randomInt(3, 7);
+        Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)], shuffleTimes);
+        if ((Date.now() % 2) === 0)
+            allowedChars = allowedChars.reverse();
+        const result = [];
+        Make.loop(() => {
+            const random = Make.randomInt(0, allowedChars.length);
+            result.push(allowedChars[random]);
+        }, numChars);
+        return result.join("");
     }
 }
 exports.Make = Make;
