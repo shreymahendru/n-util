@@ -203,7 +203,7 @@ class Make {
     static randomCode(numChars) {
         n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
-        let allowedChars = "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ~".split("");
+        let allowedChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         const shuffleTimes = Make.randomInt(1, 10);
         const shuffleAmount = Make.randomInt(7, 17);
         Make.loop(() => allowedChars = [...allowedChars.skip(shuffleAmount), ...allowedChars.take(shuffleAmount)], shuffleTimes);
