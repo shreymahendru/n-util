@@ -215,7 +215,7 @@ export abstract class Make // static class
             func(i);  
     }
     
-    public static async loopAsync(asyncFunc: () => Promise<void>, numberOfTimes: number, degreesOfParallelism?: number): Promise<void>
+    public static async loopAsync(asyncFunc: (index: number) => Promise<void>, numberOfTimes: number, degreesOfParallelism?: number): Promise<void>
     {
         given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
         given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
@@ -368,14 +368,14 @@ export abstract class Make // static class
 class TaskManager<T>
 {
     private readonly _numberOfTimes: number;
-    private readonly _taskFunc: (input: T) => Promise<any>;
+    private readonly _taskFunc: (index: number) => Promise<any>;
     private readonly _taskCount: number;
     private readonly _captureResults: boolean;
     private readonly _tasks: Task<T>[];
     private readonly _results: any[];
 
 
-    public constructor(numberOfTimes: number, taskFunc: (input: T) => Promise<any>, taskCount: number, captureResults: boolean)
+    public constructor(numberOfTimes: number, taskFunc: (index: number) => Promise<any>, taskCount: number, captureResults: boolean)
     {
         this._numberOfTimes = numberOfTimes;
         this._taskFunc = taskFunc;
@@ -397,7 +397,7 @@ class TaskManager<T>
         {
             if (this._captureResults)
                 this._results.push(null);
-            await this.executeTaskForItem(null, i);
+            await this.executeTaskForItem(i);
         }
 
         await this.finish();
@@ -414,7 +414,7 @@ class TaskManager<T>
     }
 
 
-    private async executeTaskForItem(item: T, itemIndex: number): Promise<void>
+    private async executeTaskForItem(itemIndex: number): Promise<void>
     {
         let availableTask = this._tasks.find(t => t.isFree);
         if (!availableTask)
@@ -424,7 +424,7 @@ class TaskManager<T>
             availableTask = task;
         }
 
-        availableTask.execute(item, itemIndex);
+        availableTask.execute(itemIndex);
     }
 
     private finish(): Promise<any>
@@ -438,7 +438,7 @@ class Task<T>
     private readonly _manager: TaskManager<T>;
     // @ts-ignore
     private readonly _id: number;
-    private readonly _taskFunc: (input: T) => Promise<any>;
+    private readonly _taskFunc: (index: number) => Promise<any>;
     private readonly _captureResult: boolean;
     private _promise: Promise<Task<T>>;
 
@@ -447,7 +447,7 @@ class Task<T>
     public get isFree(): boolean { return this._promise === null; }
 
 
-    public constructor(manager: TaskManager<T>, id: number, taskFunc: (input: T) => Promise<any>, captureResult: boolean)
+    public constructor(manager: TaskManager<T>, id: number, taskFunc: (index: number) => Promise<any>, captureResult: boolean)
     {
         this._manager = manager;
         this._id = id;
@@ -457,11 +457,11 @@ class Task<T>
     }
 
 
-    public execute(item: T, itemIndex: number): void
+    public execute(itemIndex: number): void
     {
         this._promise = new Promise((resolve, reject) =>
         {
-            this._taskFunc(item)
+            this._taskFunc(itemIndex)
                 .then((result) =>
                 {
                     if (this._captureResult)

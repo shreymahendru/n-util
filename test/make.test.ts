@@ -2,6 +2,7 @@ import * as Assert from "assert";
 import { Make } from "./../src/make";
 import { ApplicationException, ArgumentException } from "@nivinjoseph/n-exception";
 import { given } from "@nivinjoseph/n-defensive";
+import { Delay } from "../src";
 
 
 suite.only("Make", () =>
@@ -524,6 +525,62 @@ suite.only("Make", () =>
         });
     });
     
+    suite("loop", () =>
+    {
+        test("should loop 10 times", () =>
+        {
+            const indexes = new Array<number>();
+            let count = 0;
+            
+            Make.loop((index) =>
+            {
+                count++;
+                indexes.push(index);
+                console.log(index);
+            }, 10);
+            
+            Assert.strictEqual(count, 10);
+            Assert.deepStrictEqual(indexes, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        });
+    });
+    
+    suite("loopAsync", () =>
+    {
+        test("should loop 10 times", async () =>
+        {
+            const indexes = new Array<number>();
+            let count = 0;
+
+            await Make.loopAsync(async (index) =>
+            {
+                await Delay.milliseconds(index * 100);
+                count++;
+                indexes.push(index);
+                console.log(index);
+            }, 10, 5);
+
+            Assert.strictEqual(count, 10);
+            Assert.deepStrictEqual(indexes.orderBy(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        });
+        
+        test("should loop 7 times", async () =>
+        {
+            const indexes = new Array<number>();
+            let count = 0;
+
+            await Make.loopAsync(async (index) =>
+            {
+                await Delay.milliseconds(index * 10 * Make.randomInt(1, 9));
+                count++;
+                indexes.push(index);
+                console.log(index);
+            }, 7, 3);
+
+            Assert.strictEqual(count, 7);
+            Assert.deepStrictEqual(indexes.orderBy(), [0, 1, 2, 3, 4, 5, 6]);
+        });
+    });
+    
     suite("randomInt", () =>
     { 
         test("should be within range", () =>
@@ -555,7 +612,7 @@ suite.only("Make", () =>
             Make.loop(() =>
             {
                 const val = Make.randomCode(6);
-                console.log(val);
+                // console.log(val);
                 results.push(val);
             }, 100000);
 
@@ -572,7 +629,7 @@ suite.only("Make", () =>
             Make.loop(() =>
             {
                 const val = Make.randomTextCode(5, true);
-                console.log(val);
+                // console.log(val);
                 results.push(val);
             }, 10000);
 
@@ -589,7 +646,7 @@ suite.only("Make", () =>
             Make.loop(() =>
             {
                 const val = Make.randomNumericCode(4);
-                console.log(val);
+                // console.log(val);
                 results.push(val);
             }, 1000);
 
