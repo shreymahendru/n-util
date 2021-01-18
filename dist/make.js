@@ -270,7 +270,7 @@ class TaskManager {
             for (let i = 0; i < this._numberOfTimes; i++) {
                 if (this._captureResults)
                     this._results.push(null);
-                yield this.executeTaskForItem(null, i);
+                yield this.executeTaskForItem(i);
             }
             yield this.finish();
         });
@@ -281,7 +281,7 @@ class TaskManager {
     getResults() {
         return this._results;
     }
-    executeTaskForItem(item, itemIndex) {
+    executeTaskForItem(itemIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             let availableTask = this._tasks.find(t => t.isFree);
             if (!availableTask) {
@@ -289,7 +289,7 @@ class TaskManager {
                 task.free();
                 availableTask = task;
             }
-            availableTask.execute(item, itemIndex);
+            availableTask.execute(itemIndex);
         });
     }
     finish() {
@@ -306,9 +306,9 @@ class Task {
     }
     get promise() { return this._promise; }
     get isFree() { return this._promise === null; }
-    execute(item, itemIndex) {
+    execute(itemIndex) {
         this._promise = new Promise((resolve, reject) => {
-            this._taskFunc(item)
+            this._taskFunc(itemIndex)
                 .then((result) => {
                 if (this._captureResult)
                     this._manager.addResult(itemIndex, result);
