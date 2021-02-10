@@ -195,7 +195,7 @@ export abstract class Make // static class
                     err
                         ? reject(err)
                         : values.length === 0
-                            ? resolve()
+                            ? resolve(undefined)
                             : values.length === 1
                                 ? resolve(values[0])
                                 : resolve(values)));
