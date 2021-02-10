@@ -11,7 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Make = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
-class Make {
+// public
+class Make // static class
+ {
     constructor() { }
     static retry(func, numberOfRetries, errorPredicate) {
         n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
@@ -113,7 +115,9 @@ class Make {
                         error = err;
                         if (errorPredicate && !errorPredicate(error))
                             break;
+                        // delayMS = (delayMS + Make.getRandomInt(200, 500)) * attempts;
                         delayMS = delayMS + (Make.randomInt(400, 700) * attempts);
+                        // delayMS = 1000 * attempts;
                     }
                 }
                 if (successful)
@@ -142,7 +146,7 @@ class Make {
             let promise = new Promise((resolve, reject) => func(...p, (err, ...values) => err
                 ? reject(err)
                 : values.length === 0
-                    ? resolve()
+                    ? resolve(undefined)
                     : values.length === 1
                         ? resolve(values[0])
                         : resolve(values)));
@@ -192,17 +196,23 @@ class Make {
         };
         return result;
     }
+    /**
+     *
+     * @param min inclusive
+     * @param max exclusive
+     */
     static randomInt(min, max) {
         n_defensive_1.given(min, "min").ensureHasValue().ensureIsNumber();
         n_defensive_1.given(max, "max").ensureHasValue().ensureIsNumber()
             .ensure(t => t > min, "value has to be greater than min");
         min = Math.ceil(min);
         max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min)) + min;
+        return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
     }
     static randomCode(numChars) {
         n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
+        // let allowedChars = "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ~".split("");
         let allowedChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         const shuffleTimes = Make.randomInt(1, 10);
         const shuffleAmount = Make.randomInt(7, 17);

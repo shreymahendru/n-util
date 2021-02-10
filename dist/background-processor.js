@@ -13,6 +13,7 @@ exports.BackgroundProcessor = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const delay_1 = require("./delay");
 const n_exception_1 = require("@nivinjoseph/n-exception");
+// public
 class BackgroundProcessor {
     constructor(defaultErrorHandler, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true) {
         this._actionsToProcess = new Array();

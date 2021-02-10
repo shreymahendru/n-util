@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Duration = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
+/**
+ * @static
+ */
 class Duration {
     constructor() { }
     static fromSeconds(seconds) {

@@ -4,6 +4,9 @@ exports.DtoFactory = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const serializable_1 = require("./serializable");
 class DtoFactory {
+    /**
+     * @static
+     */
     constructor() { }
     static create(value, keys) {
         var _a;

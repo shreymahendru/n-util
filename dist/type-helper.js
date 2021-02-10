@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TypeHelper = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class TypeHelper {
+    /**
+     * @static
+     */
     constructor() { }
     static parseBoolean(value) {
         if (value == null)

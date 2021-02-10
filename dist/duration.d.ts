@@ -1,3 +1,6 @@
+/**
+ * @static
+ */
 export declare class Duration {
     private constructor();
     static fromSeconds(seconds: number): number;

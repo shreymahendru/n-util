@@ -4,6 +4,9 @@ export declare abstract class Serializable<TData extends object = {}> {
 }
 export declare class Deserializer {
     private static _typeCache;
+    /**
+     * @static
+     */
     private constructor();
     static hasType(typeName: string): boolean;
     static registerType(type: object | Function): void;

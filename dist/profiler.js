@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Profiler = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 const uuid_1 = require("./uuid");
+// public
 class Profiler {
     constructor() {
         this._id = uuid_1.Uuid.create();

@@ -44,8 +44,12 @@ class Serializable {
 }
 exports.Serializable = Serializable;
 class Deserializer {
+    /**
+     * @static
+     */
     constructor() { }
     static hasType(typeName) {
+        // this is postel's law compliant
         if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
             || !this._typeCache.has(typeName.trim()))
             return false;
@@ -83,6 +87,8 @@ class Deserializer {
                         if (typeof v === "object") {
                             if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
                                 return Deserializer.deserialize(v);
+                            // else
+                            //     return JSON.parse(JSON.stringify(v));
                         }
                         return v;
                     });
@@ -91,7 +97,7 @@ class Deserializer {
                     if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
                         acc[key] = Deserializer.deserialize(val);
                     else
-                        acc[key] = val;
+                        acc[key] = val; // JSON.parse(JSON.stringify(val));
                 }
             }
             else {
@@ -154,7 +160,7 @@ class Utilities {
         var _a;
         let propertyInfos = new Array();
         let prototype = Object.getPrototypeOf(val);
-        if (prototype === undefined || prototype === null)
+        if (prototype === undefined || prototype === null) // we are dealing with Object
             return propertyInfos;
         propertyInfos.push(...Utilities.getPropertyInfosInternal(prototype));
         let propertyNames = Object.getOwnPropertyNames(val);

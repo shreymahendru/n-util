@@ -39,4 +39,10 @@ Object.defineProperty(exports, "deserialize", { enumerable: true, get: function 
 Object.defineProperty(exports, "Deserializer", { enumerable: true, get: function () { return serializable_1.Deserializer; } });
 var dto_factory_1 = require("./dto-factory");
 Object.defineProperty(exports, "DtoFactory", { enumerable: true, get: function () { return dto_factory_1.DtoFactory; } });
+// export
+// {
+//     Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version,
+//     Profiler, ProfilerTrace,
+//     Templator, HtmlSanitizer
+// };
 //# sourceMappingURL=index.js.map

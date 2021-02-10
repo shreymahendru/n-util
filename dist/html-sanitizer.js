@@ -4,6 +4,9 @@ exports.HtmlSanitizer = void 0;
 const SanitizeHtml = require("sanitize-html");
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class HtmlSanitizer {
+    /**
+     * @static
+     */
     constructor() { }
     static sanitize(html) {
         n_defensive_1.given(html, "html").ensureHasValue().ensureIsString();

@@ -1,4 +1,7 @@
 export declare class TypeHelper {
+    /**
+     * @static
+     */
     private constructor();
     static parseBoolean(value: any): boolean | null;
     static parseNumber(value: any): number | null;
