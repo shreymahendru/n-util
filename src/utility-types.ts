@@ -18,3 +18,7 @@ export type Schema<T, K extends keyof T> = {
 export type PartialSchema<T, K extends keyof T> = {
     -readonly [P in K]?: T[P];
 };
+
+export type ClassDefinition<T extends {}> = new (...args: any[]) => T;
+
+export type ClassHierarchy<T extends {}> = Function & { prototype: T };

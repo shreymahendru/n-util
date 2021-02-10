@@ -579,6 +579,33 @@ suite.only("Make", () =>
             Assert.strictEqual(count, 7);
             Assert.deepStrictEqual(indexes.orderBy(), [0, 1, 2, 3, 4, 5, 6]);
         });
+        
+        // test.only("should work", async () =>
+        // {
+        //     const indexes = new Array<number>();
+        //     let count = 0;
+
+        //     await Make.loopAsync(async (index) =>
+        //     {
+        //         await Delay.milliseconds(5000);
+                
+        //         indexes.push(index);
+        //         // console.log("index", index);
+        //         // console.log("count", count);
+                
+        //         for (let j = 0; j < 10; j++)
+        //         {
+        //             await Delay.milliseconds(10000);
+        //             count++;
+        //             console.log(index, count, j);
+        //         }
+        //     }, 5);
+
+        //     // Assert.strictEqual(count, 7);
+        //     // Assert.deepStrictEqual(indexes.orderBy(), [0, 1, 2, 3, 4, 5, 6]);
+            
+        //     Assert.ok(true);
+        // });
     });
     
     suite("randomInt", () =>
