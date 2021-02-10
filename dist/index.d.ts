@@ -17,4 +17,4 @@ export { Templator } from "./templator";
 export { HtmlSanitizer } from "./html-sanitizer";
 export { Serializable, serialize, deserialize, Deserializer } from "./serializable";
 export { DtoFactory } from "./dto-factory";
-export { PartialPick, Schema, PartialSchema } from "./utility-types";
+export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types";
