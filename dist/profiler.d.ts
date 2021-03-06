@@ -3,7 +3,7 @@ export declare class Profiler {
     private readonly _traces;
     get id(): string;
     get traces(): ReadonlyArray<ProfilerTrace>;
-    constructor();
+    constructor(id: string);
     trace(message: string): void;
 }
 export interface ProfilerTrace {

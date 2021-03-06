@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Profiler = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const uuid_1 = require("./uuid");
 // public
 class Profiler {
-    constructor() {
-        this._id = uuid_1.Uuid.create();
+    constructor(id) {
+        n_defensive_1.given(id, "id").ensureHasValue().ensureIsString();
+        this._id = id;
         this._traces = [{
                 dateTime: Date.now(),
                 message: "Profiler created",
