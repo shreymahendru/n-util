@@ -1,5 +1,4 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Uuid } from "./uuid";
 
 // public
 export class Profiler
@@ -12,9 +11,11 @@ export class Profiler
     public get traces(): ReadonlyArray<ProfilerTrace> { return this._traces; }
     
     
-    public constructor()
+    public constructor(id: string)
     {
-        this._id = Uuid.create();
+        given(id, "id").ensureHasValue().ensureIsString();
+        
+        this._id = id;
         this._traces = [{
             dateTime: Date.now(),
             message: "Profiler created",

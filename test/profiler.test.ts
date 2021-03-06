@@ -7,7 +7,7 @@ suite("Profiler tests", () =>
 {
     test("Basics", async () =>
     {
-        const profiler = new Profiler();
+        const profiler = new Profiler("test");
         
         for (let i = 1; i <= 5; i++)
         {
