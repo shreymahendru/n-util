@@ -3,7 +3,7 @@ import "@nivinjoseph/n-ext";
 import { Templator } from "../src/templator";
 
 
-suite("Templator", () =>
+suite.only("Templator", () =>
 {
     test("Basic test", () =>
     {
@@ -22,5 +22,17 @@ suite("Templator", () =>
         
         const output = templator.render(data);
         Assert.strictEqual(output, `Hello Mr. ${data.firstName} ${data.lastName}. Address: ${data.address.street} ${(<any>data.address).city || ""} ${data.address.street}`);
+    });
+    
+    test("html escape test", () =>
+    {
+        const template = "{{data.title}}";
+        const descriptionData: Object = {};
+        descriptionData.setValue("data.title", "CME engine optimization: Take the user's age into consideration");
+        
+        const templator = new Templator(template);
+        const output = templator.render(descriptionData);
+        
+        Assert.strictEqual(output, "CME engine optimization: Take the user's age into consideration");
     });
 });

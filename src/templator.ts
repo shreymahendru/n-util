@@ -26,6 +26,6 @@ export class Templator
     {
         given(data, "data").ensureHasValue().ensureIsObject();
         
-        return Mustache.render(this._template, data);
+        return Mustache.render(this._template, data, null, { escape: (t) => t });
     }
 }

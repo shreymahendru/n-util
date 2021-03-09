@@ -5,7 +5,7 @@ import { given } from "@nivinjoseph/n-defensive";
 import { Delay } from "../src";
 
 
-suite.only("Make", () =>
+suite("Make", () =>
 {        
     let numAttempts: number;   
 
