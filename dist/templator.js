@@ -14,7 +14,7 @@ class Templator {
     get tokens() { return this._tokens; }
     render(data) {
         n_defensive_1.given(data, "data").ensureHasValue().ensureIsObject();
-        return Mustache.render(this._template, data);
+        return Mustache.render(this._template, data, null, { escape: (t) => t });
     }
 }
 exports.Templator = Templator;
