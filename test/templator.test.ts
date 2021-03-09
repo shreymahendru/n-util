@@ -3,7 +3,7 @@ import "@nivinjoseph/n-ext";
 import { Templator } from "../src/templator";
 
 
-suite.only("Templator", () =>
+suite("Templator", () =>
 {
     test("Basic test", () =>
     {
