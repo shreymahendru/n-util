@@ -23,12 +23,12 @@ class TypeHelper {
         if (value == null)
             return null;
         if (typeof (value) === "number")
-            return value;
+            return Number.isFinite(value) ? value : null;
         const strval = value.toString().trim();
         if (strval.length === 0)
             return null;
         const parsed = +strval;
-        if (!isNaN(parsed) && isFinite(parsed))
+        if (!Number.isNaN(parsed) && Number.isFinite(parsed))
             return parsed;
         return null;
     }
