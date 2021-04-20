@@ -34,7 +34,7 @@ export class TypeHelper
             return null;
 
         if (typeof (value) === "number")
-            return value;
+            return Number.isFinite(value) ? value : null;
         
         const strval = (<string>value.toString()).trim();
         
@@ -42,7 +42,7 @@ export class TypeHelper
             return null;
         
         const parsed = +strval;
-        if (!isNaN(parsed) && isFinite(parsed))
+        if (!Number.isNaN(parsed) && Number.isFinite(parsed))
             return parsed;
         
         return null;
