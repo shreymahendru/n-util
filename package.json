@@ -1,6 +1,6 @@
 {
     "name": "@nivinjoseph/n-util",
-    "version": "1.0.69",
+    "version": "1.0.70",
     "description": "Utility functions",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
