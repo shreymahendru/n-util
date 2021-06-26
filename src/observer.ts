@@ -35,7 +35,10 @@ export class Observer<T>
         if (this.isCancelled)
             return;
         
-        setTimeout(this._callback, 0, eventData);
+        if (process && process.nextTick)
+            process.nextTick(this._callback, eventData);
+        else
+            setTimeout(this._callback, 0, eventData);
     }
 
     public cancel(): void
