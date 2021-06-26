@@ -21,7 +21,10 @@ class Observer {
         // no defensive check cuz eventData can be void
         if (this.isCancelled)
             return;
-        setTimeout(this._callback, 0, eventData);
+        if (process && process.nextTick)
+            process.nextTick(this._callback, eventData);
+        else
+            setTimeout(this._callback, 0, eventData);
     }
     cancel() {
         this._callback = null;
