@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DtoFactory = exports.Deserializer = exports.deserialize = exports.serialize = exports.Serializable = exports.HtmlSanitizer = exports.Templator = exports.Profiler = exports.Version = exports.Mutex = exports.Deferred = exports.ImageHelper = exports.Time = exports.Duration = exports.TypeHelper = exports.Uuid = exports.BackgroundProcessor = exports.DisposableWrapper = exports.Delay = exports.Make = void 0;
+exports.Observer = exports.DtoFactory = exports.Deserializer = exports.deserialize = exports.serialize = exports.Serializable = exports.HtmlSanitizer = exports.Templator = exports.Profiler = exports.Version = exports.Mutex = exports.Deferred = exports.ImageHelper = exports.Time = exports.Duration = exports.TypeHelper = exports.Uuid = exports.BackgroundProcessor = exports.DisposableWrapper = exports.Delay = exports.Make = void 0;
 require("@nivinjoseph/n-ext");
 var make_1 = require("./make");
 Object.defineProperty(exports, "Make", { enumerable: true, get: function () { return make_1.Make; } });
@@ -39,6 +39,8 @@ Object.defineProperty(exports, "deserialize", { enumerable: true, get: function 
 Object.defineProperty(exports, "Deserializer", { enumerable: true, get: function () { return serializable_1.Deserializer; } });
 var dto_factory_1 = require("./dto-factory");
 Object.defineProperty(exports, "DtoFactory", { enumerable: true, get: function () { return dto_factory_1.DtoFactory; } });
+var observer_1 = require("./observer");
+Object.defineProperty(exports, "Observer", { enumerable: true, get: function () { return observer_1.Observer; } });
 // export
 // {
 //     Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version,
