@@ -2,33 +2,55 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Observer = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
+const uuid_1 = require("./uuid");
 class Observer {
-    constructor(event, callback) {
+    constructor(event) {
+        this._subMap = new Map();
         n_defensive_1.given(event, "event").ensureHasValue().ensureIsString();
         this._event = event.trim();
-        n_defensive_1.given(callback, "callback").ensureHasValue().ensureIsFunction();
-        this._callback = callback;
-        this._subscription = {
-            event: this._event,
-            isUnsubscribed: false,
-            unsubscribe: () => this.cancel()
-        };
     }
     get event() { return this._event; }
-    get subscription() { return this._subscription; }
-    get isCancelled() { return this._callback == null; }
+    get hasSubscriptions() { return this._subMap.size > 0; }
+    subscribe(callback) {
+        n_defensive_1.given(callback, "callback").ensureHasValue().ensureIsFunction();
+        const key = uuid_1.Uuid.create();
+        const subscription = {
+            event: this._event,
+            isUnsubscribed: false,
+            unsubscribe: () => this._cancel(key)
+        };
+        this._subMap.set(key, {
+            subscription,
+            callback
+        });
+        return subscription;
+    }
     notify(eventData) {
         // no defensive check cuz eventData can be void
-        if (this.isCancelled)
+        if (!this.hasSubscriptions)
             return;
-        if (process && process.nextTick)
-            process.nextTick(this._callback, eventData);
-        else
-            setTimeout(this._callback, 0, eventData);
+        if (process && process.nextTick) {
+            for (const entry of this._subMap.values()) {
+                process.nextTick(entry.callback, eventData);
+            }
+        }
+        else {
+            for (const entry of this._subMap.values()) {
+                setTimeout(entry.callback, 0, eventData);
+            }
+        }
     }
     cancel() {
-        this._callback = null;
-        this._subscription.isUnsubscribed = true;
+        for (const key of this._subMap.keys())
+            this._cancel(key);
+    }
+    _cancel(key) {
+        const subInfo = this._subMap.get(key);
+        if (subInfo == null)
+            return;
+        subInfo.subscription.isUnsubscribed = true;
+        subInfo.subscription.unsubscribe = () => { };
+        this._subMap.delete(key);
     }
 }
 exports.Observer = Observer;
