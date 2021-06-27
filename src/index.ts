@@ -19,7 +19,7 @@ export { HtmlSanitizer } from "./html-sanitizer";
 export { Serializable, serialize, deserialize, Deserializer } from "./serializable";
 export { DtoFactory } from "./dto-factory";
 export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types";
-export { Observer, Subscription } from "./observer";
+export { Observer, Observable, Subscription } from "./observer";
 
 
 // export
