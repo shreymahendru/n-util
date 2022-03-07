@@ -9,7 +9,7 @@ suite("Duration", () =>
     {
         test("Should work", () =>
         {
-            Assert.strictEqual(Duration.fromSeconds(1), 1000);
+            Assert.strictEqual(Duration.fromSeconds(1).toMilliSeconds(), 1000);
         });
     });
 
@@ -17,7 +17,7 @@ suite("Duration", () =>
     {
         test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromMinutes(1), 60000);
+            Assert.strictEqual(Duration.fromMinutes(1).toMilliSeconds(), 60000);
         });
     });
 
@@ -25,7 +25,7 @@ suite("Duration", () =>
     {
         test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromHours(1), 3600000);
+            Assert.strictEqual(Duration.fromHours(1).toMilliSeconds(), 3600000);
         });
     });
     
@@ -33,7 +33,7 @@ suite("Duration", () =>
     {
         test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromDays(1), 86400000);
+            Assert.strictEqual(Duration.fromDays(1).toMilliSeconds(), 86400000);
         });
     });
 });
