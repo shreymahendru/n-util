@@ -19,3 +19,7 @@ export { Serializable, serialize, deserialize, Deserializer } from "./serializab
 export { DtoFactory } from "./dto-factory";
 export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types";
 export { Observer, Observable, Subscription } from "./observer";
+export { debounce } from "./debounce";
+export { dedupe } from "./dedupe";
+export { synchronize } from "./synchronize";
+export { throttle } from "./throttle";
