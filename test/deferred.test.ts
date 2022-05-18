@@ -9,7 +9,7 @@ suite("Deferred Tests", () =>
             then the deferred should be able to control the execution of the callback`,
         async () =>
         {
-            const deferred = new Deferred();
+            const deferred = new Deferred<void>();
             
             let callbackExecuted = false;
             

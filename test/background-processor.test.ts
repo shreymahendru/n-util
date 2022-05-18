@@ -20,15 +20,16 @@ suite("BackgroundProcessor tests", () =>
             bp.processAction(() =>
             {
                 if ((t % 2) === 0)
+                    // eslint-disable-next-line @typescript-eslint/no-throw-literal
                     throw t;
                 console.log(t);
                 return Promise.resolve();
-            }, t > 5 ? async (e) =>
+            }, t > 5 ? async (e): Promise<void> =>
             {
                 if ((<any>e) === 8)
                     throw new Error("8 is also bad");
                 console.log(e, "custom error handler");
-            } : null);
+            } : undefined);
         });
         
         console.log("delaying 5000ms");

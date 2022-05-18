@@ -9,7 +9,7 @@ suite("Helper", () =>
     {
         enum Foo
         {
-            bar,
+            bar = 0,
             baz = 2,
             maa = "something",
             ano = 3

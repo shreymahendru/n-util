@@ -26,6 +26,7 @@ export class Templator
     {
         given(data, "data").ensureHasValue().ensureIsObject();
         
-        return Mustache.render(this._template, data, null, { escape: (t) => t });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return Mustache.render(this._template, data, null as any, { escape: (t) => t });
     }
 }

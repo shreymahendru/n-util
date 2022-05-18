@@ -60,10 +60,12 @@ export class Observer<T> implements Observable<T>
         if (!this.hasSubscriptions)
             return;
         
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (process && process.nextTick)
         {
             for (const entry of this._subMap.values())
             {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 process.nextTick(entry.callback, eventData);
             }
         }
@@ -71,6 +73,7 @@ export class Observer<T> implements Observable<T>
         {
             for (const entry of this._subMap.values())
             {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 setTimeout(entry.callback, 0, eventData);
             }
         }
@@ -89,7 +92,7 @@ export class Observer<T> implements Observable<T>
             return;
         
         (<any>subInfo.subscription).isUnsubscribed = true;
-        (<any>subInfo.subscription).unsubscribe = () => {};
+        (<any>subInfo.subscription).unsubscribe = (): void => { /** deliberately empty */};
         this._subMap.delete(key);
     }
 }
@@ -97,5 +100,5 @@ export class Observer<T> implements Observable<T>
 interface SubInfo<T>
 {
     subscription: Subscription;
-    callback: (eventData: T) => void;
+    callback(eventData: T): void;
 }

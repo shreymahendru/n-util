@@ -34,6 +34,7 @@ export class Mutex
         
         this._deferreds.remove(this._currentDeferred);
         this._currentDeferred = this._deferreds[0] || null;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (this._currentDeferred != null)
             this._currentDeferred.resolve();
     }

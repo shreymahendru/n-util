@@ -7,14 +7,15 @@ suite("Uuid", () =>
 {
     test("Created value must not be null, empty or whitespace", () =>
     {
-        let uuid = Uuid.create();
-        Assert.ok(uuid !== null && !uuid.isEmptyOrWhiteSpace());
+        const uuid = Uuid.create();
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        Assert.ok(uuid != null && !uuid.isEmptyOrWhiteSpace());
     });
 
     test("Must create different values on multiple executions", () =>
     {
-        let uuid1 = Uuid.create();
-        let uuid2 = Uuid.create();
+        const uuid1 = Uuid.create();
+        const uuid2 = Uuid.create();
         Assert.notStrictEqual(uuid1, uuid2);
     });
 });

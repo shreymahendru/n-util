@@ -133,6 +133,7 @@ suite("Serializable", () =>
             Assert.strictEqual(testObj.name.firstName, "niv");
             Assert.strictEqual(testObj.address.city, "Waterloo");
             
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             Assert.ok(serialized != null);
             
             // console.log(serialized);

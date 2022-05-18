@@ -10,7 +10,7 @@ export class DtoFactory
     private constructor() { }
 
 
-    public static create<T extends object, TDto extends {} = {}>(value: T, keys: Array<keyof T | { [key: string]: keyof T | ((val: T) => any) }>): TDto
+    public static create<T extends object, TDto extends {} = {}>(value: T, keys: Array<keyof T | { [key: string]: keyof T | ((val: T) => any); }>): TDto
     {
         given(value, "value").ensureHasValue().ensureIsObject();
         given(keys, "keys").ensureHasValue().ensureIsArray();
@@ -21,8 +21,8 @@ export class DtoFactory
 
         if (value instanceof Serializable)
         {
-            const serialized = value.serialize() as any;
-            dto = keys.reduce((acc, k) =>
+            const serialized = value.serialize();
+            dto = keys.reduce<any>((acc, k) =>
             {
                 if (typeof k === "object")
                 {
@@ -30,6 +30,7 @@ export class DtoFactory
                     {
                         const key = (k as any)[alias];
                         if (typeof key === "function")
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                             acc[alias] = key(value);
                         else
                             acc[alias] = serialized[key];
@@ -43,12 +44,13 @@ export class DtoFactory
                     if (acc[k] == null)
                         acc[k] = null;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return acc;
-            }, {} as any);
+            }, {});
         }
         else
         {
-            dto = keys.reduce((acc, k) =>
+            dto = keys.reduce<any>((acc, k) =>
             {
                 if (typeof k === "object")
                 {
@@ -56,6 +58,7 @@ export class DtoFactory
                     {
                         const key = (k as any)[alias];
                         if (typeof key === "function")
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                             acc[alias] = key(value);
                         else
                             acc[alias] = (value as any)[key];
@@ -68,21 +71,23 @@ export class DtoFactory
                     let val = (value as any)[k];
 
                     if (typeof val === "function")
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                         return acc;
 
                     if (val instanceof Serializable)
-                        val = val.serialize() as any;
+                        val = val.serialize();
 
                     acc[k] = val;
                     if (acc[k] == null)
                         acc[k] = null;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return acc;
-            }, {} as any);
+            }, {});
         }
 
         dto.$typename = typename;
 
-        return dto;
+        return dto as TDto;
     }
 }

@@ -54,15 +54,15 @@ export class Version
     {
         given(version, "version").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Version);
         
-        const majorCompare = this.compare(this.major, version.major);
+        const majorCompare = this._compare(this.major, version.major);
         if (majorCompare !== 0)
             return majorCompare;
         
-        const minorCompare = this.compare(this.minor, version.minor);
+        const minorCompare = this._compare(this.minor, version.minor);
         if (minorCompare !== 0)
             return minorCompare;
         
-        return this.compare(this.patch, version.patch);
+        return this._compare(this.patch, version.patch);
     }
     
     public toString(): string
@@ -70,7 +70,7 @@ export class Version
         return this.full;
     }
     
-    private compare(v1: number, v2: number): number
+    private _compare(v1: number, v2: number): number
     {
         given(v1, "v1").ensureHasValue().ensureIsNumber();
         given(v2, "v2").ensureHasValue().ensureIsNumber();

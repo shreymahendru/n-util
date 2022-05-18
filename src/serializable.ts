@@ -15,7 +15,7 @@ export abstract class Serializable<TData extends object = {}>
         const typeName = (<Object>this).getTypeName();
         const propertyInfos = Utilities.getPropertyInfos(this, typeName);
         
-        const serialized = propertyInfos.reduce((acc, propInfo) =>
+        const serialized = propertyInfos.reduce<Record<string, any>>((acc, propInfo) =>
         {
             const val = (this as any)[propInfo.name];
             if (val == null)
@@ -35,12 +35,12 @@ export abstract class Serializable<TData extends object = {}>
                         if (typeof v === "object")
                         {
                             if (v instanceof Serializable)
-                                return v.serialize();
+                                return v.serialize() as unknown;
                             else
-                                return JSON.parse(JSON.stringify(v));
+                                return JSON.parse(JSON.stringify(v)) as unknown;
                         }
                         
-                        return v;
+                        return v as unknown;
                     });
                 else
                     acc[propInfo.serializationKey] = val instanceof Serializable
@@ -52,11 +52,11 @@ export abstract class Serializable<TData extends object = {}>
             }
             
             return acc;
-        }, {} as any);
+        }, {});
         
         serialized.$typename = typeName;
         
-        return serialized;
+        return serialized as TData;
     }
 }
 
@@ -64,7 +64,7 @@ export abstract class Serializable<TData extends object = {}>
 
 export class Deserializer
 {
-    private static _typeCache = new Map<string, object>();
+    private static readonly _typeCache = new Map<string, object>();
     
     /**
      * @static
@@ -75,6 +75,7 @@ export class Deserializer
     public static hasType(typeName: string): boolean
     {
         // this is postel's law compliant
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
             || !this._typeCache.has(typeName.trim()))
             return false;
@@ -94,11 +95,13 @@ export class Deserializer
     public static deserialize<T>(serialized: object): T
     {
         given(serialized, "serialized").ensureHasValue().ensureIsObject()
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             .ensure(t => (<any>t).$typename && typeof (<any>t).$typename === "string"
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 && !(<any>t).$typename.isEmptyOrWhiteSpace(), "$typename property is missing on object");
 
         const typeName = (<any>serialized).$typename;
-        let type = Deserializer.getType(typeName) as any;
+        let type = Deserializer._getType(typeName) as any;
         if (type == null)
             throw new ApplicationException(`Cannot deserialize unregistered type '${typeName}'.`);
 
@@ -106,9 +109,10 @@ export class Deserializer
             type = type.constructor;
         
         if (type.deserialize && typeof type.deserialize === "function")
-            return type.deserialize(serialized);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            return type.deserialize(serialized) as T;
 
-        serialized = Object.keys(serialized).reduce((acc, key) =>
+        serialized = Object.keys(serialized).reduce<Record<string, any>>((acc, key) =>
         {
             const val = (serialized as any)[key];
             if (val == null)
@@ -128,18 +132,18 @@ export class Deserializer
 
                         if (typeof v === "object")
                         {
-                            if (v.$typename && typeof v.$typename === "string" && !v.$typename.isEmptyOrWhiteSpace())
+                            if (v.$typename && typeof v.$typename === "string" && (v.$typename as string).isNotEmptyOrWhiteSpace())
                                 return Deserializer.deserialize(v);
                             // else
                             //     return JSON.parse(JSON.stringify(v));
                         }
 
-                        return v;
+                        return v as unknown;
                     });
                 }
                 else
                 {
-                    if (val.$typename && typeof val.$typename === "string" && !val.$typename.isEmptyOrWhiteSpace())
+                    if (val.$typename && typeof val.$typename === "string" && (val.$typename as string).isNotEmptyOrWhiteSpace())
                         acc[key] = Deserializer.deserialize(val);
                     else
                         acc[key] = val; // JSON.parse(JSON.stringify(val));
@@ -151,18 +155,19 @@ export class Deserializer
             }
 
             return acc;
-        }, {} as any);
+        }, {});
 
-        return new (type as any)(serialized);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        return new type(serialized) as T;
     }
     
-    private static getType(typeName: string): object | null
+    private static _getType(typeName: string): object | null
     {
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         typeName = typeName.trim();
         
         if (this._typeCache.has(typeName))
-            return this._typeCache.get(typeName);
+            return this._typeCache.get(typeName)!;
         
         return null;
     }
@@ -191,26 +196,26 @@ export class Deserializer
 
 export function serialize(key: string): Function;
 export function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function serialize(keyOrTarget?: any, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function serialize(keyOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
 {
     if (keyOrTarget != null && typeof keyOrTarget === "object")
     {
-        const target = keyOrTarget as object;
+        const target = keyOrTarget;
         given(target, "target").ensureHasValue().ensureIsObject()
             .ensure(t => t instanceof Serializable,
                 "serialize decorator must only be used on properties in subclasses of Serializable");
 
         Deserializer.registerType(target);
 
-        if (!descriptor.get)
-            throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
+        if (!descriptor!.get)
+            throw new ArgumentException(propertyKey!, "serialize decorator must only be applied to getters");
 
-        (descriptor.get as any).serializable = true;
+        (descriptor!.get as any).serializable = true;
     }
     else
     {
-        const key = keyOrTarget as string;
-        given(key, "key").ensureIsString();
+        const key = keyOrTarget as string | null;
+        given(key as string, "key").ensureIsString();
         
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
         {
@@ -240,11 +245,11 @@ export function deserialize(target: Function): void
 
 class Utilities
 {
-    private static typeCache = new Map<string, ReadonlyArray<PropertyInfo>>();
+    private static readonly _typeCache = new Map<string, ReadonlyArray<PropertyInfo>>();
     
-    private static internal: string[] = [];
+    private static readonly _internal: Array<string> = [];
 
-    private static forbidden = ["do", "if", "for", "let", "new", "try", "var", "case", "else", "with", "await", "break",
+    private static readonly _forbidden = ["do", "if", "for", "let", "new", "try", "var", "case", "else", "with", "await", "break",
         "catch", "class", "const", "super", "throw", "while", "yield", "delete", "export", "import", "return",
         "switch", "default", "extends", "finally", "continue", "debugger", "function", "arguments", "typeof", "void"];
     
@@ -253,39 +258,39 @@ class Utilities
         given(val, "val").ensureHasValue().ensureIsObject();
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         
-        if (!Utilities.typeCache.has(typeName))
-            Utilities.typeCache.set(typeName, Utilities.getPropertyInfosInternal(val));
+        if (!Utilities._typeCache.has(typeName))
+            Utilities._typeCache.set(typeName, Utilities._getPropertyInfosInternal(val));
         
-        return Utilities.typeCache.get(typeName);
+        return Utilities._typeCache.get(typeName)!;
     }
     
     
-    private static getPropertyInfosInternal(val: any): Array<PropertyInfo>
+    private static _getPropertyInfosInternal(val: any): Array<PropertyInfo>
     {
-        let propertyInfos = new Array<PropertyInfo>();
-        let prototype = Object.getPrototypeOf(val);
+        const propertyInfos = new Array<PropertyInfo>();
+        const prototype = Object.getPrototypeOf(val);
         if (prototype === undefined || prototype === null)  // we are dealing with Object
             return propertyInfos;
 
-        propertyInfos.push(...Utilities.getPropertyInfosInternal(prototype));
+        propertyInfos.push(...Utilities._getPropertyInfosInternal(prototype));
 
-        let propertyNames = Object.getOwnPropertyNames(val);
+        const propertyNames = Object.getOwnPropertyNames(val);
         for (let name of propertyNames)
         {
             name = name.trim();
-            if (name === "constructor" || name.startsWith("_") || name.startsWith("$") || Utilities.internal.some(t => t === name))
+            if (name === "constructor" || name.startsWith("_") || name.startsWith("$") || Utilities._internal.some(t => t === name))
                 continue;
 
-            if (Utilities.forbidden.some(t => t === name))
-                throw new ApplicationException(`Class ${(<Object>val).getTypeName()} has a member with the forbidden name '${name}'. The following names are forbidden: ${Utilities.forbidden}.`);
+            if (Utilities._forbidden.some(t => t === name))
+                throw new ApplicationException(`Class ${(<Object>val).getTypeName()} has a member with the forbidden name '${name}'. The following names are forbidden: ${Utilities._forbidden}.`);
 
             const descriptor = Object.getOwnPropertyDescriptor(val, name);
-            if (descriptor.get && (descriptor.get as any).serializable)
+            if (descriptor!.get && (descriptor!.get as any).serializable)
             {
                 propertyInfos.push({
                     name,
-                    descriptor,
-                    serializationKey: (descriptor.get as any).serializationKey ?? name
+                    descriptor: descriptor!,
+                    serializationKey: (descriptor!.get as any).serializationKey ?? name
                 });
             }
         }
