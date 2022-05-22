@@ -91,8 +91,9 @@ export class Observer<T> implements Observable<T>
         if (subInfo == null)
             return;
         
-        (<any>subInfo.subscription).isUnsubscribed = true;
-        (<any>subInfo.subscription).unsubscribe = (): void => { /** deliberately empty */};
+        // @ts-expect-error: deliberately setting readonly property
+        subInfo.subscription.isUnsubscribed = true;
+        subInfo.subscription.unsubscribe = (): void => { /** deliberately empty */};
         this._subMap.delete(key);
     }
 }
