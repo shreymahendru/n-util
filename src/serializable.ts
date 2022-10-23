@@ -219,7 +219,7 @@ export function serialize(keyOrTarget?: unknown, propertyKey?: string, descripto
         
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
         {
-            given(target, "target").ensureHasValue().ensureIsObject()
+            given(target as object, "target").ensureHasValue().ensureIsObject()
                 .ensure(t => t instanceof Serializable,
                     "serialize decorator must only be used on properties in subclasses of Serializable");
 
@@ -255,7 +255,7 @@ class Utilities
     
     public static getPropertyInfos(val: any, typeName: string): ReadonlyArray<PropertyInfo>
     {
-        given(val, "val").ensureHasValue().ensureIsObject();
+        given(val as object, "val").ensureHasValue().ensureIsObject();
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         
         if (!Utilities._typeCache.has(typeName))

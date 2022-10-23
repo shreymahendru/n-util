@@ -16,7 +16,7 @@ export function synchronize(delayOrTarget?: unknown, propertyKey?: string, descr
 
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
         {
-            given(target, "target").ensureHasValue().ensureIsObject();
+            given(target as object, "target").ensureHasValue().ensureIsObject();
             given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
             given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
 
