@@ -51,6 +51,7 @@ class Observer {
         const subInfo = this._subMap.get(key);
         if (subInfo == null)
             return;
+        // @ts-expect-error: deliberately setting readonly property
         subInfo.subscription.isUnsubscribed = true;
         subInfo.subscription.unsubscribe = () => { };
         this._subMap.delete(key);

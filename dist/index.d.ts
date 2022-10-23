@@ -1,6 +1,6 @@
 import "@nivinjoseph/n-ext";
 export { Make } from "./make";
-export { Delay } from "./delay";
+export { Delay, DelayCanceller } from "./delay";
 export { Disposable } from "./disposable";
 export { DisposableWrapper } from "./disposable-wrapper";
 export { BackgroundProcessor } from "./background-processor";
