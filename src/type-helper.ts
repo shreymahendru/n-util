@@ -1,4 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
+import { ApplicationException } from "@nivinjoseph/n-exception";
 
 
 export class TypeHelper
@@ -55,6 +56,11 @@ export class TypeHelper
         return this._getEnumTuples(enumClass) as Array<[string, T]>;
     }
     
+    public static impossible(_value: never, message?: string): never
+    {
+        throw new ApplicationException(message ?? `Invalid value: ${_value}`);
+    }
+    
     private static _getEnumTuples(enumType: object): Array<[string, string | number]>
     {
         const keys = Object.keys(enumType);
@@ -79,3 +85,25 @@ export class TypeHelper
         return !isNaN(parsed) && isFinite(parsed);
     }
 }
+
+// enum Foo
+// {
+//     bar = "BAR",
+//     baz = "BAZ",
+//     zeb = "ZEB"
+// }
+
+// export function doStuff(val: Foo): void
+// {
+//     switch (val)
+//     {
+//         case Foo.bar:
+//             console.log(val);
+//             break;
+//         case Foo.baz:
+//             console.log(val, "baz");
+//             break;
+//         default:
+//             TypeHelper.impossible(val, "ff");
+//     }
+// }

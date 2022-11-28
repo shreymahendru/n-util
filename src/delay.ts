@@ -31,7 +31,11 @@ export abstract class Delay // static class
                 given(canceller, "canceller").ensureIsObject();
                 const timer = setTimeout(() => resolve(), value);
                 if (canceller)
-                    canceller.cancel = (): void => clearTimeout(timer);
+                    canceller.cancel = (): void =>
+                    {
+                        clearTimeout(timer);
+                        resolve();
+                    };
             }
             catch (error)
             {
