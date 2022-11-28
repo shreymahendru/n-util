@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TypeHelper = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
+const n_exception_1 = require("@nivinjoseph/n-exception");
 class TypeHelper {
     /**
      * @static
@@ -36,6 +37,9 @@ class TypeHelper {
         (0, n_defensive_1.given)(enumClass, "enumClass").ensureHasValue().ensureIsObject();
         return this._getEnumTuples(enumClass);
     }
+    static impossible(_value, message) {
+        throw new n_exception_1.ApplicationException(message !== null && message !== void 0 ? message : `Invalid value: ${_value}`);
+    }
     static _getEnumTuples(enumType) {
         const keys = Object.keys(enumType);
         if (keys.length === 0)
@@ -55,4 +59,24 @@ class TypeHelper {
     }
 }
 exports.TypeHelper = TypeHelper;
+// enum Foo
+// {
+//     bar = "BAR",
+//     baz = "BAZ",
+//     zeb = "ZEB"
+// }
+// export function doStuff(val: Foo): void
+// {
+//     switch (val)
+//     {
+//         case Foo.bar:
+//             console.log(val);
+//             break;
+//         case Foo.baz:
+//             console.log(val, "baz");
+//             break;
+//         default:
+//             TypeHelper.impossible(val, "ff");
+//     }
+// }
 //# sourceMappingURL=type-helper.js.map

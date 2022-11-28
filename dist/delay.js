@@ -31,7 +31,10 @@ class Delay // static class
                 (0, n_defensive_1.given)(canceller, "canceller").ensureIsObject();
                 const timer = setTimeout(() => resolve(), value);
                 if (canceller)
-                    canceller.cancel = () => clearTimeout(timer);
+                    canceller.cancel = () => {
+                        clearTimeout(timer);
+                        resolve();
+                    };
             }
             catch (error) {
                 reject(error);
