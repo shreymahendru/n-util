@@ -1,70 +1,54 @@
-/* eslint-disable @typescript-eslint/return-await */
 import { given } from "@nivinjoseph/n-defensive";
-import { Delay } from "./delay";
 import { Duration } from "./duration";
+import { Delay } from "./delay";
 import { Mutex } from "./mutex";
 
-// public
-export function synchronize(delay: Duration): Function;
-export function synchronize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function synchronize(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+
+export function synchronize<
+    This>(delay?: Duration): SynchronizeClassMethodDecorator<This, (this: This, ...args: Array<any>) => any>
 {
-    given(delayOrTarget as object, "delayOrTarget").ensureHasValue().ensureIsObject();
-    if (delayOrTarget instanceof Duration)
+    given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+        .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
+
+    const decorator: SynchronizeClassMethodDecorator<This, (this: This, ...args: any) => any> = function (value, context)
     {
-        const delayMs = delayOrTarget.toMilliSeconds();
+        const { name, kind } = context;
+        given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+        const mutexKey = Symbol.for(`__$_${String(name)}_synchronizeMutex`);
+
+        context.addInitializer(function (this)
         {
-            given(target as object, "target").ensureHasValue().ensureIsObject();
-            given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
+            (<any>this)[mutexKey] = new Mutex();
+        });
 
-            const original = descriptor.value;
-            const mutexKey = Symbol.for(`__$_${propertyKey}_synchronizeMutex`);
-
-            descriptor.value = async function (...params: Array<any>): Promise<any>
-            {
-                const mutex: Mutex = (<any>this)[mutexKey] ?? new Mutex();
-                (<any>this)[mutexKey] = mutex;
-                await mutex.lock();
-
-                try
-                {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                    return await (original as Function).call(this, ...params);
-                }
-                finally
-                {
-                    await Delay.milliseconds(delayMs);
-                    mutex.release();
-                }
-            };
-        };
-    }
-    else
-    {
-        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
-
-        const original = descriptor!.value;
-        const mutexKey = Symbol.for(`__$_${propertyKey}_synchronizeMutex`);
-
-        descriptor!.value = async function (...params: Array<any>): Promise<any>
+        return async function replacementMethod(this: This, ...args: Array<any>): Promise<any>
         {
-            const mutex: Mutex = (<any>this)[mutexKey] ?? new Mutex();
-            (<any>this)[mutexKey] = mutex;
+            const mutex: Mutex = (<any>this)[mutexKey];
+
             await mutex.lock();
-
             try
             {
+                const result = value.call(this, ...args);
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return await (original as Function).call(this, ...params);
+                return result;
             }
             finally
             {
+                if (delay != null)
+                    await Delay.milliseconds(delay.toMilliSeconds());
+
                 mutex.release();
             }
         };
-    }
+    };
+
+    return decorator;
 }
+
+
+
+type SynchronizeClassMethodDecorator<This, Fun extends (this: This, ...args: any) => any> = (
+    value: Fun,
+    context: ClassMethodDecoratorContext<This, Fun>
+) => Fun;

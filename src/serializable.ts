@@ -1,5 +1,6 @@
-import { ApplicationException, ArgumentException } from "@nivinjoseph/n-exception";
+import { ApplicationException } from "@nivinjoseph/n-exception";
 import { given } from "@nivinjoseph/n-defensive";
+import { ClassDefinition } from "./utility-types";
 
 
 export abstract class Serializable<TData extends object = {}>
@@ -8,13 +9,13 @@ export abstract class Serializable<TData extends object = {}>
     {
         given(data, "data").ensureHasValue().ensureIsObject();
     }
-    
-    
+
+
     public serialize(): TData
     {
         const typeName = (<Object>this).getTypeName();
         const propertyInfos = Utilities.getPropertyInfos(this, typeName);
-        
+
         const serialized = propertyInfos.reduce<Record<string, any>>((acc, propInfo) =>
         {
             const val = (this as any)[propInfo.name];
@@ -23,7 +24,7 @@ export abstract class Serializable<TData extends object = {}>
                 acc[propInfo.serializationKey] = null;
                 return acc;
             }
-            
+
             if (typeof val === "object")
             {
                 if (Array.isArray(val))
@@ -31,7 +32,7 @@ export abstract class Serializable<TData extends object = {}>
                     {
                         if (v == null)
                             return null;
-                        
+
                         if (typeof v === "object")
                         {
                             if (v instanceof Serializable)
@@ -39,23 +40,23 @@ export abstract class Serializable<TData extends object = {}>
                             else
                                 return JSON.parse(JSON.stringify(v)) as unknown;
                         }
-                        
+
                         return v as unknown;
                     });
                 else
                     acc[propInfo.serializationKey] = val instanceof Serializable
-                        ? val.serialize() : JSON.parse(JSON.stringify(val));   
+                        ? val.serialize() : JSON.parse(JSON.stringify(val));
             }
             else
             {
-                acc[propInfo.serializationKey] = val;    
+                acc[propInfo.serializationKey] = val;
             }
-            
+
             return acc;
         }, {});
-        
+
         serialized.$typename = typeName;
-        
+
         return serialized as TData;
     }
 }
@@ -65,13 +66,13 @@ export abstract class Serializable<TData extends object = {}>
 export class Deserializer
 {
     private static readonly _typeCache = new Map<string, object>();
-    
+
     /**
      * @static
      */
     private constructor() { }
 
-    
+
     public static hasType(typeName: string): boolean
     {
         // this is postel's law compliant
@@ -79,19 +80,19 @@ export class Deserializer
         if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
             || !this._typeCache.has(typeName.trim()))
             return false;
-        
+
         return true;
     }
 
     public static registerType(type: object | Function): void
     {
         given(type, "type").ensureHasValue();
-        
+
         const typeName = (type as Object).getTypeName();
         if (!this._typeCache.has(typeName))
             this._typeCache.set(typeName, type);
     }
-    
+
     public static deserialize<T>(serialized: object): T
     {
         given(serialized, "serialized").ensureHasValue().ensureIsObject()
@@ -107,7 +108,7 @@ export class Deserializer
 
         if (typeof type === "object")
             type = type.constructor;
-        
+
         if (type.deserialize && typeof type.deserialize === "function")
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             return type.deserialize(serialized) as T;
@@ -160,15 +161,15 @@ export class Deserializer
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         return new type(serialized) as T;
     }
-    
+
     private static _getType(typeName: string): object | null
     {
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         typeName = typeName.trim();
-        
+
         if (this._typeCache.has(typeName))
             return this._typeCache.get(typeName)!;
-        
+
         return null;
     }
 }
@@ -182,7 +183,7 @@ export class Deserializer
 //         given(target, "target").ensureHasValue().ensureIsObject()
 //             .ensure(t => t instanceof Serializable,
 //                 "serialize decorator must only be used on properties in subclasses of Serializable");
-        
+
 //         Deserializer.registerType(target);
 
 //         if (!descriptor.get)
@@ -194,59 +195,50 @@ export class Deserializer
 //     };
 // }
 
-export function serialize(key: string): Function;
-export function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function serialize(keyOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function serialize<This extends Serializable, T>(key?: string): SerializableClassGetterDecorator<This, T>
 {
-    if (keyOrTarget != null && typeof keyOrTarget === "object")
+    given(key, "key").ensureIsString();
+    key = key?.trim();
+
+
+    const decorator: SerializableClassGetterDecorator<This, T> = function (value, context): void
     {
-        const target = keyOrTarget;
-        given(target, "target").ensureHasValue().ensureIsObject()
-            .ensure(t => t instanceof Serializable,
-                "serialize decorator must only be used on properties in subclasses of Serializable");
+        given(context, "context")
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            .ensure(t => t.kind === "getter", "property has to be a getter")
+            .ensure(t => !t.private, "property should not be private")
+            .ensure(t => !t.static, "property should not be static");
 
-        Deserializer.registerType(target);
+        (value as any).serializable = true;
+        if (key != null && key.isNotEmptyOrWhiteSpace())
+            (value as any).serializationKey = key.trim();
+    };
 
-        if (!descriptor!.get)
-            throw new ArgumentException(propertyKey!, "serialize decorator must only be applied to getters");
-
-        (descriptor!.get as any).serializable = true;
-    }
-    else
-    {
-        const key = keyOrTarget as string | null;
-        given(key as string, "key").ensureIsString();
-        
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-        {
-            given(target as object, "target").ensureHasValue().ensureIsObject()
-                .ensure(t => t instanceof Serializable,
-                    "serialize decorator must only be used on properties in subclasses of Serializable");
-
-            Deserializer.registerType(target);
-
-            if (!descriptor.get)
-                throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
-
-            (descriptor.get as any).serializable = true;
-            if (key != null && key.isNotEmptyOrWhiteSpace())
-                (descriptor.get as any).serializationKey = key.trim();
-        };
-    }
+    return decorator;
 }
 
-export function deserialize(target: Function): void
+type SerializableClassGetterDecorator<This, T> = (
+    value: (this: This) => T,
+    context: ClassGetterDecoratorContext<This, T>
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+) => ((this: This) => T) | void;
+
+
+
+export function deserialize<T extends Serializable>(value: ClassDefinition<T>, context: ClassDecoratorContext<ClassDefinition<T>>): void
 {
-    given(target, "target").ensureHasValue().ensureIsFunction();
-    
-    Deserializer.registerType(target);
+    given(context, "context")
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        .ensure(t => t.kind === "class", "deserialize can only be used on a class");
+
+    Deserializer.registerType(value);
 }
 
 
 class Utilities
 {
     private static readonly _typeCache = new Map<string, ReadonlyArray<PropertyInfo>>();
-    
+
     private static readonly _internal: Array<string> = [];
 
     private static readonly _forbidden = ["do", "if", "for", "let", "new", "try", "var", "case", "else", "with", "await", "break",

@@ -13,7 +13,7 @@ class Address extends Serializable<AddressSchema>
     private readonly _street: string;
     private readonly _city: string;
 
-    @serialize
+    @serialize()
     public get street(): string { return this._street; }
 
     @serialize("locality")
@@ -25,7 +25,7 @@ class Address extends Serializable<AddressSchema>
     public constructor(data: AddressSchema)
     {
         super(data);
-        
+
         const { street, locality: city } = data;
 
         given(street, "street").ensureHasValue().ensureIsString();
@@ -34,11 +34,11 @@ class Address extends Serializable<AddressSchema>
         given(city, "city").ensureHasValue().ensureIsString();
         this._city = city;
     }
-    
+
     public static deserialize({ street, locality: city }: AddressSchema): Address
     {
         console.log("Calling custom address deserialize");
-        
+
         return new Address({ street, locality: city });
     }
 }
@@ -56,7 +56,7 @@ class Dummy extends Serializable
     {
         super({});
     }
-    
+
     public foo(): void
     {
         console.log("I am foo");
@@ -69,35 +69,35 @@ class Employee extends Serializable
     private readonly _name: FullName;
     private readonly _address: Address;
     private readonly _dummy: Dummy;
-    
-    @serialize
+
+    @serialize()
     public get id(): string { return this._id; }
-    
-    @serialize
+
+    @serialize()
     public get name(): FullName { return this._name; }
-    
-    @serialize
+
+    @serialize()
     public get address(): Address { return this._address; }
-    
-    @serialize
+
+    @serialize()
     public get dummy(): Dummy { return this._dummy; }
-    
-    
+
+
     public constructor(data: Pick<Employee, "id" | "name" | "address" | "dummy">)
     {
         super(data);
-        
+
         const { id, name, address, dummy } = data;
-        
+
         given(id, "id").ensureHasValue().ensureIsString();
         this._id = id;
-        
+
         given(name, "name").ensureHasValue().ensureIsObject();
         this._name = name;
-        
+
         given(address, "address").ensureHasValue().ensureIsObject().ensureIsType(Address);
         this._address = address;
-        
+
         given(dummy, "dummy").ensureHasValue().ensureIsObject().ensureIsType(Dummy);
         this._dummy = dummy;
     }
@@ -111,7 +111,7 @@ suite("Serializable", () =>
         test("basic", () =>
         {
             // console.log(typeof Employee);
-            
+
             const testObj = new Employee({
                 id: "1",
                 name: {
@@ -127,17 +127,17 @@ suite("Serializable", () =>
 
             Assert.strictEqual(testObj.name.firstName, "niv");
             Assert.strictEqual(testObj.address.city, "Waterloo");
-            
+
             const serialized = testObj.serialize();
-            
+
             Assert.strictEqual(testObj.name.firstName, "niv");
             Assert.strictEqual(testObj.address.city, "Waterloo");
-            
+
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             Assert.ok(serialized != null);
-            
-            // console.log(serialized);
-            
+
+            console.log(serialized);
+
             const testObj2 = new Employee({
                 id: "1",
                 name: {
@@ -150,21 +150,21 @@ suite("Serializable", () =>
                 }),
                 dummy: new Dummy()
             });
-            
+
             const serialized2 = testObj2.serialize();
-            
+
             Assert.deepStrictEqual(serialized2, serialized);
-            
+
             const deserialized = Deserializer.deserialize<Employee>(serialized);
             // console.log(deserialized);
             Assert.ok(deserialized instanceof Employee);
-            
+
             const deserialized2 = Deserializer.deserialize<Employee>(serialized2);
-            
+
             Assert.ok(deserialized2 instanceof Employee);
-            
+
             Assert.deepStrictEqual(deserialized2, deserialized);
-            
+
         });
     });
 });

@@ -1,71 +1,55 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Delay } from "./delay";
 import { Duration } from "./duration";
+import { Delay } from "./delay";
 
-// public
-/**
- * @description Only apply to methods that return void or Promise<void>; Only cares about first state
- */
-export function dedupe(delay: Duration): Function;
-export function dedupe(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function dedupe(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function dedupe<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void
+>(delay?: Duration): DedupeClassMethodDecorator<This, Args, Return>
 {
-    given(delayOrTarget as object, "delayOrTarget").ensureHasValue().ensureIsObject();
-    if (delayOrTarget instanceof Duration)
+    given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+        .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
+
+    const decorator: DedupeClassMethodDecorator<This, Args, Return> = function (value, context)
     {
-        const delayMs = delayOrTarget.toMilliSeconds();
+        const { name, kind } = context;
+        given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+        const activeKey = Symbol.for(`__$_${String(name)}_dedupeIsActive`);
+        // setting value to false on initialization.
+        context.addInitializer(function (this)
         {
-            given(target as object, "target").ensureHasValue().ensureIsObject();
-            given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
+            (<any>this)[activeKey] = false;
+        });
 
-            const original = descriptor.value;
-            const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
-
-            descriptor.value = async function (...params: Array<any>): Promise<void>
-            {
-                if (!(<any>this)[activeKey])
-                {
-                    (<any>this)[activeKey] = true;
-
-                    try
-                    {
-                        await (original as Function).call(this, ...params);
-                    }
-                    finally
-                    {
-                        await Delay.milliseconds(delayMs);
-                        (<any>this)[activeKey] = false;
-                    }
-                }
-            };
-        };
-    }
-    else
-    {
-        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
-
-        const original = descriptor!.value;
-        const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
-
-        descriptor!.value = async function (...params: Array<any>): Promise<void>
+        return async function replacementMethod(this: This, ...args: Args): Promise<void>
         {
-            if (!(<any>this)[activeKey])
-            {
-                (<any>this)[activeKey] = true;
+            if ((<any>this)[activeKey])
+                return;
 
-                try
-                {
-                    await (original as Function).call(this, ...params);
-                }
-                finally
-                {
-                    (<any>this)[activeKey] = false;
-                }
+            (<any>this)[activeKey] = true;
+
+            try
+            {
+                await value.call(this, ...args);
+            }
+            finally
+            {
+                if (delay != null)
+                    await Delay.milliseconds(delay.toMilliSeconds());
+
+                (<any>this)[activeKey] = false;
             }
         };
-    }
+    };
+
+    return decorator;
 }
+
+
+
+type DedupeClassMethodDecorator<This, Args extends Array<any>, Return> = (
+    value: (this: This, ...args: Args) => Return,
+    context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+) => (this: This, ...args: Args) => Promise<void>;

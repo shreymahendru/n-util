@@ -32,13 +32,13 @@ class Sensitive
     public asyncSynchronizeWithDelayCounts = new Array<number>();
     
     
-    @debounce
+    @debounce()
     public syncDebounce(index: number): void
     {
         this.syncDebounceCounts.push(index);
     }
     
-    @debounce
+    @debounce()
     public async asyncDebounce(index: number): Promise<void>
     {
         await Delay.milliseconds(500);
@@ -59,13 +59,13 @@ class Sensitive
     }
     
     
-    @throttle
+    @throttle()
     public syncThrottle(index: number): void
     {
         this.syncThrottleCounts.push(index);
     }
 
-    @throttle
+    @throttle()
     public async asyncThrottle(index: number): Promise<void>
     {
         await Delay.milliseconds(500);
@@ -86,13 +86,13 @@ class Sensitive
     }
     
     
-    @dedupe
+    @dedupe()
     public syncDedupe(index: number): void
     {
         this.syncDedupeCounts.push(index);
     }
     
-    @dedupe
+    @dedupe()
     public async asyncDedupe(index: number): Promise<void>
     {
         await Delay.milliseconds(500);
@@ -113,13 +113,13 @@ class Sensitive
     }
     
     
-    @synchronize
+    @synchronize()
     public syncSynchronize(index: number): void
     {
         this.syncSynchronizeCounts.push(index);
     }
     
-    @synchronize
+    @synchronize()
     public async asyncSynchronize(index: number): Promise<void>
     {
         await Delay.milliseconds(500);
