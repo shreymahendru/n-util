@@ -1,5 +1,5 @@
 import * as Assert from "assert";
-import { Serializable, serialize, Deserializer, deserialize } from "../src/serializable";
+import { Serializable, serialize, Deserializer } from "../src/serializable";
 import { given } from "@nivinjoseph/n-defensive";
 
 
@@ -8,6 +8,7 @@ type AddressSchema = {
     locality: string;
 };
 
+@serialize()
 class Address extends Serializable<AddressSchema>
 {
     private readonly _street: string;
@@ -49,7 +50,7 @@ interface FullName
     lastName: string;
 }
 
-@deserialize
+@serialize()
 class Dummy extends Serializable
 {
     public constructor()
@@ -63,6 +64,7 @@ class Dummy extends Serializable
     }
 }
 
+@serialize()
 class Employee extends Serializable
 {
     private readonly _id: string;

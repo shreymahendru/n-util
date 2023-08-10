@@ -16,7 +16,7 @@ export { Version } from "./version";
 export { Profiler, ProfilerTrace } from "./profiler";
 export { Templator } from "./templator";
 export { HtmlSanitizer } from "./html-sanitizer";
-export { Serializable, serialize, deserialize, Deserializer } from "./serializable";
+export { Serializable, serialize, Deserializer } from "./serializable";
 export { DtoFactory } from "./dto-factory";
 export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types";
 export { Observer, Observable, Subscription } from "./observer";

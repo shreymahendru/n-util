@@ -195,44 +195,52 @@ export class Deserializer
 //     };
 // }
 
-export function serialize<This extends Serializable, T>(key?: string): SerializableClassGetterDecorator<This, T>
+export function serialize<Class extends Serializable, T,
+    DecoratedValue extends SerializableClass<Class> | SerializableClassGetter<Class, T>>
+    (key?: DecoratedValue extends SerializableClass<Class> ? undefined : string): SerializeDecorator<Class, T, DecoratedValue>
 {
     given(key, "key").ensureIsString();
-    key = key?.trim();
+    const inputKey = key?.trim();
 
 
-    const decorator: SerializableClassGetterDecorator<This, T> = function (value, context): void
+    const decorator: SerializeDecorator<Class, T, DecoratedValue> = function (value, context): void
     {
-        given(context, "context")
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            .ensure(t => t.kind === "getter", "property has to be a getter")
-            .ensure(t => !t.private, "property should not be private")
-            .ensure(t => !t.static, "property should not be static");
+        const kind = context.kind;
+        given(kind, "kind").ensure(t => ["getter", "class"].contains(t), "serialize can only be used on getters or class");
 
-        (value as any).serializable = true;
-        if (key != null && key.isNotEmptyOrWhiteSpace())
-            (value as any).serializationKey = key.trim();
+        if (kind === "getter")
+        {
+            given(context as ClassGetterDecoratorContext, "context")
+                .ensure(t => !t.private, "property should not be private")
+                .ensure(t => !t.static, "property should not be static");
+
+            (value as any).serializable = true;
+            if (inputKey != null && inputKey.isNotEmptyOrWhiteSpace())
+                (value as any).serializationKey = inputKey.trim();
+        }
+        else
+        {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            given(inputKey, "inputKey").ensure(t => t == null, "can't put a ken when decorator is used on a class");
+            Deserializer.registerType(value);
+        }
     };
 
     return decorator;
 }
 
-type SerializableClassGetterDecorator<This, T> = (
-    value: (this: This) => T,
-    context: ClassGetterDecoratorContext<This, T>
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-) => ((this: This) => T) | void;
 
 
 
-export function deserialize<T extends Serializable>(value: ClassDefinition<T>, context: ClassDecoratorContext<ClassDefinition<T>>): void
-{
-    given(context, "context")
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        .ensure(t => t.kind === "class", "deserialize can only be used on a class");
 
-    Deserializer.registerType(value);
-}
+// export function deserialize<T extends Serializable>(value: ClassDefinition<T>, context: ClassDecoratorContext<ClassDefinition<T>>): void
+// {
+//     given(context, "context")
+//         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+//         .ensure(t => t.kind === "class", "deserialize can only be used on a class");
+
+//     Deserializer.registerType(value);
+// }
 
 
 class Utilities
@@ -244,19 +252,19 @@ class Utilities
     private static readonly _forbidden = ["do", "if", "for", "let", "new", "try", "var", "case", "else", "with", "await", "break",
         "catch", "class", "const", "super", "throw", "while", "yield", "delete", "export", "import", "return",
         "switch", "default", "extends", "finally", "continue", "debugger", "function", "arguments", "typeof", "void"];
-    
+
     public static getPropertyInfos(val: any, typeName: string): ReadonlyArray<PropertyInfo>
     {
         given(val as object, "val").ensureHasValue().ensureIsObject();
         given(typeName, "typeName").ensureHasValue().ensureIsString();
-        
+
         if (!Utilities._typeCache.has(typeName))
             Utilities._typeCache.set(typeName, Utilities._getPropertyInfosInternal(val));
-        
+
         return Utilities._typeCache.get(typeName)!;
     }
-    
-    
+
+
     private static _getPropertyInfosInternal(val: any): Array<PropertyInfo>
     {
         const propertyInfos = new Array<PropertyInfo>();
@@ -298,3 +306,12 @@ interface PropertyInfo
     descriptor: PropertyDescriptor;
     serializationKey: string;
 }
+
+type SerializableClass<This extends Serializable> = ClassDefinition<This>;
+type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
+
+
+type SerializeDecorator<Class extends Serializable, T, DecoratedValue extends SerializableClass<Class> | SerializableClassGetter<Class, T>> = (
+    value: DecoratedValue,
+    context: DecoratedValue extends SerializableClass<Class> ? ClassDecoratorContext<DecoratedValue> : ClassGetterDecoratorContext<Class, T>
+) => void;
