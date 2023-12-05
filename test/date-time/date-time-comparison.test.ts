@@ -3,9 +3,12 @@ import { DateTime } from "../../src/date-time";
 import { Duration } from "../../src";
 
 
-suite("DateTime Comparison", () => {
-    suite("Compare two date time", () => {
-        test("Compare same object", () => {
+suite("DateTime Comparison", () =>
+{
+    suite("Compare two date time", () =>
+    {
+        test("Compare same object", () =>
+        {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
             Assert.strictEqual(DateTime.min(dateTime, dateTime), dateTime); // return second arg when same
@@ -42,7 +45,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(dateTime.isSameDay(dateTime));
         });
 
-        test("Compare same value and zone", () => {
+        test("Compare same value and zone", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
@@ -80,7 +84,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(dateTime2.isSameDay(dateTime1));
         });
 
-        test("Compare different minutes", () => {
+        test("Compare different minutes", () =>
+        {
             const min = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2024-01-01 10:01", zone: "utc" });
 
@@ -118,7 +123,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(max.isSameDay(min));
         });
 
-        test("Compare different hours", () => {
+        test("Compare different hours", () =>
+        {
             const min = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2024-01-01 11:00", zone: "utc" });
 
@@ -156,7 +162,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(max.isSameDay(min));
         });
 
-        test("Compare different days", () => {
+        test("Compare different days", () =>
+        {
             const min = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2024-01-02 10:00", zone: "utc" });
 
@@ -194,7 +201,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(!max.isSameDay(min));
         });
 
-        test("Compare different months", () => {
+        test("Compare different months", () =>
+        {
             const min = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2024-02-01 10:00", zone: "utc" }); // 31 days apart
 
@@ -232,7 +240,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(!max.isSameDay(min));
         });
 
-        test("Compare different years", () => {
+        test("Compare different years", () =>
+        {
             const min = new DateTime({ value: "2023-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2024-01-01 10:00", zone: "utc" }); // 365 days apart
 
@@ -270,7 +279,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(!max.isSameDay(min));
         });
 
-        test("Compare different years (leap year)", () => {
+        test("Compare different years (leap year)", () =>
+        {
             const min = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const max = new DateTime({ value: "2025-01-01 10:00", zone: "utc" }); // 366 days apart
 
@@ -309,12 +319,16 @@ suite("DateTime Comparison", () => {
         });
     });
 
-    suite("Compare three date time Is Between", () => {
-        function checkIsInvalidParams(dateTime: DateTime, start: DateTime, end: DateTime): void {
-            try {
+    suite("Compare three date time Is Between", () =>
+    {
+        function checkIsInvalidParams(dateTime: DateTime, start: DateTime, end: DateTime): void
+        {
+            try
+            {
                 dateTime.isBetween(start, end);
             }
-            catch (e: any) {
+            catch (e: any)
+            {
                 // console.log(e.reason);
                 Assert.ok(e.reason);
                 return;
@@ -323,13 +337,15 @@ suite("DateTime Comparison", () => {
             Assert.fail("Start and end params are valid");
         }
 
-        test("Compare same object", () => {
+        test("Compare same object", () =>
+        {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
             Assert.ok(dateTime.isBetween(dateTime, dateTime));
         });
 
-        test("Compare same value and zone", () => {
+        test("Compare same value and zone", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
@@ -338,7 +354,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(dateTime1.isWithinTimeRange(dateTime2.timeCode, dateTime3.timeCode));
         });
 
-        test("Compare different minutes", () => {
+        test("Compare different minutes", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:01", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:02", zone: "utc" });
@@ -353,7 +370,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        test("Compare different hours", () => {
+        test("Compare different hours", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 11:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 12:00", zone: "utc" });
@@ -368,7 +386,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        test("Compare different days", () => {
+        test("Compare different days", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-02 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-03 10:00", zone: "utc" });
@@ -383,7 +402,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        test("Compare different months", () => {
+        test("Compare different months", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-02-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-03-01 10:00", zone: "utc" });
@@ -398,7 +418,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        test("Compare different years", () => {
+        test("Compare different years", () =>
+        {
             const dateTime1 = new DateTime({ value: "2023-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2025-01-01 10:00", zone: "utc" });
@@ -414,12 +435,16 @@ suite("DateTime Comparison", () => {
         });
     });
 
-    suite("Compare three date time Is Between", () => {
-        function checkIsInvalidParams(dateTime: DateTime, startTimeCode: string, endTimeCode: string): void {
-            try {
+    suite("Compare three date time Is Between", () =>
+    {
+        function checkIsInvalidParams(dateTime: DateTime, startTimeCode: string, endTimeCode: string): void
+        {
+            try
+            {
                 dateTime.isWithinTimeRange(startTimeCode, endTimeCode);
             }
-            catch (e: any) {
+            catch (e: any)
+            {
                 // console.log(e.reason);
                 Assert.ok(e.reason);
                 return;
@@ -428,13 +453,15 @@ suite("DateTime Comparison", () => {
             Assert.fail("Start and end params are valid");
         }
 
-        test("Compare same object", () => {
+        test("Compare same object", () =>
+        {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
             Assert.ok(dateTime.isWithinTimeRange(dateTime.timeCode, dateTime.timeCode));
         });
 
-        test("Compare to Invalid start time code", () => {
+        test("Compare to Invalid start time code", () =>
+        {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
             checkIsInvalidParams(dateTime, "", "1000");
@@ -444,7 +471,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime, "10000", "1000");
         });
 
-        test("Compare to Invalid end time code", () => {
+        test("Compare to Invalid end time code", () =>
+        {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
             checkIsInvalidParams(dateTime, "1000", "");
@@ -454,7 +482,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime, "1000", "10000");
         });
 
-        test("Compare same value and zone", () => {
+        test("Compare same value and zone", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
@@ -463,7 +492,8 @@ suite("DateTime Comparison", () => {
             Assert.ok(dateTime1.isWithinTimeRange(dateTime2.timeCode, dateTime3.timeCode));
         });
 
-        test("Compare different minutes", () => {
+        test("Compare different minutes", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:01", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:02", zone: "utc" });
@@ -478,7 +508,8 @@ suite("DateTime Comparison", () => {
             checkIsInvalidParams(dateTime3, dateTime2.timeCode, dateTime1.timeCode);
         });
 
-        test("Compare different hours", () => {
+        test("Compare different hours", () =>
+        {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 11:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 12:00", zone: "utc" });

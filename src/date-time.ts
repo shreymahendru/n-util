@@ -245,6 +245,64 @@ export class DateTime extends Serializable
     }
 
 
+    private static _validateZone(zone: string): void
+    {
+        if (zone.toLowerCase() === "utc")
+            return;
+
+        given(zone, "zone")
+            .ensureWhen(
+                zone.toLowerCase() === "local",
+                _ => false,
+                "should not use local zone")
+            .ensureWhen(
+                IANAZone.isValidSpecifier(zone),
+                t => IANAZone.isValidZone(t),
+                "Invalid IANA zone")
+            .ensureWhen(
+                zone.toLowerCase().startsWith("utc+"),
+                t =>
+                {
+                    // range is +00:00 to +14:00
+                    const offset = t.split("+").takeLast();
+
+                    if (offset.contains(":"))
+                    {
+                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                        return (hour >= 0 && hour < 14 && minute >= 0 && minute < 60)
+                            || (hour === 14 && minute === 0);
+                    }
+                    else
+                    {
+                        const hour = TypeHelper.parseNumber(offset)!;
+                        return hour >= 0 && hour <= 14;
+                    }
+                },
+                "Invalid UTC offset for zone")
+            .ensureWhen(
+                zone.toLowerCase().startsWith("utc-"),
+                t =>
+                {
+                    // range is -00:00 to -12:00
+                    const offset = t.split("-").takeLast();
+
+                    if (offset.contains(":"))
+                    {
+                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                        return hour >= 0 && hour < 12 && minute >= 0 && minute < 60
+                            || (hour === 12 && minute === 0);
+                    }
+
+                    else
+                    {
+                        const hour = TypeHelper.parseNumber(offset)!;
+                        return hour >= 0 && hour <= 12;
+                    }
+                },
+                "Invalid UTC offset for zone");
+    }
+
+
     public override valueOf(): number
     {
         return this._dateTime.valueOf();
@@ -488,62 +546,7 @@ export class DateTime extends Serializable
         return this.isBetween(startDateTime, endDateTime);
     }
 
-    private static _validateZone(zone: string): void
-    {
-        if (zone.toLowerCase() === "utc")
-            return;
 
-        given(zone, "zone")
-            .ensureWhen(
-                zone.toLowerCase() === "local",
-                _ => false,
-                "should not use local zone")
-            .ensureWhen(
-                IANAZone.isValidSpecifier(zone),
-                t => IANAZone.isValidZone(t),
-                "Invalid IANA zone")
-            .ensureWhen(
-                zone.toLowerCase().startsWith("utc+"),
-                t =>
-                {
-                    // range is +00:00 to +14:00
-                    const offset = t.split("+").takeLast();
-
-                    if (offset.contains(":"))
-                    {
-                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
-                        return (hour >= 0 && hour < 14 && minute >= 0 && minute < 60)
-                            || (hour === 14 && minute === 0);
-                    }
-                    else
-                    {
-                        const hour = TypeHelper.parseNumber(offset);
-                        return hour >= 0 && hour <= 14;
-                    }
-                },
-                "Invalid UTC offset for zone")
-            .ensureWhen(
-                zone.toLowerCase().startsWith("utc-"),
-                t =>
-                {
-                    // range is -00:00 to -12:00
-                    const offset = t.split("-").takeLast();
-
-                    if (offset.contains(":"))
-                    {
-                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
-                        return hour >= 0 && hour < 12 && minute >= 0 && minute < 60
-                            || (hour === 12 && minute === 0);
-                    }
-
-                    else
-                    {
-                        const hour = TypeHelper.parseNumber(offset);
-                        return hour >= 0 && hour <= 12;
-                    }
-                },
-                "Invalid UTC offset for zone");
-    }
 }
 
 

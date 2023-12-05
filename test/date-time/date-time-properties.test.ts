@@ -115,7 +115,7 @@ suite("DateTime Properties", () =>
 
         test("check 3000-01-01 is not in past", () =>
         {
-            Assert.ok(!(new DateTime({ value: "3000-01-01 10:00", zone: "utc" }).isPast));
+            Assert.ok(!new DateTime({ value: "3000-01-01 10:00", zone: "utc" }).isPast);
         });
 
         test("check now -1 minute is in past", () =>
@@ -138,7 +138,7 @@ suite("DateTime Properties", () =>
 
         test("check 2000-01-01 is not in past", () =>
         {
-            Assert.ok(!(new DateTime({ value: "2000-01-01 10:00", zone: "utc" }).isFuture));
+            Assert.ok(!new DateTime({ value: "2000-01-01 10:00", zone: "utc" }).isFuture);
         });
 
         test("check now +1 minute is in future", () =>
