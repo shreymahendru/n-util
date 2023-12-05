@@ -14,12 +14,12 @@ export class HtmlSanitizer
     {
         given(html, "html").ensureHasValue().ensureIsString();
 
-        const sanitized = SanitizeHtml(html, this.createOptions());
+        const sanitized = SanitizeHtml(html, this._createOptions());
 
         return sanitized;
     }
     
-    private static createOptions(): SanitizeHtml.IOptions
+    private static _createOptions(): SanitizeHtml.IOptions
     {
         return {
             allowedTags: SanitizeHtml.defaults.allowedTags.concat(["img"]),

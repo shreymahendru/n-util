@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TypeHelper = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
+const n_exception_1 = require("@nivinjoseph/n-exception");
 class TypeHelper {
     /**
      * @static
@@ -10,7 +11,7 @@ class TypeHelper {
     static parseBoolean(value) {
         if (value == null)
             return null;
-        if (typeof (value) === "boolean")
+        if (typeof value === "boolean")
             return value;
         const strval = value.toString().trim().toLowerCase();
         if (strval === "true")
@@ -22,7 +23,7 @@ class TypeHelper {
     static parseNumber(value) {
         if (value == null)
             return null;
-        if (typeof (value) === "number")
+        if (typeof value === "number")
             return Number.isFinite(value) ? value : null;
         const strval = value.toString().trim();
         if (strval.length === 0)
@@ -33,26 +34,49 @@ class TypeHelper {
         return null;
     }
     static enumTypeToTuples(enumClass) {
-        n_defensive_1.given(enumClass, "enumClass").ensureHasValue().ensureIsObject();
-        return this.getEnumTuples(enumClass);
+        (0, n_defensive_1.given)(enumClass, "enumClass").ensureHasValue().ensureIsObject();
+        return this._getEnumTuples(enumClass);
     }
-    static getEnumTuples(enumType) {
+    static impossible(_value, message) {
+        throw new n_exception_1.ApplicationException(message !== null && message !== void 0 ? message : `Invalid value: ${_value}`);
+    }
+    static _getEnumTuples(enumType) {
         const keys = Object.keys(enumType);
         if (keys.length === 0)
             return [];
-        if (this.isNumber(keys[0]))
-            return keys.filter(t => this.isNumber(t)).map(t => [enumType[t], +t]);
+        if (this._isNumber(keys[0]))
+            return keys.filter(t => this._isNumber(t)).map(t => [enumType[t], +t]);
         return keys.map(t => [t, enumType[t]]);
     }
-    static isNumber(value) {
+    static _isNumber(value) {
         if (value == null)
             return false;
-        value = value.toString().trim();
-        if (value.length === 0)
+        const val = value.toString().trim();
+        if (val.length === 0)
             return false;
-        let parsed = +value.toString().trim();
+        const parsed = +value.toString().trim();
         return !isNaN(parsed) && isFinite(parsed);
     }
 }
 exports.TypeHelper = TypeHelper;
+// enum Foo
+// {
+//     bar = "BAR",
+//     baz = "BAZ",
+//     zeb = "ZEB"
+// }
+// export function doStuff(val: Foo): void
+// {
+//     switch (val)
+//     {
+//         case Foo.bar:
+//             console.log(val);
+//             break;
+//         case Foo.baz:
+//             console.log(val, "baz");
+//             break;
+//         default:
+//             TypeHelper.impossible(val, "ff");
+//     }
+// }
 //# sourceMappingURL=type-helper.js.map

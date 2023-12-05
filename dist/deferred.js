@@ -12,6 +12,7 @@ class Deferred {
     resolve(value) {
         this._resolve(value);
     }
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     reject(reason) {
         this._reject(reason);
     }

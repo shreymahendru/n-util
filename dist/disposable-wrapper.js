@@ -7,7 +7,7 @@ class DisposableWrapper {
     constructor(disposeFunc) {
         this._isDisposed = false;
         this._disposePromise = null;
-        n_defensive_1.given(disposeFunc, "disposeFunc").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(disposeFunc, "disposeFunc").ensureHasValue().ensureIsFunction();
         this._disposeFunc = disposeFunc;
     }
     dispose() {

@@ -8,27 +8,27 @@ import { Duration } from "./duration";
  */
 export function dedupe(delay: Duration): Function;
 export function dedupe(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function dedupe(delayOrTarget?: any, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function dedupe(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
 {
-    given(delayOrTarget, "delayOrTarget").ensureHasValue().ensureIsObject();
+    given(delayOrTarget as object, "delayOrTarget").ensureHasValue().ensureIsObject();
     if (delayOrTarget instanceof Duration)
     {
         const delayMs = delayOrTarget.toMilliSeconds();
 
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
         {
-            given(target, "target").ensureHasValue().ensureIsObject();
+            given(target as object, "target").ensureHasValue().ensureIsObject();
             given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
             given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
 
             const original = descriptor.value;
             const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
 
-            descriptor.value = async function (...params: any[])
+            descriptor.value = async function (...params: Array<any>): Promise<void>
             {
-                if (!this[activeKey])
+                if (!(<any>this)[activeKey])
                 {
-                    this[activeKey] = true;
+                    (<any>this)[activeKey] = true;
 
                     try
                     {
@@ -37,7 +37,7 @@ export function dedupe(delayOrTarget?: any, propertyKey?: string, descriptor?: P
                     finally
                     {
                         await Delay.milliseconds(delayMs);
-                        this[activeKey] = false;
+                        (<any>this)[activeKey] = false;
                     }
                 }
             };
@@ -45,17 +45,17 @@ export function dedupe(delayOrTarget?: any, propertyKey?: string, descriptor?: P
     }
     else
     {
-        given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
+        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
+        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
 
-        const original = descriptor.value;
+        const original = descriptor!.value;
         const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
 
-        descriptor.value = async function (...params: any[])
+        descriptor!.value = async function (...params: Array<any>): Promise<void>
         {
-            if (!this[activeKey])
+            if (!(<any>this)[activeKey])
             {
-                this[activeKey] = true;
+                (<any>this)[activeKey] = true;
 
                 try
                 {
@@ -63,7 +63,7 @@ export function dedupe(delayOrTarget?: any, propertyKey?: string, descriptor?: P
                 }
                 finally
                 {
-                    this[activeKey] = false;
+                    (<any>this)[activeKey] = false;
                 }
             }
         };

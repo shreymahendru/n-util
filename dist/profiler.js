@@ -5,7 +5,7 @@ const n_defensive_1 = require("@nivinjoseph/n-defensive");
 // public
 class Profiler {
     constructor(id) {
-        n_defensive_1.given(id, "id").ensureHasValue().ensureIsString();
+        (0, n_defensive_1.given)(id, "id").ensureHasValue().ensureIsString();
         this._id = id;
         this._traces = [{
                 dateTime: Date.now(),
@@ -16,7 +16,7 @@ class Profiler {
     get id() { return this._id; }
     get traces() { return this._traces; }
     trace(message) {
-        n_defensive_1.given(message, "message").ensureHasValue().ensureIsString();
+        (0, n_defensive_1.given)(message, "message").ensureHasValue().ensureIsString();
         const now = Date.now();
         this._traces.push({
             dateTime: now,

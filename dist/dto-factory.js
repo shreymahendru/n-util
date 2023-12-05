@@ -10,8 +10,8 @@ class DtoFactory {
     constructor() { }
     static create(value, keys) {
         var _a;
-        n_defensive_1.given(value, "value").ensureHasValue().ensureIsObject();
-        n_defensive_1.given(keys, "keys").ensureHasValue().ensureIsArray();
+        (0, n_defensive_1.given)(value, "value").ensureHasValue().ensureIsObject();
+        (0, n_defensive_1.given)(keys, "keys").ensureHasValue().ensureIsArray();
         const typename = (_a = value.$typename) !== null && _a !== void 0 ? _a : value.getTypeName();
         let dto;
         if (value instanceof serializable_1.Serializable) {
@@ -21,6 +21,7 @@ class DtoFactory {
                     Object.keys(k).forEach((alias) => {
                         const key = k[alias];
                         if (typeof key === "function")
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                             acc[alias] = key(value);
                         else
                             acc[alias] = serialized[key];
@@ -33,6 +34,7 @@ class DtoFactory {
                     if (acc[k] == null)
                         acc[k] = null;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return acc;
             }, {});
         }
@@ -42,6 +44,7 @@ class DtoFactory {
                     Object.keys(k).forEach((alias) => {
                         const key = k[alias];
                         if (typeof key === "function")
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                             acc[alias] = key(value);
                         else
                             acc[alias] = value[key];
@@ -52,6 +55,7 @@ class DtoFactory {
                 else {
                     let val = value[k];
                     if (typeof val === "function")
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                         return acc;
                     if (val instanceof serializable_1.Serializable)
                         val = val.serialize();
@@ -59,6 +63,7 @@ class DtoFactory {
                     if (acc[k] == null)
                         acc[k] = null;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return acc;
             }, {});
         }

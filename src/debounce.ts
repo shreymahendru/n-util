@@ -8,16 +8,16 @@ import { Duration } from "./duration";
  */
 export function debounce(delay: Duration): Function;
 export function debounce(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function debounce(delayOrTarget?: any, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function debounce(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
 {
-    given(delayOrTarget, "delayOrTarget").ensureHasValue().ensureIsObject();
+    given(delayOrTarget as object, "delayOrTarget").ensureHasValue().ensureIsObject();
     if (delayOrTarget instanceof Duration)
     {
         const delayMs = delayOrTarget.toMilliSeconds();
 
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
         {
-            given(target, "target").ensureHasValue().ensureIsObject();
+            given(target as object, "target").ensureHasValue().ensureIsObject();
             given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
             given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
 
@@ -25,29 +25,29 @@ export function debounce(delayOrTarget?: any, propertyKey?: string, descriptor?:
             const activeKey = Symbol.for(`__$_${propertyKey}_debounceIsActive`);
             const scheduledCallKey = Symbol.for(`__$_${propertyKey}_debounceScheduledCall`);
 
-            descriptor.value = async function (...params: any[])
+            descriptor.value = async function (...params: Array<any>): Promise<void>
             {
-                this[scheduledCallKey] = async () =>
+                (<any>this)[scheduledCallKey] = async (): Promise<void> =>
                 {
                     await (original as Function).call(this, ...params);
                 };
 
-                if (this[activeKey])
+                if ((<any>this)[activeKey])
                     return;
 
-                while (this[scheduledCallKey] != null && !this[activeKey])
+                while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
                 {
-                    this[activeKey] = true;
+                    (<any>this)[activeKey] = true;
                     await Delay.milliseconds(delayMs);
-                    const currentCall = this[scheduledCallKey];
-                    this[scheduledCallKey] = null;
+                    const currentCall = (<any>this)[scheduledCallKey];
+                    (<any>this)[scheduledCallKey] = null;
                     try
                     {
                         await (currentCall as Function)();
                     }
                     finally
                     {
-                        this[activeKey] = false;
+                        (<any>this)[activeKey] = false;
                     }
                 }
             };
@@ -55,35 +55,35 @@ export function debounce(delayOrTarget?: any, propertyKey?: string, descriptor?:
     }
     else
     {
-        given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
+        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
+        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
 
-        const original = descriptor.value;
+        const original = descriptor!.value;
         const activeKey = Symbol.for(`__$_${propertyKey}_debounceIsActive`);
         const scheduledCallKey = Symbol.for(`__$_${propertyKey}_debounceScheduledCall`);
 
-        descriptor.value = async function (...params: any[])
+        descriptor!.value = async function (...params: Array<any>): Promise<void>
         {
-            this[scheduledCallKey] = async () =>
+            (<any>this)[scheduledCallKey] = async (): Promise<void> =>
             {
                 await (original as Function).call(this, ...params);
             };
             
-            if (this[activeKey])
+            if ((<any>this)[activeKey])
                 return;
             
-            while (this[scheduledCallKey] != null && !this[activeKey])
+            while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
             {
-                this[activeKey] = true;
-                const currentCall = this[scheduledCallKey];
-                this[scheduledCallKey] = null;
+                (<any>this)[activeKey] = true;
+                const currentCall = (<any>this)[scheduledCallKey];
+                (<any>this)[scheduledCallKey] = null;
                 try
                 {
                     await (currentCall as Function)();
                 }
                 finally
                 {
-                    this[activeKey] = false;
+                    (<any>this)[activeKey] = false;
                 }
             }
         };

@@ -1,27 +1,19 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Make = void 0;
+const tslib_1 = require("tslib");
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 // public
 class Make // static class
  {
     constructor() { }
     static retry(func, numberOfRetries, errorPredicate) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
-        let numberOfAttempts = numberOfRetries + 1;
-        let result = function (...p) {
-            return __awaiter(this, void 0, void 0, function* () {
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        (0, n_defensive_1.given)(errorPredicate, "errorPredicate").ensureIsFunction();
+        const numberOfAttempts = numberOfRetries + 1;
+        const result = function (...p) {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 let successful = false;
                 let attempts = 0;
                 let funcResult;
@@ -46,17 +38,17 @@ class Make // static class
         return result;
     }
     static retryWithDelay(func, numberOfRetries, delayMS, errorPredicate) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
-        let numberOfAttempts = numberOfRetries + 1;
-        let result = function (...p) {
-            return __awaiter(this, void 0, void 0, function* () {
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        (0, n_defensive_1.given)(errorPredicate, "errorPredicate").ensureIsFunction();
+        const numberOfAttempts = numberOfRetries + 1;
+        const result = function (...p) {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 let successful = false;
                 let attempts = 0;
                 let funcResult;
                 let error;
-                let executeWithDelay = (delay) => {
+                const executeWithDelay = (delay) => {
                     return new Promise((resolve, reject) => {
                         setTimeout(() => {
                             func(...p)
@@ -85,18 +77,18 @@ class Make // static class
         return result;
     }
     static retryWithExponentialBackoff(func, numberOfRetries, errorPredicate) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        n_defensive_1.given(errorPredicate, "errorPredicate").ensureIsFunction();
-        let numberOfAttempts = numberOfRetries + 1;
-        let result = function (...p) {
-            return __awaiter(this, void 0, void 0, function* () {
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        (0, n_defensive_1.given)(errorPredicate, "errorPredicate").ensureIsFunction();
+        const numberOfAttempts = numberOfRetries + 1;
+        const result = function (...p) {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 let successful = false;
                 let attempts = 0;
                 let delayMS = 0;
                 let funcResult;
                 let error;
-                let executeWithDelay = (delay) => {
+                const executeWithDelay = (delay) => {
                     return new Promise((resolve, reject) => {
                         setTimeout(() => {
                             func(...p)
@@ -128,10 +120,10 @@ class Make // static class
         return result;
     }
     static syncToAsync(func) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        let result = function (...p) {
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
             try {
-                let val = func(...p);
+                const val = func(...p);
                 return Promise.resolve(val);
             }
             catch (error) {
@@ -141,9 +133,9 @@ class Make // static class
         return result;
     }
     static callbackToPromise(func) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        let result = function (...p) {
-            let promise = new Promise((resolve, reject) => func(...p, (err, ...values) => err
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        const result = function (...p) {
+            const promise = new Promise((resolve, reject) => func(...p, (err, ...values) => err
                 ? reject(err)
                 : values.length === 0
                     ? resolve(undefined)
@@ -155,21 +147,21 @@ class Make // static class
         return result;
     }
     static loop(func, numberOfTimes) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
-        n_defensive_1.given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
         for (let i = 0; i < numberOfTimes; i++)
             func(i);
     }
     static loopAsync(asyncFunc, numberOfTimes, degreesOfParallelism) {
-        return __awaiter(this, void 0, void 0, function* () {
-            n_defensive_1.given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
-            n_defensive_1.given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-            let taskManager = new TaskManager(numberOfTimes, asyncFunc, degreesOfParallelism, false);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            (0, n_defensive_1.given)(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+            (0, n_defensive_1.given)(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
+            const taskManager = new TaskManager(numberOfTimes, asyncFunc, degreesOfParallelism !== null && degreesOfParallelism !== void 0 ? degreesOfParallelism : null, false);
             yield taskManager.execute();
         });
     }
     static errorSuppressed(func, defaultValue = null) {
-        n_defensive_1.given(func, "func").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(func, "func").ensureHasValue().ensureIsFunction();
         const result = function (...p) {
             try {
                 return func(...p);
@@ -182,9 +174,9 @@ class Make // static class
         return result;
     }
     static errorSuppressedAsync(asyncFunc, defaultValue = null) {
-        n_defensive_1.given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
         const result = function (...p) {
-            return __awaiter(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 try {
                     return yield asyncFunc(...p);
                 }
@@ -202,15 +194,15 @@ class Make // static class
      * @param max exclusive
      */
     static randomInt(min, max) {
-        n_defensive_1.given(min, "min").ensureHasValue().ensureIsNumber();
-        n_defensive_1.given(max, "max").ensureHasValue().ensureIsNumber()
+        (0, n_defensive_1.given)(min, "min").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(max, "max").ensureHasValue().ensureIsNumber()
             .ensure(t => t > min, "value has to be greater than min");
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
     }
     static randomCode(numChars) {
-        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+        (0, n_defensive_1.given)(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
         // let allowedChars = "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ~".split("");
         let allowedChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -227,9 +219,9 @@ class Make // static class
         return result.join("");
     }
     static randomTextCode(numChars, caseInsensitive = false) {
-        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+        (0, n_defensive_1.given)(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
-        n_defensive_1.given(caseInsensitive, "caseInsensitive").ensureHasValue().ensureIsBoolean();
+        (0, n_defensive_1.given)(caseInsensitive, "caseInsensitive").ensureHasValue().ensureIsBoolean();
         let allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         if (caseInsensitive)
             allowedChars = "abcdefghijklmnopqrstuvwxyz".split("");
@@ -246,7 +238,7 @@ class Make // static class
         return result.join("");
     }
     static randomNumericCode(numChars) {
-        n_defensive_1.given(numChars, "numChars").ensureHasValue().ensureIsNumber()
+        (0, n_defensive_1.given)(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
         let allowedChars = "0123456789".split("");
         const shuffleTimes = Make.randomInt(1, 10);
@@ -265,6 +257,7 @@ class Make // static class
 exports.Make = Make;
 class TaskManager {
     constructor(numberOfTimes, taskFunc, taskCount, captureResults) {
+        this._results = [];
         this._numberOfTimes = numberOfTimes;
         this._taskFunc = taskFunc;
         this._taskCount = !taskCount || taskCount <= 0 ? numberOfTimes : taskCount;
@@ -276,13 +269,13 @@ class TaskManager {
             this._results = [];
     }
     execute() {
-        return __awaiter(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (let i = 0; i < this._numberOfTimes; i++) {
                 if (this._captureResults)
                     this._results.push(null);
-                yield this.executeTaskForItem(i);
+                yield this._executeTaskForItem(i);
             }
-            yield this.finish();
+            yield this._finish();
         });
     }
     addResult(itemIndex, result) {
@@ -291,18 +284,18 @@ class TaskManager {
     getResults() {
         return this._results;
     }
-    executeTaskForItem(itemIndex) {
-        return __awaiter(this, void 0, void 0, function* () {
+    _executeTaskForItem(itemIndex) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let availableTask = this._tasks.find(t => t.isFree);
             if (!availableTask) {
-                let task = yield Promise.race(this._tasks.map(t => t.promise));
+                const task = yield Promise.race(this._tasks.map(t => t.promise));
                 task.free();
                 availableTask = task;
             }
             availableTask.execute(itemIndex);
         });
     }
-    finish() {
+    _finish() {
         return Promise.all(this._tasks.filter(t => !t.isFree).map(t => t.promise));
     }
 }
@@ -315,7 +308,7 @@ class Task {
         this._promise = null;
     }
     get promise() { return this._promise; }
-    get isFree() { return this._promise === null; }
+    get isFree() { return this._promise == null; }
     execute(itemIndex) {
         this._promise = new Promise((resolve, reject) => {
             this._taskFunc(itemIndex)

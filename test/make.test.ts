@@ -24,7 +24,7 @@ suite("Make", () =>
             numAttempts = 0;   
             let value = null;
             
-            let testFunc = (val: number) =>
+            const testFunc = (val: number): Promise<never> =>
             {                                
                 numAttempts++;
                 value = ++val;
@@ -33,7 +33,7 @@ suite("Make", () =>
             
             // if (onErrors && onErrors.every(t => !(error instanceof t)))
             
-            let modifiedFunc = Make.retry(testFunc, 4, err => err instanceof ApplicationException);
+            const modifiedFunc = Make.retry(testFunc, 4, err => err instanceof ApplicationException);
             testInput = 1;
             
             try 
@@ -54,14 +54,14 @@ suite("Make", () =>
         {
             numAttempts = 0;
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
 
                 return Promise.reject(new ApplicationException("not working"));
             };
 
-            let modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
+            const modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
 
             try 
             {
@@ -80,7 +80,7 @@ suite("Make", () =>
         {
             numAttempts = 0;
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -89,7 +89,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };            
             
-            let modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
+            const modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
 
             try 
             {
@@ -108,7 +108,7 @@ suite("Make", () =>
         {    
             numAttempts = 0;
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -117,7 +117,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };          
             
-            let modifiedFunc = Make.retry(testFunc, 3, err => err instanceof ArgumentException);
+            const modifiedFunc = Make.retry(testFunc, 3, err => err instanceof ArgumentException);
 
             try 
             {
@@ -136,7 +136,7 @@ suite("Make", () =>
         {
             numAttempts = 0;
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -145,7 +145,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retry(testFunc, 3,
+            const modifiedFunc = Make.retry(testFunc, 3,
                 err => err instanceof ArgumentException || err instanceof ApplicationException);
 
             try 
@@ -165,13 +165,13 @@ suite("Make", () =>
         {
             numAttempts = 0;
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
+            const modifiedFunc = Make.retry(testFunc, 4, err => err instanceof Error);
 
             try 
             {
@@ -200,14 +200,14 @@ suite("Make", () =>
             
             time = Date.now();
             
-            let testFunc = (val: number) =>
+            const testFunc = (val: number): Promise<void> =>
             {              
                 numAttempts++; 
                 value = ++val;
                 return Promise.reject(new ApplicationException("not working"));
             };
             
-            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof ApplicationException);  
+            const modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof ApplicationException);  
             testInput = 1;
             
             try 
@@ -233,7 +233,7 @@ suite("Make", () =>
             
             time = Date.now();
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -242,7 +242,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof Error);
+            const modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof Error);
 
             try 
             {
@@ -266,7 +266,7 @@ suite("Make", () =>
 
             time = Date.now();            
             
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -275,7 +275,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof ArgumentException);
+            const modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof ArgumentException);
 
             try 
             {
@@ -299,7 +299,7 @@ suite("Make", () =>
 
             time = Date.now();             
             
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -308,7 +308,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithDelay(testFunc, 3, 300,
+            const modifiedFunc = Make.retryWithDelay(testFunc, 3, 300,
                 err => err instanceof ArgumentException || err instanceof ApplicationException);
 
             try 
@@ -331,13 +331,13 @@ suite("Make", () =>
             
             time = Date.now(); 
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof Error);
+            const modifiedFunc = Make.retryWithDelay(testFunc, 4, 300, err => err instanceof Error);
 
             try 
             {
@@ -367,14 +367,14 @@ suite("Make", () =>
             
             time = Date.now();
             
-            let testFunc = (val: number) =>
+            const testFunc = (val: number): Promise<void> =>
             {
                 numAttempts++;                
                 value = ++val;
                 return Promise.reject(new ApplicationException("not working"));
             };          
             
-            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof ApplicationException);  
+            const modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof ApplicationException);  
             testInput = 1;
             
             try 
@@ -400,7 +400,7 @@ suite("Make", () =>
 
             time = Date.now();            
             
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -409,7 +409,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof Error);
+            const modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof Error);
 
             try 
             {
@@ -433,7 +433,7 @@ suite("Make", () =>
 
             time = Date.now();
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -442,7 +442,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof ArgumentException);
+            const modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3, err => err instanceof ArgumentException);
 
             try 
             {
@@ -466,7 +466,7 @@ suite("Make", () =>
             
             time = Date.now();
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 if ((numAttempts % 2) === 0)
@@ -475,7 +475,7 @@ suite("Make", () =>
                     return Promise.reject(new ArgumentException("error", "some error"));
             };
 
-            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3,
+            const modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 3,
                 err => err instanceof ArgumentException || err instanceof ApplicationException);
 
             try 
@@ -500,13 +500,13 @@ suite("Make", () =>
 
             time = Date.now();
 
-            let testFunc = () =>
+            const testFunc = (): Promise<void> =>
             {
                 numAttempts++;
                 return Promise.resolve();
             };
 
-            let modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 4, err => err instanceof Error);
+            const modifiedFunc = Make.retryWithExponentialBackoff(testFunc, 4, err => err instanceof Error);
 
             try 
             {
@@ -634,7 +634,7 @@ suite("Make", () =>
     {
         test("should generate unique values", () =>
         {
-            const results: string[] = [];
+            const results: Array<string> = [];
             
             Make.loop(() =>
             {
@@ -651,7 +651,7 @@ suite("Make", () =>
     {
         test("should generate unique values", () =>
         {
-            const results: string[] = [];
+            const results: Array<string> = [];
 
             Make.loop(() =>
             {
@@ -668,7 +668,7 @@ suite("Make", () =>
     {
         test("should generate unique values", () =>
         {
-            const results: string[] = [];
+            const results: Array<string> = [];
 
             Make.loop(() =>
             {

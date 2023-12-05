@@ -13,7 +13,8 @@ suite("ImageHelper", () =>
             
             const buffer = ImageHelper.dataUrlToBuffer(dataUrl);
             
-            Assert.ok(buffer !== null);
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            Assert.ok(buffer != null);
             Assert.ok(buffer.byteLength > 0);
             Assert.strictEqual(buffer.toString("base64"), "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==");
         });

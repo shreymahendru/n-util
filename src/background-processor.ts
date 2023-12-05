@@ -11,14 +11,14 @@ export class BackgroundProcessor implements Disposable
     private readonly _breakOnlyWhenNoWork: boolean;
     private readonly _actionsToProcess: Array<Action> = new Array<Action>();
     private readonly _actionsExecuting: Array<Action> = new Array<Action>();
-    private _isDisposed: boolean = false;
+    private _isDisposed = false;
     private _timeout: any = null;
 
 
     public get queueLength(): number { return this._actionsToProcess.length; }
 
 
-    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, breakIntervalMilliseconds: number = 1000, breakOnlyWhenNoWork = true)
+    public constructor(defaultErrorHandler: (e: Error) => Promise<void>, breakIntervalMilliseconds = 1000, breakOnlyWhenNoWork = true)
     {
         given(defaultErrorHandler, "defaultErrorHandler").ensureHasValue().ensureIsFunction();
         given(breakIntervalMilliseconds, "breakIntervalMilliseconds").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
@@ -28,7 +28,7 @@ export class BackgroundProcessor implements Disposable
         this._breakIntervalMilliseconds = breakIntervalMilliseconds || 0;
         this._breakOnlyWhenNoWork = breakOnlyWhenNoWork;
 
-        this.initiateBackgroundProcessing();
+        this._initiateBackgroundProcessing();
     }
 
 
@@ -38,7 +38,7 @@ export class BackgroundProcessor implements Disposable
             throw new ObjectDisposedException(this);
         
         given(action, "action").ensureHasValue().ensureIsFunction();
-        given(errorHandler, "errorHandler").ensureIsFunction();
+        given(errorHandler as Function, "errorHandler").ensureIsFunction();
 
         this._actionsToProcess.push(new Action(action, errorHandler || this._defaultErrorHandler));
     }
@@ -57,7 +57,7 @@ export class BackgroundProcessor implements Disposable
         {
             while (this._actionsToProcess.length > 0)
             {
-                const action = this._actionsToProcess.shift();
+                const action = this._actionsToProcess.shift()!;
                 this._actionsExecuting.push(action);
                 action.execute(() => this._actionsExecuting.remove(action));
             }
@@ -68,7 +68,7 @@ export class BackgroundProcessor implements Disposable
     }
 
 
-    private initiateBackgroundProcessing()
+    private _initiateBackgroundProcessing(): void
     {
         if (this._isDisposed)
             return;
@@ -81,17 +81,17 @@ export class BackgroundProcessor implements Disposable
         {
             if (this._actionsToProcess.length > 0)
             {
-                const action = this._actionsToProcess.shift();
+                const action = this._actionsToProcess.shift()!;
                 this._actionsExecuting.push(action);
                 action.execute(() =>
                 {
                     this._actionsExecuting.remove(action);
-                    this.initiateBackgroundProcessing();
+                    this._initiateBackgroundProcessing();
                 });
             }
             else
             {
-                this.initiateBackgroundProcessing();
+                this._initiateBackgroundProcessing();
             }
         }, timeout);
     }
@@ -148,7 +148,7 @@ class Action
         {
             try 
             {
-                this._errorHandler(error)
+                this._errorHandler(error as Error)
                     .then(() => postExecuteCallback())
                     .catch((error) =>
                     {

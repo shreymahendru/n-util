@@ -4,30 +4,30 @@ exports.Duration = void 0;
 const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class Duration {
     constructor(ms) {
-        n_defensive_1.given(ms, "ms").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        (0, n_defensive_1.given)(ms, "ms").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
         this._ms = ms;
     }
     static fromMilliSeconds(milliSeconds) {
         return new Duration(milliSeconds);
     }
     static fromSeconds(seconds) {
-        n_defensive_1.given(seconds, "seconds").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(seconds, "seconds").ensureHasValue().ensureIsNumber();
         return this.fromMilliSeconds(seconds * 1000);
     }
     static fromMinutes(minutes) {
-        n_defensive_1.given(minutes, "minutes").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(minutes, "minutes").ensureHasValue().ensureIsNumber();
         return this.fromSeconds(minutes * 60);
     }
     static fromHours(hours) {
-        n_defensive_1.given(hours, "hours").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(hours, "hours").ensureHasValue().ensureIsNumber();
         return this.fromMinutes(hours * 60);
     }
     static fromDays(days) {
-        n_defensive_1.given(days, "days").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(days, "days").ensureHasValue().ensureIsNumber();
         return this.fromHours(days * 24);
     }
     static fromWeeks(weeks) {
-        n_defensive_1.given(weeks, "weeks").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(weeks, "weeks").ensureHasValue().ensureIsNumber();
         return this.fromDays(weeks * 7);
     }
     toMilliSeconds(round = false) {

@@ -9,7 +9,7 @@ class ImageHelper {
      */
     constructor() { }
     static dataUrlToBuffer(dataUrl) {
-        n_defensive_1.given(dataUrl, "dataUrl").ensureHasValue().ensureIsString();
+        (0, n_defensive_1.given)(dataUrl, "dataUrl").ensureHasValue().ensureIsString();
         dataUrl = dataUrl.trim();
         const splitted = dataUrl.split(",");
         // fi.fileMime = splitted[0].trim().split(";")[0].substr(5);

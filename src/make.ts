@@ -6,15 +6,15 @@ export abstract class Make // static class
     private constructor() { }
 
 
-    public static retry<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
+    public static retry<T>(func: (...params: Array<any>) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: Array<any>) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(errorPredicate, "errorPredicate").ensureIsFunction();
+        given(errorPredicate as Function, "errorPredicate").ensureIsFunction();
         
-        let numberOfAttempts = numberOfRetries + 1;
+        const numberOfAttempts = numberOfRetries + 1;
         
-        let result = async function (...p: any[]): Promise<T>
+        const result = async function (...p: Array<any>): Promise<T>
         {
             let successful = false;
             let attempts = 0;
@@ -40,7 +40,7 @@ export abstract class Make // static class
             }
 
             if (successful)
-                return funcResult;
+                return funcResult as T;
 
             throw error;
         };
@@ -48,15 +48,15 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithDelay<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, delayMS: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
+    public static retryWithDelay<T>(func: (...params: Array<any>) => Promise<T>, numberOfRetries: number, delayMS: number, errorPredicate?: (error: any) => boolean): (...params: Array<any>) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(errorPredicate, "errorPredicate").ensureIsFunction();
+        given(errorPredicate as Function, "errorPredicate").ensureIsFunction();
         
-        let numberOfAttempts = numberOfRetries + 1;
+        const numberOfAttempts = numberOfRetries + 1;
         
-        let result = async function (...p: any[]): Promise<T>
+        const result = async function (...p: Array<any>): Promise<T>
         {
             let successful = false;
             let attempts = 0;
@@ -64,7 +64,7 @@ export abstract class Make // static class
             let funcResult: any;
             let error: any;
 
-            let executeWithDelay = (delay: number) =>
+            const executeWithDelay = (delay: number): Promise<unknown> =>
             {
                 return new Promise((resolve, reject) =>
                 {
@@ -96,7 +96,7 @@ export abstract class Make // static class
             }
 
             if (successful)
-                return funcResult;
+                return funcResult as T;
 
             throw error;
         };
@@ -104,15 +104,15 @@ export abstract class Make // static class
         return result;
     }
 
-    public static retryWithExponentialBackoff<T>(func: (...params: any[]) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: any[]) => Promise<T>
+    public static retryWithExponentialBackoff<T>(func: (...params: Array<any>) => Promise<T>, numberOfRetries: number, errorPredicate?: (error: any) => boolean): (...params: Array<any>) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         given(numberOfRetries, "numberOfRetries").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
-        given(errorPredicate, "errorPredicate").ensureIsFunction();
+        given(errorPredicate as Function, "errorPredicate").ensureIsFunction();
         
-        let numberOfAttempts = numberOfRetries + 1;
+        const numberOfAttempts = numberOfRetries + 1;
         
-        let result = async function (...p: any[]): Promise<T>
+        const result = async function (...p: Array<any>): Promise<T>
         {
             let successful = false;
             let attempts = 0;
@@ -121,7 +121,7 @@ export abstract class Make // static class
             let funcResult: any;
             let error: any;
 
-            let executeWithDelay = (delay: number) =>
+            const executeWithDelay = (delay: number): Promise<unknown> =>
             {
                 return new Promise((resolve, reject) =>
                 {
@@ -156,7 +156,7 @@ export abstract class Make // static class
             }
 
             if (successful)
-                return funcResult;
+                return funcResult as T;
 
             throw error;
         };
@@ -164,15 +164,15 @@ export abstract class Make // static class
         return result;
     }
     
-    public static syncToAsync<T>(func: (...params: any[]) => T): (...params: any[]) => Promise<T>
+    public static syncToAsync<T>(func: (...params: Array<any>) => T): (...params: Array<any>) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         
-        let result = function (...p: any[]): Promise<T>
+        const result = function (...p: Array<any>): Promise<T>
         {
             try 
             {
-                let val = func(...p);
+                const val = func(...p);
                 return Promise.resolve(val);
             }
             catch (error)
@@ -184,23 +184,23 @@ export abstract class Make // static class
         return result;
     }
     
-    public static callbackToPromise<T>(func: (...params: any[]) => void): (...params: any[]) => Promise<T>
+    public static callbackToPromise<T>(func: (...params: Array<any>) => void): (...params: Array<any>) => Promise<T>
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         
-        let result = function (...p: any[]): Promise<T>
+        const result = function (...p: Array<any>): Promise<T>
         {
-            let promise = new Promise<any>((resolve, reject) =>
-                func(...p, (err: Error, ...values: any[]) =>
+            const promise = new Promise<T | undefined>((resolve, reject) =>
+                func(...p, (err: Error | null, ...values: Array<any>) =>
                     err
                         ? reject(err)
                         : values.length === 0
                             ? resolve(undefined)
                             : values.length === 1
                                 ? resolve(values[0])
-                                : resolve(values)));
+                                : resolve(values as unknown as T)));
             
-            return promise;
+            return promise as Promise<T>;
         };   
         
         return result;
@@ -220,15 +220,15 @@ export abstract class Make // static class
         given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
         given(numberOfTimes, "numberOfTimes").ensureHasValue().ensureIsNumber().ensure(t => t > 0);
         
-        let taskManager = new TaskManager<void>(numberOfTimes, asyncFunc, degreesOfParallelism, false);
+        const taskManager = new TaskManager<void>(numberOfTimes, asyncFunc, degreesOfParallelism ?? null, false);
         await taskManager.execute();
     }
     
-    public static errorSuppressed<T extends (...params: any[]) => U, U>(func: T, defaultValue: U = null): T
+    public static errorSuppressed<T extends (...params: Array<any>) => U, U>(func: T, defaultValue: U | null = null): T
     {
         given(func, "func").ensureHasValue().ensureIsFunction();
         
-        const result = function (...p: any[]): any
+        const result = function (...p: Array<any>): any
         {
             try 
             {
@@ -241,14 +241,14 @@ export abstract class Make // static class
             }
         };
         
-        return <any>result;
+        return result as T;
     }
     
-    public static errorSuppressedAsync<T extends (...params: any[]) => Promise<U>, U>(asyncFunc: T, defaultValue: U = null): T
+    public static errorSuppressedAsync<T extends (...params: Array<any>) => Promise<U>, U>(asyncFunc: T, defaultValue: U | null = null): T
     {
         given(asyncFunc, "asyncFunc").ensureHasValue().ensureIsFunction();
 
-        const result = async function (...p: any[]): Promise<any>
+        const result = async function (...p: Array<any>): Promise<any>
         {
             try 
             {
@@ -261,7 +261,7 @@ export abstract class Make // static class
             }
         };
 
-        return <any>result;
+        return result as T;
     }
 
     /**
@@ -296,7 +296,7 @@ export abstract class Make // static class
         if ((Date.now() % 2) === 0)
             allowedChars = allowedChars.reverse();
         
-        const result: string[] = [];
+        const result: Array<string> = [];
         
         Make.loop(() =>
         {
@@ -307,7 +307,7 @@ export abstract class Make // static class
         return result.join("");
     }
     
-    public static randomTextCode(numChars: number, caseInsensitive: boolean = false): string
+    public static randomTextCode(numChars: number, caseInsensitive = false): string
     {
         given(numChars, "numChars").ensureHasValue().ensureIsNumber()
             .ensure(t => t > 0, "value has to be greater than 0");
@@ -326,7 +326,7 @@ export abstract class Make // static class
         if ((Date.now() % 2) === 0)
             allowedChars = allowedChars.reverse();
 
-        const result: string[] = [];
+        const result: Array<string> = [];
 
         Make.loop(() =>
         {
@@ -352,7 +352,7 @@ export abstract class Make // static class
         if ((Date.now() % 2) === 0)
             allowedChars = allowedChars.reverse();
 
-        const result: string[] = [];
+        const result: Array<string> = [];
 
         Make.loop(() =>
         {
@@ -371,11 +371,11 @@ class TaskManager<T>
     private readonly _taskFunc: (index: number) => Promise<any>;
     private readonly _taskCount: number;
     private readonly _captureResults: boolean;
-    private readonly _tasks: Task<T>[];
-    private readonly _results: any[];
+    private readonly _tasks: Array<Task<T>>;
+    private readonly _results: Array<any> = [];
 
 
-    public constructor(numberOfTimes: number, taskFunc: (index: number) => Promise<any>, taskCount: number, captureResults: boolean)
+    public constructor(numberOfTimes: number, taskFunc: (index: number) => Promise<any>, taskCount: number | null, captureResults: boolean)
     {
         this._numberOfTimes = numberOfTimes;
         this._taskFunc = taskFunc;
@@ -397,10 +397,10 @@ class TaskManager<T>
         {
             if (this._captureResults)
                 this._results.push(null);
-            await this.executeTaskForItem(i);
+            await this._executeTaskForItem(i);
         }
 
-        await this.finish();
+        await this._finish();
     }
 
     public addResult(itemIndex: number, result: any): void
@@ -408,26 +408,26 @@ class TaskManager<T>
         this._results[itemIndex] = result;
     }
 
-    public getResults(): any[]
+    public getResults(): Array<any>
     {
         return this._results;
     }
 
 
-    private async executeTaskForItem(itemIndex: number): Promise<void>
+    private async _executeTaskForItem(itemIndex: number): Promise<void>
     {
         let availableTask = this._tasks.find(t => t.isFree);
         if (!availableTask)
         {
-            let task = await Promise.race(this._tasks.map(t => t.promise));
-            task.free();
-            availableTask = task;
+            const task = await Promise.race(this._tasks.map(t => t.promise));
+            task!.free();
+            availableTask = task!;
         }
 
         availableTask.execute(itemIndex);
     }
 
-    private finish(): Promise<any>
+    private _finish(): Promise<any>
     {
         return Promise.all(this._tasks.filter(t => !t.isFree).map(t => t.promise));
     }
@@ -436,15 +436,15 @@ class TaskManager<T>
 class Task<T>
 {
     private readonly _manager: TaskManager<T>;
-    // @ts-ignore
+    // @ts-expect-error: not used atm
     private readonly _id: number;
     private readonly _taskFunc: (index: number) => Promise<any>;
     private readonly _captureResult: boolean;
-    private _promise: Promise<Task<T>>;
+    private _promise: Promise<Task<T>> | null;
 
 
-    public get promise(): Promise<Task<T>> { return this._promise; }
-    public get isFree(): boolean { return this._promise === null; }
+    public get promise(): Promise<Task<T>> | null { return this._promise; }
+    public get isFree(): boolean { return this._promise == null; }
 
 
     public constructor(manager: TaskManager<T>, id: number, taskFunc: (index: number) => Promise<any>, captureResult: boolean)

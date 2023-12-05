@@ -24,6 +24,6 @@ export class DisposableWrapper implements Disposable
             this._disposePromise = this._disposeFunc();
         }
         
-        return this._disposePromise;
+        return this._disposePromise!;
     }
 }

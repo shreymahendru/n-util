@@ -18,10 +18,9 @@ suite("Profiler tests", () =>
         
         profiler.traces.forEach(t =>
         {
-            console.log(`${(new Date(t.dateTime)).toISOString()} ${t.message}; ${t.diffMs}MS`);
+            console.log(`${new Date(t.dateTime).toISOString()} ${t.message}; ${t.diffMs}MS`);
         });
         
         Assert.strictEqual(profiler.traces.length, 6);
-        
     });
 });

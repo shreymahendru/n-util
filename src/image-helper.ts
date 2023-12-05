@@ -15,7 +15,7 @@ export class ImageHelper
         given(dataUrl, "dataUrl").ensureHasValue().ensureIsString();
         dataUrl = dataUrl.trim();
         
-        const splitted: string[] = dataUrl.split(",");
+        const splitted: Array<string> = dataUrl.split(",");
         // fi.fileMime = splitted[0].trim().split(";")[0].substr(5);
         // fi.fileData = splitted[1];
         

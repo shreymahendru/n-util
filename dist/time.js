@@ -8,11 +8,11 @@ const n_defensive_1 = require("@nivinjoseph/n-defensive");
 class Time {
     constructor() { }
     static isPast(time) {
-        n_defensive_1.given(time, "time").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(time, "time").ensureHasValue().ensureIsNumber();
         return time < Date.now();
     }
     static isFuture(time) {
-        n_defensive_1.given(time, "time").ensureHasValue().ensureIsNumber();
+        (0, n_defensive_1.given)(time, "time").ensureHasValue().ensureIsNumber();
         return time > Date.now();
     }
 }

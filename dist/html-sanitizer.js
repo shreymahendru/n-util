@@ -9,11 +9,11 @@ class HtmlSanitizer {
      */
     constructor() { }
     static sanitize(html) {
-        n_defensive_1.given(html, "html").ensureHasValue().ensureIsString();
-        const sanitized = SanitizeHtml(html, this.createOptions());
+        (0, n_defensive_1.given)(html, "html").ensureHasValue().ensureIsString();
+        const sanitized = SanitizeHtml(html, this._createOptions());
         return sanitized;
     }
-    static createOptions() {
+    static _createOptions() {
         return {
             allowedTags: SanitizeHtml.defaults.allowedTags.concat(["img"]),
             allowedAttributes: Object.assign(SanitizeHtml.defaults.allowedAttributes, {

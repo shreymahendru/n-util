@@ -1,4 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
+import { ApplicationException } from "@nivinjoseph/n-exception";
 
 
 export class TypeHelper
@@ -9,15 +10,15 @@ export class TypeHelper
     private constructor() { }
     
     
-    public static parseBoolean(value: any): boolean | null
+    public static parseBoolean(value: unknown): boolean | null
     {
         if (value == null)
             return null;
         
-        if (typeof (value) === "boolean")
+        if (typeof value === "boolean")
             return value;
         
-        const strval = (<string>value.toString()).trim().toLowerCase();
+        const strval = (<object>value).toString().trim().toLowerCase();
         
         if (strval === "true")
             return true;
@@ -28,15 +29,15 @@ export class TypeHelper
         return null;
     }
     
-    public static parseNumber(value: any): number | null
+    public static parseNumber(value: unknown): number | null
     {
         if (value == null)
             return null;
 
-        if (typeof (value) === "number")
+        if (typeof value === "number")
             return Number.isFinite(value) ? value : null;
         
-        const strval = (<string>value.toString()).trim();
+        const strval = (<object>value).toString().trim();
         
         if (strval.length === 0)
             return null;
@@ -48,34 +49,61 @@ export class TypeHelper
         return null;
     }
     
-    public static enumTypeToTuples<T extends string | number>(enumClass: object): ReadonlyArray<[string, T]>
+    public static enumTypeToTuples<T extends string | number>(enumClass: object): Array<[string, T]>
     {
         given(enumClass, "enumClass").ensureHasValue().ensureIsObject();
         
-        return this.getEnumTuples(enumClass) as any;
+        return this._getEnumTuples(enumClass) as Array<[string, T]>;
     }
     
-    private static getEnumTuples(enumType: object): ReadonlyArray<[string, string | number]>
+    public static impossible(_value: never, message?: string): never
+    {
+        throw new ApplicationException(message ?? `Invalid value: ${_value}`);
+    }
+    
+    private static _getEnumTuples(enumType: object): Array<[string, string | number]>
     {
         const keys = Object.keys(enumType);
         if (keys.length === 0)
             return [];
 
-        if (this.isNumber(keys[0]))
-            return keys.filter(t => this.isNumber(t)).map(t => [(<any>enumType)[t], +t]) as any;
+        if (this._isNumber(keys[0]))
+            return keys.filter(t => this._isNumber(t)).map(t => [(<any>enumType)[t] as string, +t]);
 
-        return keys.map(t => [t, (<any>enumType)[t]]) as any;
+        return keys.map(t => [t, (<any>enumType)[t] as string]);
     }
     
-    private static isNumber(value: any): boolean
+    private static _isNumber(value: unknown): boolean
     {
         if (value == null)
             return false;
 
-        value = value.toString().trim();
-        if (value.length === 0)
+        const val = (<object>value).toString().trim();
+        if (val.length === 0)
             return false;
-        let parsed = +value.toString().trim();
+        const parsed = +(<object>value).toString().trim();
         return !isNaN(parsed) && isFinite(parsed);
     }
 }
+
+// enum Foo
+// {
+//     bar = "BAR",
+//     baz = "BAZ",
+//     zeb = "ZEB"
+// }
+
+// export function doStuff(val: Foo): void
+// {
+//     switch (val)
+//     {
+//         case Foo.bar:
+//             console.log(val);
+//             break;
+//         case Foo.baz:
+//             console.log(val, "baz");
+//             break;
+//         default:
+//             TypeHelper.impossible(val, "ff");
+//     }
+// }

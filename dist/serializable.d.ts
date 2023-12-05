@@ -3,7 +3,7 @@ export declare abstract class Serializable<TData extends object = {}> {
     serialize(): TData;
 }
 export declare class Deserializer {
-    private static _typeCache;
+    private static readonly _typeCache;
     /**
      * @static
      */
@@ -11,7 +11,7 @@ export declare class Deserializer {
     static hasType(typeName: string): boolean;
     static registerType(type: object | Function): void;
     static deserialize<T>(serialized: object): T;
-    private static getType;
+    private static _getType;
 }
 export declare function serialize(key: string): Function;
 export declare function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;

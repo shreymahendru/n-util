@@ -6,13 +6,13 @@ const uuid_1 = require("./uuid");
 class Observer {
     constructor(event) {
         this._subMap = new Map();
-        n_defensive_1.given(event, "event").ensureHasValue().ensureIsString();
+        (0, n_defensive_1.given)(event, "event").ensureHasValue().ensureIsString();
         this._event = event.trim();
     }
     get event() { return this._event; }
     get hasSubscriptions() { return this._subMap.size > 0; }
     subscribe(callback) {
-        n_defensive_1.given(callback, "callback").ensureHasValue().ensureIsFunction();
+        (0, n_defensive_1.given)(callback, "callback").ensureHasValue().ensureIsFunction();
         const key = uuid_1.Uuid.create();
         const subscription = {
             event: this._event,
@@ -29,13 +29,16 @@ class Observer {
         // no defensive check cuz eventData can be void
         if (!this.hasSubscriptions)
             return;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (process && process.nextTick) {
             for (const entry of this._subMap.values()) {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 process.nextTick(entry.callback, eventData);
             }
         }
         else {
             for (const entry of this._subMap.values()) {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 setTimeout(entry.callback, 0, eventData);
             }
         }
@@ -48,6 +51,7 @@ class Observer {
         const subInfo = this._subMap.get(key);
         if (subInfo == null)
             return;
+        // @ts-expect-error: deliberately setting readonly property
         subInfo.subscription.isUnsubscribed = true;
         subInfo.subscription.unsubscribe = () => { };
         this._subMap.delete(key);

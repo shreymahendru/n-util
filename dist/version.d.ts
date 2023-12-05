@@ -10,5 +10,5 @@ export declare class Version {
     equals(version: Version): boolean;
     compareTo(version: Version): number;
     toString(): string;
-    private compare;
+    private _compare;
 }

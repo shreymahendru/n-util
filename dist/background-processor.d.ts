@@ -11,5 +11,5 @@ export declare class BackgroundProcessor implements Disposable {
     constructor(defaultErrorHandler: (e: Error) => Promise<void>, breakIntervalMilliseconds?: number, breakOnlyWhenNoWork?: boolean);
     processAction(action: () => Promise<void>, errorHandler?: (e: Error) => Promise<void>): void;
     dispose(killQueue?: boolean): Promise<void>;
-    private initiateBackgroundProcessing;
+    private _initiateBackgroundProcessing;
 }
