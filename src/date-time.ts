@@ -411,11 +411,11 @@ export class DateTime extends Serializable
      * 
      * @returns the difference in calendar days
      */
-    public daysDiff(value: DateTime): Duration
+    public daysDiff(value: DateTime): number
     {
         given(value, "value").ensureHasValue().ensureIsType(DateTime);
 
-        return Duration.fromDays(Math.abs(Number.parseInt(this._dateTime.diff(value._dateTime, ["days"]).days.toString())));
+        return Math.abs(Number.parseInt(this._dateTime.diff(value._dateTime, ["days"]).days.toString()));
     }
 
     public isSameDay(value: DateTime): boolean

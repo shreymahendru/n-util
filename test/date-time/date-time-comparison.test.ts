@@ -38,8 +38,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(dateTime.timeDiff(dateTime).toSeconds(), 0);
             Assert.strictEqual(dateTime.timeDiff(dateTime).toSeconds(), 0);
 
-            Assert.strictEqual(dateTime.daysDiff(dateTime).toSeconds(), 0);
-            Assert.strictEqual(dateTime.daysDiff(dateTime).toSeconds(), 0);
+            Assert.strictEqual(dateTime.daysDiff(dateTime), 0);
+            Assert.strictEqual(dateTime.daysDiff(dateTime), 0);
 
             Assert.ok(dateTime.isSameDay(dateTime));
             Assert.ok(dateTime.isSameDay(dateTime));
@@ -77,8 +77,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(dateTime1.timeDiff(dateTime2).toSeconds(), 0);
             Assert.strictEqual(dateTime2.timeDiff(dateTime1).toSeconds(), 0);
 
-            Assert.strictEqual(dateTime1.daysDiff(dateTime2).toSeconds(), 0);
-            Assert.strictEqual(dateTime2.daysDiff(dateTime1).toSeconds(), 0);
+            Assert.strictEqual(dateTime1.daysDiff(dateTime2), 0);
+            Assert.strictEqual(dateTime2.daysDiff(dateTime1), 0);
 
             Assert.ok(dateTime1.isSameDay(dateTime2));
             Assert.ok(dateTime2.isSameDay(dateTime1));
@@ -116,8 +116,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromMinutes(1).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromMinutes(1).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toSeconds(), 0);
-            Assert.strictEqual(max.daysDiff(min).toSeconds(), 0);
+            Assert.strictEqual(min.daysDiff(max), 0);
+            Assert.strictEqual(max.daysDiff(min), 0);
 
             Assert.ok(min.isSameDay(max));
             Assert.ok(max.isSameDay(min));
@@ -155,8 +155,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromHours(1).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromHours(1).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toSeconds(), 0);
-            Assert.strictEqual(max.daysDiff(min).toSeconds(), 0);
+            Assert.strictEqual(min.daysDiff(max), 0);
+            Assert.strictEqual(max.daysDiff(min), 0);
 
             Assert.ok(min.isSameDay(max));
             Assert.ok(max.isSameDay(min));
@@ -194,8 +194,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromDays(1).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromDays(1).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toDays(), 1);
-            Assert.strictEqual(max.daysDiff(min).toDays(), 1);
+            Assert.strictEqual(min.daysDiff(max), 1);
+            Assert.strictEqual(max.daysDiff(min), 1);
 
             Assert.ok(!min.isSameDay(max));
             Assert.ok(!max.isSameDay(min));
@@ -233,8 +233,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromDays(31).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromDays(31).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toDays(), 31);
-            Assert.strictEqual(max.daysDiff(min).toDays(), 31);
+            Assert.strictEqual(min.daysDiff(max), 31);
+            Assert.strictEqual(max.daysDiff(min), 31);
 
             Assert.ok(!min.isSameDay(max));
             Assert.ok(!max.isSameDay(min));
@@ -272,8 +272,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromDays(365).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromDays(365).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toDays(), 365);
-            Assert.strictEqual(max.daysDiff(min).toDays(), 365);
+            Assert.strictEqual(min.daysDiff(max), 365);
+            Assert.strictEqual(max.daysDiff(min), 365);
 
             Assert.ok(!min.isSameDay(max));
             Assert.ok(!max.isSameDay(min));
@@ -311,8 +311,8 @@ suite("DateTime Comparison", () =>
             Assert.strictEqual(min.timeDiff(max).toSeconds(), Duration.fromDays(366).toSeconds());
             Assert.strictEqual(max.timeDiff(min).toSeconds(), Duration.fromDays(366).toSeconds());
 
-            Assert.strictEqual(min.daysDiff(max).toDays(), 366);
-            Assert.strictEqual(max.daysDiff(min).toDays(), 366);
+            Assert.strictEqual(min.daysDiff(max), 366);
+            Assert.strictEqual(max.daysDiff(min), 366);
 
             Assert.ok(!min.isSameDay(max));
             Assert.ok(!max.isSameDay(min));
