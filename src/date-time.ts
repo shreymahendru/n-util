@@ -6,7 +6,7 @@ import { Schema } from "./utility-types";
 import { TypeHelper } from "./type-helper";
 
 
-export class DateTime extends Serializable
+export class DateTime extends Serializable<DateTimeSchema>
 {
     private static readonly _format = "yyyy-MM-dd HH:mm";
 
@@ -247,6 +247,8 @@ export class DateTime extends Serializable
 
     private static _validateZone(zone: string): void
     {
+        zone = zone.trim();
+
         if (zone.toLowerCase() === "utc")
             return;
 
@@ -263,41 +265,30 @@ export class DateTime extends Serializable
                 zone.toLowerCase().startsWith("utc+"),
                 t =>
                 {
-                    // range is +00:00 to +14:00
-                    const offset = t.split("+").takeLast();
+                    // range is +00:00 to +14:00 (https://en.wikipedia.org/wiki/List_of_UTC_offsets)
+                    let offset = t.split("+").takeLast().trim();
 
-                    if (offset.contains(":"))
-                    {
-                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
-                        return (hour >= 0 && hour < 14 && minute >= 0 && minute < 60)
-                            || (hour === 14 && minute === 0);
-                    }
-                    else
-                    {
-                        const hour = TypeHelper.parseNumber(offset)!;
-                        return hour >= 0 && hour <= 14;
-                    }
+                    if (!offset.contains(":"))
+                        offset = `${offset}:00`;
+
+                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                    return (hour >= 0 && hour < 14 && minute >= 0 && minute < 60)
+                        || (hour === 14 && minute === 0);
                 },
                 "Invalid UTC offset for zone")
             .ensureWhen(
                 zone.toLowerCase().startsWith("utc-"),
                 t =>
                 {
-                    // range is -00:00 to -12:00
-                    const offset = t.split("-").takeLast();
+                    // range is -00:00 to -12:00 (https://en.wikipedia.org/wiki/List_of_UTC_offsets)
+                    let offset = t.split("-").takeLast();
 
-                    if (offset.contains(":"))
-                    {
-                        const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
-                        return hour >= 0 && hour < 12 && minute >= 0 && minute < 60
-                            || (hour === 12 && minute === 0);
-                    }
+                    if (!offset.contains(":"))
+                        offset = `${offset}:00`;
 
-                    else
-                    {
-                        const hour = TypeHelper.parseNumber(offset)!;
-                        return hour >= 0 && hour <= 12;
-                    }
+                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                    return hour >= 0 && hour < 12 && minute >= 0 && minute < 60
+                        || (hour === 12 && minute === 0);
                 },
                 "Invalid UTC offset for zone");
     }
@@ -308,9 +299,15 @@ export class DateTime extends Serializable
         return this._dateTime.valueOf();
     }
 
-    public equals(value: DateTime): boolean
+    public equals(value?: DateTime | null): boolean
     {
-        given(value, "value").ensureHasValue().ensureIsType(DateTime);
+        given(value, "value").ensureIsType(DateTime);
+
+        if (value == null)
+            return false;
+
+        if (value === this)
+            return true;
 
         return value.value === this._value && value.zone === this._zone;
     }
@@ -322,8 +319,6 @@ export class DateTime extends Serializable
 
     public toStringDateTime(): string
     {
-        // return this._dateTime.toFormat(DateTime._format);
-
         return this._value;
     }
 
@@ -432,7 +427,7 @@ export class DateTime extends Serializable
         given(time, "time").ensureHasValue().ensureIsObject();
 
         return new DateTime({
-            value: this._dateTime.plus({ seconds: time.toSeconds() }).toFormat(DateTime._format),
+            value: this._dateTime.plus({ milliseconds: time.toMilliSeconds() }).toFormat(DateTime._format),
             zone: this._zone
         });
     }
@@ -442,7 +437,7 @@ export class DateTime extends Serializable
         given(time, "time").ensureHasValue().ensureIsObject();
 
         return new DateTime({
-            value: this._dateTime.minus({ seconds: time.toSeconds() }).toFormat(DateTime._format),
+            value: this._dateTime.minus({ milliseconds: time.toMilliSeconds() }).toFormat(DateTime._format),
             zone: this._zone
         });
     }
@@ -545,8 +540,6 @@ export class DateTime extends Serializable
 
         return this.isBetween(startDateTime, endDateTime);
     }
-
-
 }
 
 
