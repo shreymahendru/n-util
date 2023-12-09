@@ -20,6 +20,9 @@ export class DateTime extends Serializable<DateTimeSchema>
     private readonly _timeValue: string;
 
 
+    /**
+     * @returns system's local timezone
+     */
     public static get currentZone(): string { return LuxonDateTime.local().zoneName; }
 
 
@@ -424,7 +427,7 @@ export class DateTime extends Serializable<DateTimeSchema>
 
     public addTime(time: Duration): DateTime
     {
-        given(time, "time").ensureHasValue().ensureIsObject();
+        given(time, "time").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Duration);
 
         return new DateTime({
             value: this._dateTime.plus({ milliseconds: time.toMilliSeconds() }).toFormat(DateTime._format),
@@ -434,7 +437,7 @@ export class DateTime extends Serializable<DateTimeSchema>
 
     public subtractTime(time: Duration): DateTime
     {
-        given(time, "time").ensureHasValue().ensureIsObject();
+        given(time, "time").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Duration);
 
         return new DateTime({
             value: this._dateTime.minus({ milliseconds: time.toMilliSeconds() }).toFormat(DateTime._format),
@@ -520,7 +523,7 @@ export class DateTime extends Serializable<DateTimeSchema>
             .ensure(t => t.matchesFormat("####"))
             .ensure(t => Number.parseInt(t) >= 0 && Number.parseInt(t) <= 2359);
 
-        given(endTimeCode, "end").ensureHasValue().ensureIsString()
+        given(endTimeCode, "endTimeCode").ensureHasValue().ensureIsString()
             .ensure(t => t.matchesFormat("####"))
             .ensure(t => Number.parseInt(t) >= 0 && Number.parseInt(t) <= 2359)
             .ensure(t => Number.parseInt(t) >= Number.parseInt(startTimeCode),

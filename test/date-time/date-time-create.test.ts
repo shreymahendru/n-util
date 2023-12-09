@@ -337,7 +337,9 @@ suite("DateTime Create", () =>
 
     suite("Now", () =>
     {
-        test("Should be same as Luxon now in utc",
+        test(`Given DateTime.now() in default zone (utc)
+        when it's compared to Luxon DateTime now in utc
+        then it should be same`,
             () =>
             {
                 // this might fail if at the end of minute and next is at start of minute. but rare condition
@@ -345,7 +347,9 @@ suite("DateTime Create", () =>
             }
         );
 
-        test("Should be same as Luxon now in UTC+5:30",
+        test(`Given DateTime.now() in zone UTC+5:30
+        when it's compared to Luxon DateTime now in zone UTC+5:30
+        then it should be same`,
             () =>
             {
                 // this might fail if at the end of minute and next is at start of minute. but rare condition
@@ -354,7 +358,9 @@ suite("DateTime Create", () =>
             }
         );
 
-        test("Timestamp should be same in different zones",
+        test(`Given DateTime.now() in different zones utc and UTC+5:30
+        when the timestamps are compared
+        then it should be same`,
             () =>
             {
                 // this might fail if at the end of minute and next is at start of minute. but rare condition
@@ -391,7 +397,7 @@ suite("DateTime Create", () =>
 
         test(`Given zone as America/Los_Angeles
         when DateTime for now is created 
-            then zone property should be America/Los_Angeles`,
+        then zone property should be America/Los_Angeles`,
             () =>
             {
                 Assert.strictEqual(DateTime.now("America/Los_Angeles").zone, "America/Los_Angeles");
@@ -815,7 +821,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01), time value(10:00) and zone
         when DateTime is created from that values
-            then it should have the value "2024-01-01 10:00"`,
+        then it should have the value "2024-01-01 10:00"`,
             () =>
             {
                 Assert.strictEqual(DateTime.createFromValues(validDateValue, validTimeValue, "utc").value, "2024-01-01 10:00");
@@ -824,7 +830,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value as an empty string
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("", validTimeValue);
@@ -833,7 +839,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in incorrect format "2024/01/01"
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024/01/01", validTimeValue);
@@ -842,7 +848,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in invalid format 24-1-1
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("24-1-1", validTimeValue);
@@ -851,7 +857,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in invalid format 2024-1-1
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024-1-1", validTimeValue);
@@ -860,7 +866,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in invalid format 2024-01-1
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024-01-1", validTimeValue);
@@ -869,7 +875,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in invalid format 2024-1-01
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024-1-01", validTimeValue);
@@ -878,7 +884,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value in invalid format 24-01-01
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("24-01-01", validTimeValue);
@@ -887,7 +893,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value as empty string
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "");
@@ -896,7 +902,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value in invalid format 10.00
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "10.00");
@@ -905,7 +911,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value in invalid format 1000
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "1000");
@@ -914,7 +920,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value in invalid format 00:1
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "00:1");
@@ -923,7 +929,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value in invalid format 100:00
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "100:00");
@@ -932,7 +938,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value with invalid minute 10:60
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "10:60");
@@ -941,7 +947,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid date value(2024-01-01) and zone, and time value with invalid hour 24:00
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid(validDateValue, "24:00");
@@ -950,7 +956,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value with invalid day 0 2024-01-00
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024-01-00", validTimeValue);
@@ -959,7 +965,7 @@ suite("DateTime Create", () =>
 
         test(`Given a valid time value(10:00) and zone, and date value with invalid day 32 2024-01-32
         when DateTime is created from that values
-            then  it should throw a validation error`,
+        then  it should throw a validation error`,
             () =>
             {
                 checkIsInvalid("2024-01-32", validTimeValue);
