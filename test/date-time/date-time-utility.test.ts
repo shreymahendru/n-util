@@ -1,6 +1,7 @@
 import * as Assert from "assert";
 import { DateTime } from "../../src/date-time";
 import { IANAZone, DateTime as LuxonDateTime } from "luxon";
+import { ArgumentException } from "@nivinjoseph/n-exception";
 
 
 suite("DateTime Utility", () =>
@@ -31,14 +32,13 @@ suite("DateTime Utility", () =>
         const value = "2024-01-01 10:00";
         const zone = "utc";
         const dateTime = new DateTime({ value: value, zone: zone });
-        const luxonDateTime = LuxonDateTime.fromFormat(value, "yyyy-MM-dd HH:mm", { zone });
 
         test(`Given a DateTime with value "2024-01-01 10:00" and zone utc
         when it's compared to luxon dateTime representing the same 
         then it's valueOf() should be same as Luxon DateTime`,
             () =>
             {
-                Assert.strictEqual(dateTime.valueOf(), luxonDateTime.valueOf());
+                Assert.strictEqual(dateTime.valueOf(), 1704103200000);
             }
         );
 
@@ -48,15 +48,6 @@ suite("DateTime Utility", () =>
             () =>
             {
                 Assert.ok(LuxonDateTime.fromMillis(dateTime.valueOf()).isValid);
-            }
-        );
-
-        test(`Given a DateTime with value "2024-01-01 10:00" and zone utc
-        when it's valueOf() is evaluated
-        then it should be 1000 * timestamp`,
-            () =>
-            {
-                Assert.strictEqual(dateTime.valueOf(), dateTime.timestamp * 1000, "valueOf should be 1000 times timestamp");
             }
         );
 
@@ -140,12 +131,23 @@ suite("DateTime Utility", () =>
             }
         );
 
-        test(`Given a valid value (${value}) and zone (utc)
+        const value1 = "2024-02-29 18:30";
+        test(`Given a valid value (${value1}) and zone (utc)
         when a DateTime is created from that value and zone
-        then toStringDateTime() should return the value in a valid DateTime format`,
+        then toStringDateTime() on that dateTime should return the passed in value`,
             () =>
             {
-                Assert.ok(DateTime.validateDateTimeFormat(new DateTime({ value: value, zone: "utc" }).toStringDateTime()));
+                Assert.strictEqual(new DateTime({ value: value1, zone: "utc" }).toStringDateTime(), value1);
+            }
+        );
+
+        const value2 = "1986-08-17 15:57";
+        test(`Given a valid value (${value2}) and zone (utc)
+        when a DateTime is created from that value and zone
+        then toStringDateTime() on that dateTime should return the passed in value`,
+            () =>
+            {
+                Assert.strictEqual(new DateTime({ value: value2, zone: "utc" }).toStringDateTime(), value2);
             }
         );
 
@@ -198,6 +200,26 @@ suite("DateTime Utility", () =>
             () =>
             {
                 Assert.strictEqual(new DateTime({ value, zone: "utc" }).toStringISO(), "2024-01-01T10:00:00.000Z");
+            }
+        );
+
+        const value1 = "2024-02-29 18:30";
+        test(`Given a valid value (${value1}) and zone (utc)
+        when a DateTime is created from that value and zone
+        then toStringDateTime() on that dateTime should return the passed in value`,
+            () =>
+            {
+                Assert.strictEqual(new DateTime({ value: value1, zone: "utc" }).toStringISO(), "2024-02-29T18:30:00.000Z");
+            }
+        );
+
+        const value2 = "1986-08-17 15:57";
+        test(`Given a valid value (${value2}) and zone (utc)
+        when a DateTime is created from that value and zone
+        then toStringDateTime() on that dateTime should return the passed in value`,
+            () =>
+            {
+                Assert.strictEqual(new DateTime({ value: value2, zone: "utc" }).toStringISO(), "1986-08-17T15:57:00.000Z");
             }
         );
 
@@ -351,8 +373,26 @@ suite("DateTime Utility", () =>
             {
                 Assert.strictEqual(dateTime.convertToZone("utc").value, value);
                 Assert.strictEqual(dateTime.convertToZone("UTC+5:30").value, "2024-01-01 15:30");
-                const isInDst = IANAZone.create("America/Los_Angeles").formatOffset(Date.now(), "narrow") === "-7";
-                Assert.strictEqual(dateTime.convertToZone("America/Los_Angeles").value, isInDst ? "2024-01-01 03:00" : "2024-01-01 02:00");
+            }
+        );
+
+        test(`Given a DateTime object with value ("2024-01-01 10:00") outside DST and zone (utc)
+        when a DateTime is converted to America/Los_Angeles (PST - Pacific Standard Time)
+        then DateTime returned should have value changed with -8 hours`,
+            () =>
+            {
+                const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
+                Assert.strictEqual(dateTime.convertToZone("America/Los_Angeles").value, "2024-01-01 02:00");
+            }
+        );
+
+        test(`Given a DateTime object with value ("2024-06-01 10:00") within DST and zone (utc)
+        when a DateTime is converted to America/Los_Angeles (PDT — Pacific Daylight Time)
+        then DateTime returned should have value changed with -7 hours`,
+            () =>
+            {
+                const dateTime = new DateTime({ value: "2024-06-01 10:00", zone: "utc" });
+                Assert.strictEqual(dateTime.convertToZone("America/Los_Angeles").value, "2024-06-01 03:00");
             }
         );
 
@@ -367,18 +407,7 @@ suite("DateTime Utility", () =>
                 then it should throw a validation error`,
                     () =>
                     {
-                        try
-                        {
-                            dateTime.convertToZone(zone);
-                        }
-                        catch (e: any)
-                        {
-                            // console.log(e.reason);
-                            Assert.ok(e.reason);
-                            return;
-                        }
-
-                        Assert.fail(`Zone ${zone} is valid`);
+                        Assert.throws(() => dateTime.convertToZone(zone), ArgumentException);
                     }
                 );
             }

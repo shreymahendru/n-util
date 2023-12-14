@@ -1,6 +1,7 @@
 import * as Assert from "assert";
 import { DateTime } from "../../src/date-time";
 import { DateTime as LuxonDateTime } from "luxon";
+import { ArgumentException } from "@nivinjoseph/n-exception";
 
 
 suite("DateTime Create", () =>
@@ -11,19 +12,7 @@ suite("DateTime Create", () =>
 
         function checkIsInvalid(value: string, zone = "utc"): void
         {
-            let dateTime = "";
-            try
-            {
-                dateTime = new DateTime({ value, zone }).toString();
-            }
-            catch (e: any)
-            {
-                // console.log(e.reason);
-                Assert.ok(e.reason);
-                return;
-            }
-
-            Assert.fail(`DateTime ${dateTime} is valid`);
+            Assert.throws(() => new DateTime({ value, zone }), ArgumentException);
         }
 
         test(`Given a valid value and zone
@@ -31,7 +20,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "utc" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "utc" }));
             }
         );
 
@@ -121,7 +110,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: "2024-02-29 10:00", zone: "utc" }));
+                Assert.doesNotThrow(() => new DateTime({ value: "2024-02-29 10:00", zone: "utc" }));
             }
         );
 
@@ -220,7 +209,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "America/Los_Angeles" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "America/Los_Angeles" }));
             }
         );
 
@@ -238,7 +227,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC" }));
             }
         );
 
@@ -247,7 +236,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC+5:30" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC+5:30" }));
             }
         );
 
@@ -256,7 +245,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC-3" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC-3" }));
             }
         );
 
@@ -265,7 +254,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC+14:00" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC+14:00" }));
             }
         );
 
@@ -274,7 +263,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC-12:00" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC-12:00" }));
             }
         );
 
@@ -283,7 +272,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC+00:01" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC+00:01" }));
             }
         );
 
@@ -292,7 +281,7 @@ suite("DateTime Create", () =>
         then it should return a DateTime object`,
             () =>
             {
-                Assert.ok(new DateTime({ value: validValue, zone: "UTC-00:01" }));
+                Assert.doesNotThrow(() => new DateTime({ value: validValue, zone: "UTC-00:01" }));
             }
         );
 
@@ -338,12 +327,13 @@ suite("DateTime Create", () =>
     suite("Now", () =>
     {
         test(`Given DateTime.now() in default zone (utc)
-        when it's compared to Luxon DateTime now in utc
+        when it's compared to Date now in utc
         then it should be same`,
             () =>
             {
+                const nativeDate = new Date().toISOString().substring(0, 16).replace("T", " ");
                 // this might fail if at the end of minute and next is at start of minute. but rare condition
-                Assert.strictEqual(DateTime.now().value, LuxonDateTime.utc().toFormat("yyyy-MM-dd HH:mm"));
+                Assert.strictEqual(DateTime.now().value, nativeDate);
             }
         );
 
@@ -352,6 +342,7 @@ suite("DateTime Create", () =>
         then it should be same`,
             () =>
             {
+                // using luxon in this test because native date does not support timezones well
                 // this might fail if at the end of minute and next is at start of minute. but rare condition
                 Assert.strictEqual(DateTime.now("UTC+5:30").value,
                     LuxonDateTime.now().setZone("UTC+5:30").toFormat("yyyy-MM-dd HH:mm"));
@@ -403,35 +394,24 @@ suite("DateTime Create", () =>
                 Assert.strictEqual(DateTime.now("America/Los_Angeles").zone, "America/Los_Angeles");
             }
         );
-
-        // zone validation is done in constructor
-    }
-    );
+    });
 
 
 
     suite("From Timestamp", () =>
     {
-        const timeStamp = LuxonDateTime.fromFormat("2024-01-01 10:00", "yyyy-MM-dd HH:mm", { zone: "utc" }).toSeconds();
-        const maxTimestamp = LuxonDateTime.fromFormat("9999-12-31 23:59:59", "yyyy-MM-dd HH:mm:ss", { zone: "utc" }).toSeconds();
-        const minTimestamp = LuxonDateTime.fromFormat("0000-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss", { zone: "utc" }).toSeconds();
+        const timeStamp = 1704103200;// "2024-01-01 10:00" 
+        const maxTimestamp = 253402300799;// "9999-12-31 23:59:59" 
+        const minTimestamp = -62167219200;// "0000-01-01 00:00:00"
 
-        function checkIsInvalid(timestamp: number): void
-        {
-            let dateTime = "";
-            try
+        test(`Given a valid timestamp and zone
+        when DateTime is created from that timestamp
+        then there should not be any issues`,
+            () =>
             {
-                dateTime = DateTime.createFromTimestamp(timestamp, "utc").toString();
+                Assert.doesNotThrow(() => DateTime.createFromTimestamp(timeStamp, "utc"),);
             }
-            catch (e: any)
-            {
-                // console.log(e.reason);
-                Assert.ok(e.reason);
-                return;
-            }
-
-            Assert.fail(`DateTime ${dateTime} is valid`);
-        }
+        );
 
         test(`Given a valid timestamp for "2024-01-01 10:00"
         when DateTime is created from that timestamp
@@ -492,7 +472,7 @@ suite("DateTime Create", () =>
         then it should throw a validation error`,
             () =>
             {
-                checkIsInvalid(maxTimestamp + 1);
+                Assert.throws(() => DateTime.createFromTimestamp(maxTimestamp + 1, "utc"), ArgumentException);
             }
         );
 
@@ -501,7 +481,8 @@ suite("DateTime Create", () =>
         then it should throw a validation error`,
             () =>
             {
-                checkIsInvalid(minTimestamp - 1);
+                Assert.throws(() => DateTime.createFromTimestamp(minTimestamp - 1, "utc"), ArgumentException);
+
             }
         );
 
@@ -531,10 +512,127 @@ suite("DateTime Create", () =>
                 Assert.strictEqual(DateTime.createFromTimestamp(timeStamp, "America/Los_Angeles").zone, "America/Los_Angeles");
             }
         );
+    });
 
-        // zone validation is done in constructor
-    }
-    );
+    suite("From MilliSecondsSinceEpoch", () =>
+    {
+        const milliSeconds = 1704103200000; // "2024-01-01 10:00"
+        const maxMilliSecondsSinceEpoch = 253402300799999; // "9999-12-31 23:59:59.999"
+        const minMilliSecondsSinceEpoch = -62167219200000; // "0000-01-01 00:00:00.000"
+
+        test(`Given a valid milliSeconds and zone
+        when DateTime is created from that milliSeconds
+        then there should not be any issues`,
+            () =>
+            {
+                Assert.doesNotThrow(() => DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "utc"),);
+            }
+        );
+
+        test(`Given a valid milliSeconds for "2024-01-01 10:00"
+        when DateTime is created from that milliSeconds
+        then value should be "2024-01-01 10:00"`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "utc").value, "2024-01-01 10:00");
+            }
+        );
+
+        test(`Given a valid milliSeconds for "2024-01-01 10:00"
+        when DateTime is created from that milliSeconds
+        then valueOf() should return what's passed in`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "utc").valueOf(), milliSeconds);
+            }
+        );
+
+        test(`Given milliSeconds 0 in utc
+        when DateTime is created from that milliSeconds
+        the value should be epoch start`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(0, "utc").value, "1970-01-01 00:00");
+            }
+        );
+
+        test(`Given milliSeconds -1 in utc
+        when DateTime is created from that milliSeconds
+        the value should be epoch start -1 second`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(-1, "utc").value, "1969-12-31 23:59");
+            }
+        );
+
+        test(`Given a valid milliSeconds for "9999-12-31 23:59"
+        when DateTime is created from that milliSeconds
+        then value should be "9999-12-31 23:59"`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(maxMilliSecondsSinceEpoch, "utc").value,
+                    "9999-12-31 23:59");
+            }
+        );
+
+        test(`Given a valid milliSeconds for "0000-01-01 00:00"
+        when DateTime is created from that milliSeconds
+        then value should be "0000-01-01 00:00"`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(minMilliSecondsSinceEpoch, "utc").value,
+                    "0000-01-01 00:00");
+            }
+        );
+
+        test(`Given a milliSeconds for greater than "9999-12-31 23:59:00 999"
+        when DateTime is created from that milliSeconds
+        then it should throw a validation error`,
+            () =>
+            {
+                Assert.throws(() => DateTime.createFromMilliSecondsSinceEpoch(maxMilliSecondsSinceEpoch + 1, "utc"),
+                    ArgumentException);
+            }
+        );
+
+        test(`Given a milliSeconds for less than "0000-01-01 00:00"
+        when DateTime is created from that milliSeconds
+        then it should throw a validation error`,
+            () =>
+            {
+                Assert.throws(() => DateTime.createFromMilliSecondsSinceEpoch(minMilliSecondsSinceEpoch - 1, "utc"),
+                    ArgumentException);
+
+            }
+        );
+
+        test(`Given a valid milliSeconds and zone as utc
+        when DateTime is created from that milliSeconds
+        then zone property should be utc`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "utc").zone, "utc");
+            }
+        );
+
+        test(`Given a valid milliSeconds and zone as UTC+5:30
+        when DateTime is created from that milliSeconds
+        then zone property should be UTC+5:30`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "UTC+5:30").zone, "UTC+5:30");
+            }
+        );
+
+        test(`Given a valid milliSeconds and zone as America/Los_Angeles
+        when DateTime is created from that milliSeconds
+        then zone property should be America/Los_Angeles`,
+            () =>
+            {
+                Assert.strictEqual(DateTime.createFromMilliSecondsSinceEpoch(milliSeconds, "America/Los_Angeles").zone, "America/Los_Angeles");
+            }
+        );
+    });
 
     suite("From Codes", () =>
     {
@@ -543,20 +641,17 @@ suite("DateTime Create", () =>
 
         function checkIsInvalid(dateCode: string, timeCode: string): void
         {
-            let dateTime = "";
-            try
-            {
-                dateTime = DateTime.createFromCodes(dateCode, timeCode, "utc").toString();
-            }
-            catch (e: any)
-            {
-                // console.log(e.reason);
-                Assert.ok(e.reason);
-                return;
-            }
-
-            Assert.fail(`DateTime ${dateTime} is valid`);
+            Assert.throws(() => DateTime.createFromCodes(dateCode, timeCode, "utc"), ArgumentException);
         }
+
+        test(`Given a valid date code(20240101), time code(1000) and zone
+        when DateTime is created from that codes
+        then it should not throw any errors"`,
+            () =>
+            {
+                Assert.doesNotThrow(() => DateTime.createFromCodes(validDateCode, validTimeCode, "utc"));
+            }
+        );
 
         test(`Given a valid date code(20240101), time code(1000) and zone
         when DateTime is created from that codes
@@ -576,7 +671,7 @@ suite("DateTime Create", () =>
             }
         );
 
-        test(`Given a valid time code(1000) and zone, and date code contain special characters 2024-01-01
+        test(`Given a valid time code(1000) and zone, and date code is in invalid format 2024-01-01
         when DateTime is created from that codes
         then  it should throw a validation error`,
             () =>
@@ -627,6 +722,87 @@ suite("DateTime Create", () =>
             () =>
             {
                 checkIsInvalid("240101", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid day 0 20240100
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20240100", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid day 32 20240132
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20240132", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid day feb 29 on non-leap year 20230229
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20230229", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid day feb 30 20240230
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20240230", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code feb 29 on leap year 20240229
+        when DateTime is created from that codes
+        then  it should return the DateTime object`,
+            () =>
+            {
+                Assert.doesNotThrow(() => DateTime.createFromCodes("20240229", validTimeCode, "utc"));
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid day 20240431 (April 31)
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20240431", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid month 0 20240001 
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20240001", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid month 13 20241301 
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("20241301", validTimeCode);
+            }
+        );
+
+        test(`Given a valid time code(1000) and zone, and date code with invalid year >9999 100000101 
+        when DateTime is created from that codes
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("100000101", validTimeCode);
             }
         );
 
@@ -684,87 +860,6 @@ suite("DateTime Create", () =>
             }
         );
 
-        test(`Given a valid time code(1000) and zone, and date code with invalid day 0 20240100
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20240100", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid day 32 20240132
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20240132", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid day feb 29 on non-leap year 20230229
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20230229", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid day feb 30 20240230
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20240230", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code feb 29 on leap year 20240229
-        when DateTime is created from that codes
-        then  it should return the DateTime object`,
-            () =>
-            {
-                Assert.ok(DateTime.createFromCodes("20240229", validTimeCode, "utc"));
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid day 20240431 (April 31)
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20240431", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid month 0 20240001 
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20240001", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid month 13 20241301 
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("20241301", validTimeCode);
-            }
-        );
-
-        test(`Given a valid time code(1000) and zone, and date code with invalid year >9999 100000101 
-        when DateTime is created from that codes
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("100000101", validTimeCode);
-            }
-        );
-
         test(`Given a valid date code(20240101), time code(1000) and zone as utc
         when DateTime is created from that codes
         then zone property should be utc`,
@@ -791,10 +886,7 @@ suite("DateTime Create", () =>
                 Assert.strictEqual(DateTime.createFromCodes(validDateCode, validTimeCode, "America/Los_Angeles").zone, "America/Los_Angeles");
             }
         );
-
-        // zone validation is done in constructor
-    }
-    );
+    });
 
 
     suite("From values", () =>
@@ -804,19 +896,7 @@ suite("DateTime Create", () =>
 
         function checkIsInvalid(dateValue: string, timeValue: string): void
         {
-            let dateTime = "";
-            try
-            {
-                dateTime = DateTime.createFromValues(dateValue, timeValue, "utc").toString();
-            }
-            catch (e: any)
-            {
-                // console.log(e.reason);
-                Assert.ok(e.reason);
-                return;
-            }
-
-            Assert.fail(`DateTime ${dateTime} is valid`);
+            Assert.throws(() => DateTime.createFromValues(dateValue, timeValue, "utc"), ArgumentException);
         }
 
         test(`Given a valid date value(2024-01-01), time value(10:00) and zone
@@ -891,6 +971,78 @@ suite("DateTime Create", () =>
             }
         );
 
+        test(`Given a valid time value(10:00) and zone, and date value with invalid day 0 2024-01-00
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-01-00", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid day 32 2024-01-32
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-01-32", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid day feb 29 on non-leap year 2023-02-29
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2023-02-29", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid day feb 30 2024-02-30
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-02-30", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid day 2024-04-31 (April 31)
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-04-31", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid month 0 2024-00-01 
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-00-01", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid month 13 2024-13-01 
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("2024-13-01", validTimeValue);
+            }
+        );
+
+        test(`Given a valid time value(10:00) and zone, and date value with invalid year >9999 10000-01-01 
+        when DateTime is created from that values
+        then  it should throw a validation error`,
+            () =>
+            {
+                checkIsInvalid("10000-01-01", validTimeValue);
+            }
+        );
+
         test(`Given a valid date value(2024-01-01) and zone, and time value as empty string
         when DateTime is created from that values
         then  it should throw a validation error`,
@@ -954,84 +1106,12 @@ suite("DateTime Create", () =>
             }
         );
 
-        test(`Given a valid time value(10:00) and zone, and date value with invalid day 0 2024-01-00
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-01-00", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid day 32 2024-01-32
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-01-32", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid day feb 29 on non-leap year 2023-02-29
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2023-02-29", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid day feb 30 2024-02-30
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-02-30", validTimeValue);
-            }
-        );
-
         test(`Given a valid time value(10:00) and zone, and date value feb 29 on leap year 2024-02-29
         when DateTime is created from that values
         then  it should return the DateTime object`,
             () =>
             {
-                Assert.ok(DateTime.createFromValues("2024-02-29", validTimeValue, "utc"));
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid day 2024-04-31 (April 31)
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-04-31", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid month 0 2024-00-01 
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-00-01", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid month 13 2024-13-01 
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("2024-13-01", validTimeValue);
-            }
-        );
-
-        test(`Given a valid time value(10:00) and zone, and date value with invalid year >9999 10000-01-01 
-        when DateTime is created from that values
-        then  it should throw a validation error`,
-            () =>
-            {
-                checkIsInvalid("10000-01-01", validTimeValue);
+                Assert.doesNotThrow(() => DateTime.createFromValues("2024-02-29", validTimeValue, "utc"));
             }
         );
 
@@ -1061,8 +1141,6 @@ suite("DateTime Create", () =>
                 Assert.strictEqual(DateTime.createFromValues(validDateValue, validTimeValue, "America/Los_Angeles").zone, "America/Los_Angeles");
             }
         );
-
-        // zone validation is done in constructor
     });
 });
 

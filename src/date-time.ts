@@ -1,5 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { IANAZone, DateTime as LuxonDateTime, Interval as LuxonInterval } from "luxon";
+import { DateTime as LuxonDateTime, Interval as LuxonInterval } from "luxon";
 import { Serializable, serialize } from "./serializable";
 import { Duration } from "./duration";
 import { Schema } from "./utility-types";
@@ -8,6 +8,7 @@ import { TypeHelper } from "./type-helper";
 
 export class DateTime extends Serializable<DateTimeSchema>
 {
+
     private static readonly _format = "yyyy-MM-dd HH:mm";
 
     private readonly _value: string;
@@ -114,6 +115,25 @@ export class DateTime extends Serializable<DateTimeSchema>
         given(zone, "zone").ensureHasValue().ensureIsString();
 
         const dateTimeString = LuxonDateTime.fromSeconds(timestamp).setZone(zone).toFormat(this._format);
+        return new DateTime({
+            value: dateTimeString,
+            zone
+        });
+    }
+
+    /**
+    * Create a DateTime from a number of seconds since the epoch (meaning since 1 January 1970 00:00:00 UTC).
+    *
+    * @param milliseconds -  number of milliseconds since the epoch (meaning since 1 January 1970 00:00:00 UTC)
+    * @param zone - a zone identifier. As a string, that can be any IANA zone supported by the host environment,
+    *  or a fixed-offset name of the form 'UTC+3', or the string 'utc'.
+    */
+    public static createFromMilliSecondsSinceEpoch(milliseconds: number, zone: string): DateTime
+    {
+        given(milliseconds, "milliseconds").ensureHasValue().ensureIsNumber();
+        given(zone, "zone").ensureHasValue().ensureIsString();
+
+        const dateTimeString = LuxonDateTime.fromMillis(milliseconds).setZone(zone).toFormat(this._format);
         return new DateTime({
             value: dateTimeString,
             zone
@@ -261,10 +281,6 @@ export class DateTime extends Serializable<DateTimeSchema>
                 _ => false,
                 "should not use local zone")
             .ensureWhen(
-                IANAZone.isValidSpecifier(zone),
-                t => IANAZone.isValidZone(t),
-                "Invalid IANA zone")
-            .ensureWhen(
                 zone.toLowerCase().startsWith("utc+"),
                 t =>
                 {
@@ -274,7 +290,11 @@ export class DateTime extends Serializable<DateTimeSchema>
                     if (!offset.contains(":"))
                         offset = `${offset}:00`;
 
-                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t));
+
+                    if (hour == null || minute == null)
+                        return false;
+
                     return (hour >= 0 && hour < 14 && minute >= 0 && minute < 60)
                         || (hour === 14 && minute === 0);
                 },
@@ -289,7 +309,11 @@ export class DateTime extends Serializable<DateTimeSchema>
                     if (!offset.contains(":"))
                         offset = `${offset}:00`;
 
-                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t)!);
+                    const [hour, minute] = offset.split(":").map(t => TypeHelper.parseNumber(t));
+
+                    if (hour == null || minute == null)
+                        return false;
+
                     return hour >= 0 && hour < 12 && minute >= 0 && minute < 60
                         || (hour === 12 && minute === 0);
                 },
@@ -425,6 +449,10 @@ export class DateTime extends Serializable<DateTimeSchema>
         return Math.abs(daysDiff) < 1;
     }
 
+    /**
+    * Adds duration in milliseconds and increases the timestamp by the right number of milliseconds. 
+    * this accounts for shift in DST
+    */
     public addTime(time: Duration): DateTime
     {
         given(time, "time").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Duration);
@@ -435,6 +463,10 @@ export class DateTime extends Serializable<DateTimeSchema>
         });
     }
 
+    /**
+     * Subtracts duration in milliseconds and decreases the timestamp by the right number of milliseconds. 
+     * this accounts for shift in DST
+     */
     public subtractTime(time: Duration): DateTime
     {
         given(time, "time").ensureHasValue().ensureIsObject().ensureIsInstanceOf(Duration);
@@ -445,6 +477,10 @@ export class DateTime extends Serializable<DateTimeSchema>
         });
     }
 
+    /**
+     * Adds number of days in calendar days, this doesn't change time based on DST
+     * @param days number of calendar days to add
+     */
     public addDays(days: number): DateTime
     {
         given(days, "days").ensureHasValue().ensureIsNumber()
@@ -456,6 +492,10 @@ export class DateTime extends Serializable<DateTimeSchema>
         });
     }
 
+    /**
+    * Subtracts number of days in calendar days, this doesn't change time based on DST
+    * @param days number of calendar days to subtract
+    */
     public subtractDays(days: number): DateTime
     {
         given(days, "days").ensureHasValue().ensureIsNumber()

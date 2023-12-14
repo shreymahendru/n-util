@@ -1,69 +1,10 @@
 import * as Assert from "assert";
 import { DateTime } from "../../src/date-time";
-import { DateTime as LuxonDateTime } from "luxon";
 import { Duration } from "../../src";
 
 
 suite("DateTime Properties", () =>
 {
-    suite("Value", () =>
-    {
-        const validDateTime = "2024-01-01 10:00";
-
-        test(`Given a valid value (${validDateTime}) 
-        when a DateTime is created from that value
-        then it should have value set to ${validDateTime}`,
-            () =>
-            {
-                Assert.strictEqual(new DateTime({ value: validDateTime, zone: "utc" }).value, validDateTime);
-            }
-        );
-
-        test(`Given a valid value (${validDateTime}) 
-        when a DateTime is created from that value
-        then the value property should be in valid date time format`,
-            () =>
-            {
-                const dateTime = new DateTime({ value: validDateTime, zone: "utc" });
-                Assert.ok(DateTime.validateDateTimeFormat(dateTime.value));
-            }
-        );
-    });
-
-
-    suite("Zone", () =>
-    {
-        const value = "2024-01-01 10:00";
-
-        test(`Given a valid value (${value}) and zone (utc)
-        when a DateTime is created from that value
-        then it should have zone set to utc`,
-            () =>
-            {
-                Assert.strictEqual(new DateTime({ value: value, zone: "utc" }).zone, "utc");
-            }
-        );
-
-        test(`Given a valid value (${value}) and zone (UTC+5:30)
-        when a DateTime is created from that value
-        then it should have zone set to UTC+5:30`,
-            () =>
-            {
-                Assert.strictEqual(new DateTime({ value: value, zone: "UTC+5:30" }).zone, "UTC+5:30");
-            }
-        );
-
-        test(`Given a valid value (${value}) and zone (America/Los_Angeles)
-        when a DateTime is created from that value
-        then it should have zone set to America/Los_Angeles`,
-            () =>
-            {
-                Assert.strictEqual(new DateTime({ value: value, zone: "America/Los_Angeles" }).zone, "America/Los_Angeles");
-            }
-        );
-    });
-
-
     suite("Timestamp", () =>
     {
         test(`Given a luxon date time
@@ -71,8 +12,7 @@ suite("DateTime Properties", () =>
         then both should have same timeStamp`,
             () =>
             {
-                const timeStamp = LuxonDateTime.fromFormat("2024-01-01 10:00", "yyyy-MM-dd HH:mm", { zone: "utc" }).toSeconds();
-                Assert.strictEqual(new DateTime({ value: "2024-01-01 10:00", zone: "utc" }).timestamp, timeStamp);
+                Assert.strictEqual(new DateTime({ value: "2024-01-01 10:00", zone: "utc" }).timestamp, 1704103200);
             });
 
         test(`Given a value epoch start ("1970-01-01 00:00") in utc
@@ -148,7 +88,7 @@ suite("DateTime Properties", () =>
         then the date value property should be in valid date format`,
             () =>
             {
-                Assert.ok(DateTime.validateDateFormat(dateTime.dateValue));
+                Assert.ok(dateTime.dateValue.matchesFormat("####-##-##"));
             }
         );
     });
@@ -173,7 +113,7 @@ suite("DateTime Properties", () =>
         then the time value property should be in valid time format`,
             () =>
             {
-                Assert.ok(DateTime.validateTimeFormat(dateTime.timeValue));
+                Assert.ok(dateTime.timeValue.matchesFormat("##:##"));
             }
         );
     });
