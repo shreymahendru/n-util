@@ -2,6 +2,7 @@ import * as Assert from "assert";
 import { DateTime } from "../../src/date-time";
 import { Duration } from "../../src";
 import { given } from "@nivinjoseph/n-defensive";
+import { ArgumentException } from "@nivinjoseph/n-exception";
 
 
 suite("DateTime Math", () =>
@@ -10,6 +11,8 @@ suite("DateTime Math", () =>
     {
         const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
         const dateTimeNonLeapYear = new DateTime({ value: "2025-01-01 10:00", zone: "utc" });
+        const dateTimeStartDateDst = new DateTime({ value: "2024-03-10 00:00", zone: "America/Los_Angeles" });
+        const dateTimeEndDateDst = new DateTime({ value: "2024-11-03 00:00", zone: "America/Los_Angeles" });
 
         function checkIsCorrect(dateTime: DateTime, duration: Duration, time: string, expectedValue: string): void
         {
@@ -48,6 +51,12 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromMinutes(0), "0 minutes", dateTime.value);
             checkIsCorrect(dateTime, Duration.fromMinutes(1), "1 minute", "2024-01-01 10:01");
             checkIsCorrect(dateTime, Duration.fromMinutes(60), "60 minutes", "2024-01-01 11:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromMinutes(60), "60 minute", "2024-03-10 01:00");
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromMinutes(120), "120 minute", "2024-03-10 03:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(60), "60 minute", "2024-11-03 01:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(120), "120 minute", "2024-11-03 01:00");
         });
 
         suite("Add hours", () =>
@@ -56,6 +65,12 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromHours(1), "1 hour", "2024-01-01 11:00");
             checkIsCorrect(dateTime, Duration.fromHours(24), "24 hours", "2024-01-02 10:00");
             checkIsCorrect(dateTime, Duration.fromHours(48), "48 hours", "2024-01-03 10:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromHours(1), "1 hour", "2024-03-10 01:00");
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromHours(2), "2 hours", "2024-03-10 03:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(1), "1 hour", "2024-11-03 01:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(2), "2 hours", "2024-11-03 01:00");
         });
 
         suite("Add days", () =>
@@ -65,6 +80,10 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromDays(31), "31 days", "2024-02-01 10:00");
             checkIsCorrect(dateTime, Duration.fromDays(366), "366 days", "2025-01-01 10:00");
             checkIsCorrect(dateTimeNonLeapYear, Duration.fromDays(365), "365 days", "2026-01-01 10:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromDays(1), "1 day", "2024-03-11 01:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromDays(1), "1 day", "2024-11-03 23:00");
         });
 
         suite("Add weeks", () =>
@@ -73,6 +92,10 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromWeeks(1), "1 week", "2024-01-08 10:00");
             checkIsCorrect(dateTime, Duration.fromWeeks(366 / 7), `366 / 7 weeks`, "2025-01-01 10:00");
             checkIsCorrect(dateTimeNonLeapYear, Duration.fromWeeks(365 / 7), `365 / 7 weeks`, "2026-01-01 10:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromWeeks(1), "1 week", "2024-03-17 01:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromWeeks(1), "1 week", "2024-11-09 23:00");
         });
     });
 
@@ -81,6 +104,8 @@ suite("DateTime Math", () =>
     {
         const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
         const dateTimeLeapYear = new DateTime({ value: "2025-01-01 10:00", zone: "utc" });
+        const dateTimeStartDateDst = new DateTime({ value: "2024-03-10 04:00", zone: "America/Los_Angeles" });
+        const dateTimeEndDateDst = new DateTime({ value: "2024-11-03 04:00", zone: "America/Los_Angeles" });
 
         function checkIsCorrect(dateTime: DateTime, duration: Duration, time: string, expectedValue: string): void
         {
@@ -122,6 +147,14 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromMinutes(1), "1 minute", "2024-01-01 09:59");
             checkIsCorrect(dateTime, Duration.fromMinutes(60), "60 minutes", "2024-01-01 09:00");
             checkIsCorrect(dateTime, Duration.fromMinutes(61), "61 minutes", "2024-01-01 08:59");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromMinutes(60), "60 minute", "2024-03-10 03:00");
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromMinutes(120), "120 minute", "2024-03-10 01:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(60), "60 minute", "2024-11-03 03:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(120), "120 minute", "2024-11-03 02:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(180), "180 minute", "2024-11-03 01:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromMinutes(240), "240 minute", "2024-11-03 01:00");
         });
 
         suite("Subtract hours", () =>
@@ -130,6 +163,16 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromHours(1), "1 hour", "2024-01-01 09:00");
             checkIsCorrect(dateTime, Duration.fromHours(24), "24 hours", "2023-12-31 10:00");
             checkIsCorrect(dateTime, Duration.fromHours(25), "25 hours", "2023-12-31 09:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromHours(1), "1 hour", "2024-03-10 03:00");
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromHours(2), "2 hours", "2024-03-10 01:00");
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromHours(24), "24 hours", "2024-03-09 03:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(1), "1 hour", "2024-11-03 03:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(2), "2 hours", "2024-11-03 02:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(3), "3 hours", "2024-11-03 01:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(4), "4 hours", "2024-11-03 01:00");
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromHours(24), "24 hours", "2024-11-02 05:00");
         });
 
         suite("Subtract days", () =>
@@ -139,6 +182,10 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromDays(31), "31 days", "2023-12-01 10:00");
             checkIsCorrect(dateTime, Duration.fromDays(365), "365 days", "2023-01-01 10:00");
             checkIsCorrect(dateTimeLeapYear, Duration.fromDays(366), "366 days", "2024-01-01 10:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromDays(1), "1 day", "2024-03-09 03:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromDays(1), "1 day", "2024-11-02 05:00");
         });
 
         suite("Subtract weeks", () =>
@@ -147,6 +194,10 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, Duration.fromWeeks(1), "1 week", "2023-12-25 10:00");
             checkIsCorrect(dateTime, Duration.fromWeeks(365 / 7), `365 / 7 weeks`, "2023-01-01 10:00");
             checkIsCorrect(dateTimeLeapYear, Duration.fromWeeks(366 / 7), `366 / 7 weeks`, "2024-01-01 10:00");
+
+            checkIsCorrect(dateTimeStartDateDst, Duration.fromWeeks(1), "1 week", "2024-03-03 03:00");
+
+            checkIsCorrect(dateTimeEndDateDst, Duration.fromWeeks(1), "1 week", "2024-10-27 05:00");
         });
     });
 
@@ -180,6 +231,12 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, 31, "2024-02-01 10:00");
             checkIsCorrect(dateTime, 366, "2025-01-01 10:00");
             checkIsCorrect(dateTimeNonLeapYear, 365, "2026-01-01 10:00");
+
+            const dateTimeStartDateDst = new DateTime({ value: "2024-03-10 00:00", zone: "America/Los_Angeles" });
+            checkIsCorrect(dateTimeStartDateDst, 1, "2024-03-11 00:00");
+
+            const dateTimeEndDateDst = new DateTime({ value: "2024-11-03 00:00", zone: "America/Los_Angeles" });
+            checkIsCorrect(dateTimeEndDateDst, 1, "2024-11-04 00:00");
         });
 
         suite("Invalid Params", () =>
@@ -191,18 +248,7 @@ suite("DateTime Math", () =>
                 then it should throw a validation error`,
                     () =>
                     {
-                        try
-                        {
-                            dateTime.addDays(days);
-                        }
-                        catch (e: any)
-                        {
-                            // console.log(e.reason);
-                            Assert.ok(e.reason);
-                            return;
-                        }
-
-                        Assert.fail("days param is valid");
+                        Assert.throws(() => dateTime.addDays(days), ArgumentException);
                     }
                 );
             }
@@ -244,6 +290,13 @@ suite("DateTime Math", () =>
             checkIsCorrect(dateTime, 31, "2023-12-01 10:00");
             checkIsCorrect(dateTime, 365, "2023-01-01 10:00");
             checkIsCorrect(dateTimeLeapYear, 366, "2024-01-01 10:00");
+            checkIsCorrect(new DateTime({ value: "2024-03-10 10:00", zone: "America/Los_Angeles" }), 1, "2024-03-09 10:00");
+
+            const dateTimeStartDateDst = new DateTime({ value: "2024-03-10 04:00", zone: "America/Los_Angeles" });
+            checkIsCorrect(dateTimeStartDateDst, 1, "2024-03-09 04:00");
+
+            const dateTimeEndDateDst = new DateTime({ value: "2024-11-03 04:00", zone: "America/Los_Angeles" });
+            checkIsCorrect(dateTimeEndDateDst, 1, "2024-11-02 04:00");
         });
 
         suite("Invalid Params", () =>
@@ -255,18 +308,7 @@ suite("DateTime Math", () =>
                 then it should throw a validation error`,
                     () =>
                     {
-                        try
-                        {
-                            dateTime.subtractDays(days);
-                        }
-                        catch (e: any)
-                        {
-                            // console.log(e.reason);
-                            Assert.ok(e.reason);
-                            return;
-                        }
-
-                        Assert.fail("days param is valid");
+                        Assert.throws(() => dateTime.subtractDays(days), ArgumentException);
                     }
                 );
             }
