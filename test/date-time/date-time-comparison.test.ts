@@ -6,7 +6,7 @@ import { IANAZone } from "luxon";
 import { ArgumentException } from "@nivinjoseph/n-exception";
 
 
-suite.only("DateTime Comparison", () =>
+suite("DateTime Comparison", () =>
 {
 
     function testDifferentSetOfValues(compareFunction: (minValue: string, maxValue: string, diff: string,
