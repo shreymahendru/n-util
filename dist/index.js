@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.throttle = exports.synchronize = exports.dedupe = exports.debounce = exports.Observer = exports.DtoFactory = exports.Deserializer = exports.deserialize = exports.serialize = exports.Serializable = exports.HtmlSanitizer = exports.Templator = exports.Profiler = exports.Version = exports.Mutex = exports.Deferred = exports.ImageHelper = exports.Time = exports.Duration = exports.TypeHelper = exports.Uuid = exports.BackgroundProcessor = exports.DisposableWrapper = exports.Delay = exports.Make = void 0;
+exports.DateTime = exports.throttle = exports.synchronize = exports.dedupe = exports.debounce = exports.Observer = exports.DtoFactory = exports.Deserializer = exports.deserialize = exports.serialize = exports.Serializable = exports.HtmlSanitizer = exports.Templator = exports.Profiler = exports.Version = exports.Mutex = exports.Deferred = exports.ImageHelper = exports.Time = exports.Duration = exports.TypeHelper = exports.Uuid = exports.BackgroundProcessor = exports.DisposableWrapper = exports.Delay = exports.Make = void 0;
 require("@nivinjoseph/n-ext");
 var make_1 = require("./make");
 Object.defineProperty(exports, "Make", { enumerable: true, get: function () { return make_1.Make; } });
@@ -49,6 +49,8 @@ var synchronize_1 = require("./synchronize");
 Object.defineProperty(exports, "synchronize", { enumerable: true, get: function () { return synchronize_1.synchronize; } });
 var throttle_1 = require("./throttle");
 Object.defineProperty(exports, "throttle", { enumerable: true, get: function () { return throttle_1.throttle; } });
+var date_time_1 = require("./date-time");
+Object.defineProperty(exports, "DateTime", { enumerable: true, get: function () { return date_time_1.DateTime; } });
 // export
 // {
 //     Make, Delay, Disposable, BackgroundProcessor, Uuid, TypeHelper, Duration, Time, ImageHelper, Deferred, Mutex, Version,
