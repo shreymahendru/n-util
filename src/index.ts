@@ -24,6 +24,7 @@ export { debounce } from "./debounce";
 export { dedupe } from "./dedupe";
 export { synchronize } from "./synchronize";
 export { throttle } from "./throttle";
+export { DateTime, DateTimeSchema } from "./date-time";
 
 
 // export
