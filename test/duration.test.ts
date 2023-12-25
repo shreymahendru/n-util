@@ -1,39 +1,40 @@
-import * as Assert from "assert";
+import assert from "node:assert";
+import { describe, test } from "node:test";
 import "@nivinjoseph/n-ext";
-import { Duration } from "../src/duration";
+import { Duration } from "../src/index.js";
 
 
-suite("Duration", () =>
+await describe("Duration", async () =>
 {
-    suite("fromSeconds", () =>
+    await describe("fromSeconds", async () =>
     {
-        test("Should work", () =>
+        await test("Should work", () =>
         {
-            Assert.strictEqual(Duration.fromSeconds(1).toMilliSeconds(), 1000);
+            assert.strictEqual(Duration.fromSeconds(1).toMilliSeconds(), 1000);
         });
     });
 
-    suite("fromMinutes", () =>
+    await describe("fromMinutes", async () =>
     {
-        test("should work", () =>
+        await test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromMinutes(1).toMilliSeconds(), 60000);
+            assert.strictEqual(Duration.fromMinutes(1).toMilliSeconds(), 60000);
         });
     });
 
-    suite("fromHours", () =>
+    await describe("fromHours", async () =>
     {
-        test("should work", () =>
+        await test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromHours(1).toMilliSeconds(), 3600000);
+            assert.strictEqual(Duration.fromHours(1).toMilliSeconds(), 3600000);
         });
     });
-    
-    suite("fromDays", () =>
+
+    await describe("fromDays", async () =>
     {
-        test("should work", () =>
+        await test("should work", () =>
         {
-            Assert.strictEqual(Duration.fromDays(1).toMilliSeconds(), 86400000);
+            assert.strictEqual(Duration.fromDays(1).toMilliSeconds(), 86400000);
         });
     });
 });

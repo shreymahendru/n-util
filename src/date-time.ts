@@ -1,9 +1,9 @@
 import { given } from "@nivinjoseph/n-defensive";
 import { DateTime as LuxonDateTime, Interval as LuxonInterval } from "luxon";
-import { Serializable, serialize } from "./serializable";
-import { Duration } from "./duration";
-import { Schema } from "./utility-types";
-import { TypeHelper } from "./type-helper";
+import { Serializable, serialize } from "./serializable.js";
+import { Duration } from "./duration.js";
+import { Schema } from "./utility-types.js";
+import { TypeHelper } from "./type-helper.js";
 
 
 export class DateTime extends Serializable<DateTimeSchema>
@@ -27,10 +27,10 @@ export class DateTime extends Serializable<DateTimeSchema>
     public static get currentZone(): string { return LuxonDateTime.local().zoneName; }
 
 
-    @serialize
+    @serialize()
     public get value(): string { return this._value; }
 
-    @serialize
+    @serialize()
     public get zone(): string { return this._zone; }
 
     public get timestamp(): number { return this._timestamp; }

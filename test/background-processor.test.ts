@@ -1,10 +1,11 @@
-import * as Assert from "assert";
-import { BackgroundProcessor, Delay } from "../src/index";
+import assert from "node:assert";
+import { describe, test } from "node:test";
+import { BackgroundProcessor, Delay } from "../src/index.js";
 
 
-suite("BackgroundProcessor tests", () =>
+await describe("BackgroundProcessor tests", async () =>
 {
-    test("Should work fine (check console output)", async () =>
+    await test("Should work fine (check console output)", async () =>
     {
         const bp = new BackgroundProcessor((e) =>
         {
@@ -31,13 +32,13 @@ suite("BackgroundProcessor tests", () =>
                 console.log(e, "custom error handler");
             } : undefined);
         });
-        
+
         console.log("delaying 5000ms");
         await Delay.milliseconds(5000);
         console.log("disposing");
         await bp.dispose();
 
         await Delay.seconds(8);
-        Assert.ok(true);
+        assert.ok(true);
     });
 });

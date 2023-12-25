@@ -1,5 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Uuid } from "./uuid";
+import { Uuid } from "./uuid.js";
 
 
 export interface Observable<T>

@@ -1,6 +1,6 @@
 import { given } from "@nivinjoseph/n-defensive";
 import { ArgumentException, InvalidArgumentException } from "@nivinjoseph/n-exception";
-import { TypeHelper } from "./type-helper";
+import { TypeHelper } from "./type-helper.js";
 
 
 export class Version

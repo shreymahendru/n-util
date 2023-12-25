@@ -1,85 +1,50 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Delay } from "./delay";
-import { Duration } from "./duration";
+import { Duration } from "./duration.js";
+import { Delay } from "./delay.js";
 
-// public
-/**
- * @description Only apply to methods that return void or Promise<void>; Only cares about last state including intermediary
- */
-export function debounce(delay: Duration): Function;
-export function debounce(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function debounce(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function debounce<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void>(delay?: Duration): DebounceClassMethodDecorator<This, Args, Return>
 {
-    given(delayOrTarget as object, "delayOrTarget").ensureHasValue().ensureIsObject();
-    if (delayOrTarget instanceof Duration)
-    {
-        const delayMs = delayOrTarget.toMilliSeconds();
+    given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+        .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+    const decorator: DebounceClassMethodDecorator<This, Args, Return> = function (value, context)
+    {
+        const { name, kind } = context;
+        given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
+
+        const activeKey = Symbol.for(`__$_${String(name)}_debounceIsActive`);
+        const scheduledCallKey = Symbol.for(`__$_${String(name)}_debounceScheduledCall`);
+
+        context.addInitializer(function (this)
         {
-            given(target as object, "target").ensureHasValue().ensureIsObject();
-            given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
+            (<any>this)[activeKey] = false;
+            (<any>this)[scheduledCallKey] = null;
+        });
 
-            const original = descriptor.value;
-            const activeKey = Symbol.for(`__$_${propertyKey}_debounceIsActive`);
-            const scheduledCallKey = Symbol.for(`__$_${propertyKey}_debounceScheduledCall`);
-
-            descriptor.value = async function (...params: Array<any>): Promise<void>
-            {
-                (<any>this)[scheduledCallKey] = async (): Promise<void> =>
-                {
-                    await (original as Function).call(this, ...params);
-                };
-
-                if ((<any>this)[activeKey])
-                    return;
-
-                while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
-                {
-                    (<any>this)[activeKey] = true;
-                    await Delay.milliseconds(delayMs);
-                    const currentCall = (<any>this)[scheduledCallKey];
-                    (<any>this)[scheduledCallKey] = null;
-                    try
-                    {
-                        await (currentCall as Function)();
-                    }
-                    finally
-                    {
-                        (<any>this)[activeKey] = false;
-                    }
-                }
-            };
-        };
-    }
-    else
-    {
-        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
-
-        const original = descriptor!.value;
-        const activeKey = Symbol.for(`__$_${propertyKey}_debounceIsActive`);
-        const scheduledCallKey = Symbol.for(`__$_${propertyKey}_debounceScheduledCall`);
-
-        descriptor!.value = async function (...params: Array<any>): Promise<void>
+        return async function replacementMethod(this: This, ...args: Args): Promise<void>
         {
             (<any>this)[scheduledCallKey] = async (): Promise<void> =>
             {
-                await (original as Function).call(this, ...params);
+                await value.call(this, ...args);
             };
-            
+
             if ((<any>this)[activeKey])
                 return;
-            
+
             while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
             {
                 (<any>this)[activeKey] = true;
-                const currentCall = (<any>this)[scheduledCallKey];
+                if (delay != null)
+                    await Delay.milliseconds(delay.toMilliSeconds());
+
+                const currentCall: () => Promise<void> = (<any>this)[scheduledCallKey];
                 (<any>this)[scheduledCallKey] = null;
                 try
                 {
-                    await (currentCall as Function)();
+                    await currentCall();
                 }
                 finally
                 {
@@ -87,5 +52,13 @@ export function debounce(delayOrTarget?: unknown, propertyKey?: string, descript
                 }
             }
         };
-    }
+    };
+
+    return decorator;
 }
+
+
+type DebounceClassMethodDecorator<This, Args extends Array<any>, Return> = (
+    value: (this: This, ...args: Args) => Return,
+    context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+) => (this: This, ...args: Args) => Promise<void>;
