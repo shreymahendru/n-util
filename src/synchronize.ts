@@ -15,7 +15,7 @@ export function synchronize<
         const { name, kind } = context;
         given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        const mutexKey = Symbol.for(`__$_${String(name)}_synchronizeMutex`);
+        const mutexKey = Symbol.for(`@nivinjoseph/n-util/synchronize/${String(name)}/mutex`);
 
         context.addInitializer(function (this)
         {

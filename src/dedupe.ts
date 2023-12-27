@@ -16,7 +16,7 @@ export function dedupe<
         const { name, kind } = context;
         given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        const activeKey = Symbol.for(`__$_${String(name)}_dedupeIsActive`);
+        const activeKey = Symbol.for(`@nivinjoseph/n-util/dedupe/${String(name)}/isActive`);
         // setting value to false on initialization.
         context.addInitializer(function (this)
         {

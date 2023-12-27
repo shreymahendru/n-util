@@ -15,8 +15,8 @@ export function debounce<
         const { name, kind } = context;
         given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        const activeKey = Symbol.for(`__$_${String(name)}_debounceIsActive`);
-        const scheduledCallKey = Symbol.for(`__$_${String(name)}_debounceScheduledCall`);
+        const activeKey = Symbol.for(`@nivinjoseph/n-util/debounce/${String(name)}/isActive`);
+        const scheduledCallKey = Symbol.for(`@nivinjoseph/n-util/debounce/${String(name)}/scheduledCall`);
 
         context.addInitializer(function (this)
         {

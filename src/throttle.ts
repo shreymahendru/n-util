@@ -16,8 +16,8 @@ export function throttle<
         const { name, kind } = context;
         given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
 
-        const activeKey = Symbol.for(`__$_${String(name)}_throttleIsActive`);
-        const scheduledCallKey = Symbol.for(`__$_${String(name)}_throttleScheduledCall`);
+        const activeKey = Symbol.for(`@nivinjoseph/n-util/throttle/${String(name)}/isActive`);
+        const scheduledCallKey = Symbol.for(`@nivinjoseph/n-util/throttle/${String(name)}/scheduledCall`);
 
         context.addInitializer(function (this)
         {

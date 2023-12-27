@@ -246,12 +246,12 @@ class Utilities
     public static fetchSerializableClassKey(className: string): symbol
     {
         given(className, "className").ensureHasValue().ensureIsString();
-        return Symbol.for(`__$_${className}__isSerializable`);
+        return Symbol.for(`@nivinjoseph/n-util/serializable/${className}/isSerializable`);
     }
 
     public static fetchSerializableFieldsKey(): symbol
     {
-        return Symbol.for("__$_serializableFields");
+        return Symbol.for("@nivinjoseph/n-util/serializable/fields");
     }
 
     public static fetchSerializableFieldsForObject(val: Object): ReadonlyArray<SerializableFieldInfo>
