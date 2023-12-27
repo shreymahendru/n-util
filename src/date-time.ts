@@ -5,7 +5,7 @@ import { Duration } from "./duration.js";
 import { Schema } from "./utility-types.js";
 import { TypeHelper } from "./type-helper.js";
 
-
+@serialize()
 export class DateTime extends Serializable<DateTimeSchema>
 {
 

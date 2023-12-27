@@ -106,11 +106,50 @@ class Employee extends Serializable
 }
 
 
-await describe.only("Serializable", async () =>
+@serialize()
+class Dummy2 extends Dummy
 {
-    await describe.only("serialize",  async () =>
+    @serialize()
+    public get field1(): string { return "Dummy2 Field 1"; }
+
+    @serialize("field2Key")
+    public get field2(): string { return "Dummy2 Field 2"; }
+
+    @serialize()
+    public get field3(): string { return "Dummy2 Field 3"; }
+
+    public constructor()
     {
-        await test.only("basic", () =>
+        super();
+    }
+
+    public asd(): void
+    {
+        console.log("I am foo");
+    }
+}
+
+
+
+@serialize()
+class Dummy3 extends Dummy2
+{
+    @serialize()
+    public override get field1(): string { return "Dummy3 Field 1"; }
+
+    @serialize("newKeyForField2")
+    public override get field2(): string { return "Dummy3 Field 2"; }
+
+    @serialize()
+    public get field4(): string { return "Dummy3 Field 4"; }
+}
+
+
+await describe("Serializable", async () =>
+{
+    await describe("serialize", async () =>
+    {
+        await test("basic", () =>
         {
             // console.log(typeof Employee);
 
@@ -127,18 +166,23 @@ await describe.only("Serializable", async () =>
                 dummy: new Dummy()
             });
 
-            assert.strictEqual(testObj.name.firstName, "niv");
-            assert.strictEqual(testObj.address.city, "Waterloo");
-
-            const serialized = testObj.serialize();
-
-            assert.strictEqual(testObj.name.firstName, "niv");
-            assert.strictEqual(testObj.address.city, "Waterloo");
-
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            assert.ok(serialized != null);
-
-            // console.log(serialized);
+            const serializedTextObj = testObj.serialize();
+            assert.deepStrictEqual(serializedTextObj, {
+                "id": "1",
+                "name": {
+                    "firstName": "niv",
+                    "lastName": "jo"
+                },
+                "address": {
+                    "street": "911 Roger rd",
+                    "locality": "Waterloo",
+                    "$typename": "Address"
+                },
+                "dummy": {
+                    "$typename": "Dummy"
+                },
+                "$typename": "Employee"
+            });
 
             const testObj2 = new Employee({
                 id: "1",
@@ -153,20 +197,70 @@ await describe.only("Serializable", async () =>
                 dummy: new Dummy()
             });
 
-            const serialized2 = testObj2.serialize();
+            const serializedTestObj2 = testObj2.serialize();
 
-            assert.deepStrictEqual(serialized2, serialized);
+            assert.deepStrictEqual(serializedTestObj2, serializedTextObj);
 
-            const deserialized = Deserializer.deserialize<Employee>(serialized);
-            // console.log(deserialized);
+            const deserialized = Deserializer.deserialize<Employee>(serializedTextObj);
+            console.log(deserialized);
             assert.ok(deserialized instanceof Employee);
 
-            const deserialized2 = Deserializer.deserialize<Employee>(serialized2);
+            const deserialized2 = Deserializer.deserialize<Employee>(serializedTestObj2);
 
             assert.ok(deserialized2 instanceof Employee);
 
             assert.deepStrictEqual(deserialized2, deserialized);
 
+
+            const dummy = new Dummy().serialize();
+            console.log(dummy);
+
+
+            const dummy2 = new Dummy2().serialize();
+            console.log(dummy2);
+
+            const dummy3 = new Dummy3().serialize();
+            console.log(dummy3);
+
+        });
+
+        await test("inheritance", () =>
+        {
+            const dummy = new Dummy();
+            const serializedDummy = dummy.serialize();
+            console.log(serializedDummy);
+            assert.deepStrictEqual(serializedDummy, {
+                "$typename": "Dummy"
+            });
+            const deserializedDummy = Deserializer.deserialize<Dummy>(serializedDummy);
+            assert.ok(deserializedDummy instanceof Dummy);
+
+            const dummy2 = new Dummy2();
+            const serializedDummy2 = dummy2.serialize();
+
+            assert.deepStrictEqual(serializedDummy2, {
+                "field1": "Dummy2 Field 1",
+                "field2Key": "Dummy2 Field 2",
+                "field3": "Dummy2 Field 3",
+                "$typename": "Dummy2"
+            });
+            const deserializedDummy2 = Deserializer.deserialize<Dummy2>(serializedDummy2);
+            assert.ok(deserializedDummy2 instanceof Dummy2);
+
+
+            const dummy3 = new Dummy3();
+            const serializedDummy3 = dummy3.serialize();
+            console.log(serializedDummy3);
+            assert.deepStrictEqual(serializedDummy3, {
+                "field1": "Dummy3 Field 1",
+                "newKeyForField2": "Dummy3 Field 2",
+                "field3": "Dummy2 Field 3",
+                "field4": "Dummy3 Field 4",
+                "$typename": "Dummy3"
+            });
+
+            const deserializedDummy3 = Deserializer.deserialize<Dummy3>(serializedDummy3);
+            assert.ok(deserializedDummy3 instanceof Dummy3);
         });
     });
 });

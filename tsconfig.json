@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
         "module": "NodeNext",
-        "target": "ES2017",
+        "target": "ES2022",
         "lib": [
-            "ES2023"
+            "ES2023",
+            "esnext.decorators"
         ],
         "strict": true,
         "strictNullChecks": true,

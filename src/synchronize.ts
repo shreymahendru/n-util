@@ -29,7 +29,7 @@ export function synchronize<
             await mutex.lock();
             try
             {
-                const result = value.call(this, ...args);
+                const result = await value.call(this, ...args);
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return result;
             }
