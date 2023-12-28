@@ -1,55 +1,31 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.dedupe = void 0;
-const tslib_1 = require("tslib");
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const delay_1 = require("./delay");
-const duration_1 = require("./duration");
-function dedupe(delayOrTarget, propertyKey, descriptor) {
-    (0, n_defensive_1.given)(delayOrTarget, "delayOrTarget").ensureHasValue().ensureIsObject();
-    if (delayOrTarget instanceof duration_1.Duration) {
-        const delayMs = delayOrTarget.toMilliSeconds();
-        return function (target, propertyKey, descriptor) {
-            (0, n_defensive_1.given)(target, "target").ensureHasValue().ensureIsObject();
-            (0, n_defensive_1.given)(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            (0, n_defensive_1.given)(descriptor, "descriptor").ensureHasValue().ensureIsObject();
-            const original = descriptor.value;
-            const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
-            descriptor.value = function (...params) {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    if (!this[activeKey]) {
-                        this[activeKey] = true;
-                        try {
-                            yield original.call(this, ...params);
-                        }
-                        finally {
-                            yield delay_1.Delay.milliseconds(delayMs);
-                            this[activeKey] = false;
-                        }
-                    }
-                });
-            };
+import { given } from "@nivinjoseph/n-defensive";
+import { Duration } from "./duration.js";
+import { Delay } from "./delay.js";
+export function dedupe(delay) {
+    given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+        .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
+    const decorator = function (value, context) {
+        const { name, kind } = context;
+        given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
+        const activeKey = Symbol.for(`@nivinjoseph/n-util/dedupe/${String(name)}/isActive`);
+        // setting value to false on initialization.
+        context.addInitializer(function () {
+            this[activeKey] = false;
+        });
+        return async function replacementMethod(...args) {
+            if (this[activeKey])
+                return;
+            this[activeKey] = true;
+            try {
+                await value.call(this, ...args);
+            }
+            finally {
+                if (delay != null)
+                    await Delay.milliseconds(delay.toMilliSeconds());
+                this[activeKey] = false;
+            }
         };
-    }
-    else {
-        (0, n_defensive_1.given)(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-        (0, n_defensive_1.given)(descriptor, "descriptor").ensureHasValue().ensureIsObject();
-        const original = descriptor.value;
-        const activeKey = Symbol.for(`__$_${propertyKey}_dedupeIsActive`);
-        descriptor.value = function (...params) {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                if (!this[activeKey]) {
-                    this[activeKey] = true;
-                    try {
-                        yield original.call(this, ...params);
-                    }
-                    finally {
-                        this[activeKey] = false;
-                    }
-                }
-            });
-        };
-    }
+    };
+    return decorator;
 }
-exports.dedupe = dedupe;
 //# sourceMappingURL=dedupe.js.map

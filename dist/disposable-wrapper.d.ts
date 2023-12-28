@@ -1,4 +1,4 @@
-import { Disposable } from "./disposable";
+import { Disposable } from "./disposable.js";
 export declare class DisposableWrapper implements Disposable {
     private readonly _disposeFunc;
     private _isDisposed;
@@ -6,3 +6,4 @@ export declare class DisposableWrapper implements Disposable {
     constructor(disposeFunc: () => Promise<void>);
     dispose(): Promise<void>;
 }
+//# sourceMappingURL=disposable-wrapper.d.ts.map

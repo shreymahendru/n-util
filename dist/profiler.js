@@ -1,11 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Profiler = void 0;
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
+import { given } from "@nivinjoseph/n-defensive";
 // public
-class Profiler {
+export class Profiler {
+    _id;
+    _traces;
+    get id() { return this._id; }
+    get traces() { return this._traces; }
     constructor(id) {
-        (0, n_defensive_1.given)(id, "id").ensureHasValue().ensureIsString();
+        given(id, "id").ensureHasValue().ensureIsString();
         this._id = id;
         this._traces = [{
                 dateTime: Date.now(),
@@ -13,10 +14,8 @@ class Profiler {
                 diffMs: 0
             }];
     }
-    get id() { return this._id; }
-    get traces() { return this._traces; }
     trace(message) {
-        (0, n_defensive_1.given)(message, "message").ensureHasValue().ensureIsString();
+        given(message, "message").ensureHasValue().ensureIsString();
         const now = Date.now();
         this._traces.push({
             dateTime: now,
@@ -25,5 +24,4 @@ class Profiler {
         });
     }
 }
-exports.Profiler = Profiler;
 //# sourceMappingURL=profiler.js.map

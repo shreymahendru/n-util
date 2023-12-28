@@ -1,14 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Deferred = void 0;
-class Deferred {
+export class Deferred {
+    _promise;
+    _resolve;
+    _reject;
+    get promise() { return this._promise; }
     constructor() {
         this._promise = new Promise((resolve, reject) => {
             this._resolve = resolve;
             this._reject = reject;
         });
     }
-    get promise() { return this._promise; }
     resolve(value) {
         this._resolve(value);
     }
@@ -17,5 +17,4 @@ class Deferred {
         this._reject(reason);
     }
 }
-exports.Deferred = Deferred;
 //# sourceMappingURL=deferred.js.map

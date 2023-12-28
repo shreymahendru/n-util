@@ -14,3 +14,4 @@ export declare class Duration {
     toDays(round?: boolean): number;
     toWeeks(round?: boolean): number;
 }
+//# sourceMappingURL=duration.d.ts.map

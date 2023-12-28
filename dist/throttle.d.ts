@@ -1,6 +1,5 @@
-import { Duration } from "./duration";
-/**
- * @description Only apply to methods that return void or Promise<void>; Cares about first and last states including intermediary
- */
-export declare function throttle(delay: Duration): Function;
-export declare function throttle(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
+import { Duration } from "./duration.js";
+export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(delay?: Duration): ThrottleClassMethodDecorator<This, Args, Return>;
+type ThrottleClassMethodDecorator<This, Args extends Array<any>, Return> = (value: (this: This, ...args: Args) => Return, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>) => (this: This, ...args: Args) => Promise<void>;
+export {};
+//# sourceMappingURL=throttle.d.ts.map

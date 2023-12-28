@@ -1,6 +1,5 @@
-import { Duration } from "./duration";
-/**
- * @description Only apply to methods that return void or Promise<void>; Only cares about last state including intermediary
- */
-export declare function debounce(delay: Duration): Function;
-export declare function debounce(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
+import { Duration } from "./duration.js";
+export declare function debounce<This, Args extends Array<any>, Return extends Promise<void> | void>(delay?: Duration): DebounceClassMethodDecorator<This, Args, Return>;
+type DebounceClassMethodDecorator<This, Args extends Array<any>, Return> = (value: (this: This, ...args: Args) => Return, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>) => (this: This, ...args: Args) => Promise<void>;
+export {};
+//# sourceMappingURL=debounce.d.ts.map

@@ -7,3 +7,4 @@ export declare class DtoFactory {
         [key: string]: keyof T | ((val: T) => any);
     }>): TDto;
 }
+//# sourceMappingURL=dto-factory.d.ts.map

@@ -12,3 +12,4 @@ export declare class Version {
     toString(): string;
     private _compare;
 }
+//# sourceMappingURL=version.d.ts.map

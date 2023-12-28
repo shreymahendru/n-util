@@ -6,3 +6,4 @@ export declare class Templator {
     constructor(template: string);
     render(data: Object): string;
 }
+//# sourceMappingURL=templator.d.ts.map

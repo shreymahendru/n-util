@@ -1,6 +1,6 @@
-import { Serializable } from "./serializable";
-import { Duration } from "./duration";
-import { Schema } from "./utility-types";
+import { Serializable } from "./serializable.js";
+import { Duration } from "./duration.js";
+import { Schema } from "./utility-types.js";
 export declare class DateTime extends Serializable<DateTimeSchema> {
     private static readonly _format;
     private readonly _value;
@@ -31,14 +31,14 @@ export declare class DateTime extends Serializable<DateTimeSchema> {
      */
     static now(zone?: string): DateTime;
     /**
-    * Create a DateTime from a number of seconds since the epoch (meaning since 1 January 1970 00:00:00 UTC).
+    * Create a DateTime from the number of seconds since the epoch (meaning since 1 January 1970 00:00:00 UTC).
     *
     * @param timestamp - number of seconds since 1970 UTC
     * @param zone - a zone identifier. As a string, that can be any IANA zone supported by the host environment, or a fixed-offset name of the form 'UTC+3', or the string 'utc'.
     */
     static createFromTimestamp(timestamp: number, zone: string): DateTime;
     /**
-    * Create a DateTime from a number of seconds since the epoch (meaning since 1 January 1970 00:00:00 UTC).
+    * Create a DateTime from the milliseconds since the epoch (meaning since 1 January 1970 00:00:00 UTC).
     *
     * @param milliseconds -  number of milliseconds since the epoch (meaning since 1 January 1970 00:00:00 UTC)
     * @param zone - a zone identifier. As a string, that can be any IANA zone supported by the host environment,
@@ -151,4 +151,5 @@ export declare class DateTime extends Serializable<DateTimeSchema> {
      */
     isWithinTimeRange(startTimeCode: string, endTimeCode: string): boolean;
 }
-export declare type DateTimeSchema = Schema<DateTime, "value" | "zone">;
+export type DateTimeSchema = Schema<DateTime, "value" | "zone">;
+//# sourceMappingURL=date-time.d.ts.map

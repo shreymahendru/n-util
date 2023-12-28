@@ -5,3 +5,4 @@ export declare class Mutex {
     lock(): Promise<void>;
     release(): void;
 }
+//# sourceMappingURL=mutex.d.ts.map

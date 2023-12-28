@@ -1,33 +1,31 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Duration = void 0;
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-class Duration {
+import { given } from "@nivinjoseph/n-defensive";
+export class Duration {
+    _ms;
     constructor(ms) {
-        (0, n_defensive_1.given)(ms, "ms").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
+        given(ms, "ms").ensureHasValue().ensureIsNumber().ensure(t => t >= 0);
         this._ms = ms;
     }
     static fromMilliSeconds(milliSeconds) {
         return new Duration(milliSeconds);
     }
     static fromSeconds(seconds) {
-        (0, n_defensive_1.given)(seconds, "seconds").ensureHasValue().ensureIsNumber();
+        given(seconds, "seconds").ensureHasValue().ensureIsNumber();
         return this.fromMilliSeconds(seconds * 1000);
     }
     static fromMinutes(minutes) {
-        (0, n_defensive_1.given)(minutes, "minutes").ensureHasValue().ensureIsNumber();
+        given(minutes, "minutes").ensureHasValue().ensureIsNumber();
         return this.fromSeconds(minutes * 60);
     }
     static fromHours(hours) {
-        (0, n_defensive_1.given)(hours, "hours").ensureHasValue().ensureIsNumber();
+        given(hours, "hours").ensureHasValue().ensureIsNumber();
         return this.fromMinutes(hours * 60);
     }
     static fromDays(days) {
-        (0, n_defensive_1.given)(days, "days").ensureHasValue().ensureIsNumber();
+        given(days, "days").ensureHasValue().ensureIsNumber();
         return this.fromHours(days * 24);
     }
     static fromWeeks(weeks) {
-        (0, n_defensive_1.given)(weeks, "weeks").ensureHasValue().ensureIsNumber();
+        given(weeks, "weeks").ensureHasValue().ensureIsNumber();
         return this.fromDays(weeks * 7);
     }
     toMilliSeconds(round = false) {
@@ -55,5 +53,4 @@ class Duration {
         return round ? Math.round(result) : result;
     }
 }
-exports.Duration = Duration;
 //# sourceMappingURL=duration.js.map
