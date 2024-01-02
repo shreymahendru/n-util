@@ -1,5 +1,9 @@
 import { Duration } from "./duration.js";
-export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(delay?: Duration): ThrottleClassMethodDecorator<This, Args, Return>;
-type ThrottleClassMethodDecorator<This, Args extends Array<any>, Return> = (value: (this: This, ...args: Args) => Return, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>) => (this: This, ...args: Args) => Promise<void>;
+export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(delay: Duration): ThrottleClassMethodDecorator<This, Args, Return>;
+export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(target: TargetFunction<This, Args, Return>, context: Context<This, Args, Return>): ReplacementFunction<This, Args>;
+type TargetFunction<This, Args extends Array<any>, Return extends Promise<void> | void> = (this: This, ...args: Args) => Return;
+type ReplacementFunction<This, Args extends Array<any>> = (this: This, ...args: Args) => Promise<void>;
+type Context<This, Args extends Array<any>, Return extends Promise<void> | void> = ClassMethodDecoratorContext<This, TargetFunction<This, Args, Return>>;
+type ThrottleClassMethodDecorator<This, Args extends Array<any>, Return extends Promise<void> | void> = (target: TargetFunction<This, Args, Return>, context: Context<This, Args, Return>) => ReplacementFunction<This, Args>;
 export {};
 //# sourceMappingURL=throttle.d.ts.map

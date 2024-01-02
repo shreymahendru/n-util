@@ -5,7 +5,7 @@ import { Serializable, serialize } from "./serializable.js";
 import { Duration } from "./duration.js";
 import { TypeHelper } from "./type-helper.js";
 let DateTime = (() => {
-    let _classDecorators = [serialize()];
+    let _classDecorators = [serialize];
     let _classDescriptor;
     let _classExtraInitializers = [];
     let _classThis;
@@ -17,8 +17,8 @@ let DateTime = (() => {
         static { _classThis = this; }
         static {
             const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(_classSuper[Symbol.metadata] ?? null) : void 0;
-            _get_value_decorators = [serialize()];
-            _get_zone_decorators = [serialize()];
+            _get_value_decorators = [serialize];
+            _get_zone_decorators = [serialize];
             __esDecorate(this, null, _get_value_decorators, { kind: "getter", name: "value", static: false, private: false, access: { has: obj => "value" in obj, get: obj => obj.value }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(this, null, _get_zone_decorators, { kind: "getter", name: "zone", static: false, private: false, access: { has: obj => "zone" in obj, get: obj => obj.zone }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);

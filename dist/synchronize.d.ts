@@ -1,5 +1,9 @@
 import { Duration } from "./duration.js";
-export declare function synchronize<This>(delay?: Duration): SynchronizeClassMethodDecorator<This, (this: This, ...args: Array<any>) => any>;
-type SynchronizeClassMethodDecorator<This, Fun extends (this: This, ...args: any) => any> = (value: Fun, context: ClassMethodDecoratorContext<This, Fun>) => Fun;
+export declare function synchronize<This, Args extends Array<any>>(delay: Duration): SynchronizeClassMethodDecorator<This, Args>;
+export declare function synchronize<This, Args extends Array<any>>(target: TargetFunction<This, Args>, context: Context<This, Args>): ReplacementFunction<This, Args>;
+type TargetFunction<This, Args extends Array<any>> = (this: This, ...args: Args) => any;
+type ReplacementFunction<This, Args extends Array<any>> = (this: This, ...args: Args) => Promise<any>;
+type Context<This, Args extends Array<any>> = ClassMethodDecoratorContext<This, TargetFunction<This, Args>>;
+type SynchronizeClassMethodDecorator<This, Args extends Array<any>> = (value: TargetFunction<This, Args>, context: Context<This, Args>) => ReplacementFunction<This, Args>;
 export {};
 //# sourceMappingURL=synchronize.d.ts.map

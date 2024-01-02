@@ -14,9 +14,11 @@ export declare class Deserializer {
     static deserialize<T>(serialized: object): T;
     private static _getType;
 }
-export declare function serialize<Class extends Serializable, T, DecoratedValue extends SerializableClass<Class> | SerializableClassGetter<Class, T>>(key?: DecoratedValue extends SerializableClass<Class> ? undefined : string): SerializeDecorator<Class, T, DecoratedValue>;
+export declare function serialize<Class extends Serializable>(target: SerializableClass<Class>, context: ClassDecoratorContext<SerializableClass<Class>>): void;
+export declare function serialize<Class extends Serializable, T>(target: SerializableClassGetter<Class, T>, context: ClassGetterDecoratorContext<Class, T>): void;
+export declare function serialize<Class extends Serializable, T>(key: string): SerializeClassGetterDecorator<Class, T>;
 type SerializableClass<This extends Serializable> = ClassDefinition<This>;
 type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
-type SerializeDecorator<Class extends Serializable, T, DecoratedValue extends SerializableClass<Class> | SerializableClassGetter<Class, T>> = (value: DecoratedValue, context: DecoratedValue extends SerializableClass<Class> ? ClassDecoratorContext<DecoratedValue> : ClassGetterDecoratorContext<Class, T>) => void;
+type SerializeClassGetterDecorator<Class extends Serializable, T> = (target: SerializableClassGetter<Class, T>, context: ClassGetterDecoratorContext<Class, T>) => void;
 export {};
 //# sourceMappingURL=serializable.d.ts.map

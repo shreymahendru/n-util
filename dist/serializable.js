@@ -10,7 +10,7 @@ export class Serializable {
         const typeName = this.getTypeName();
         const fields = Utilities.fetchSerializableFieldsForObject(this);
         const serialized = fields.reduce((acc, field) => {
-            const val = field.value.call(this);
+            const val = field.target.call(this);
             const serializationKey = field.key ?? field.name;
             if (val == null) {
                 acc[serializationKey] = null;
@@ -120,10 +120,41 @@ export class Deserializer {
         return null;
     }
 }
-export function serialize(key) {
-    given(key, "key").ensureIsString();
-    const inputKey = key?.trim();
-    const decorator = function (value, context) {
+export function serialize(keyOrTarget, context) {
+    if (typeof keyOrTarget === "string") {
+        const key = keyOrTarget;
+        given(key, "key").ensureHasValue().ensureIsString();
+        const decorator = function (target, context) {
+            Utilities.configureMetaOnContext(context, target, key);
+        };
+        return decorator;
+    }
+    else {
+        given(context, "context").ensureHasValue().ensureIsObject();
+        Utilities.configureMetaOnContext(context, keyOrTarget);
+    }
+}
+class Utilities {
+    static fetchSerializableFieldsForObject(val) {
+        const meta = val.constructor[Symbol.metadata];
+        if (meta == null)
+            return [];
+        const fields = meta[this._fetchSerializableFieldsKey()];
+        if (fields == null || fields.isEmpty)
+            return [];
+        const className = val.constructor.name;
+        given(className, className)
+            .ensure(t => {
+            const key = this._fetchSerializableClassKey(t);
+            const isSerializable = val.constructor[Symbol.metadata][key];
+            return isSerializable === true;
+        }, `class '${className}' should have the serialize decorator`);
+        return fields;
+    }
+    static configureMetaOnContext(context, target, key) {
+        given(context, "context").ensureHasValue().ensureIsObject();
+        given(target, "target").ensureHasValue().ensureIsFunction();
+        given(key, "key").ensureIsString();
         const kind = context.kind;
         given(kind, "kind").ensure(t => ["getter", "class"].contains(t), "serialize can only be used on getters or class");
         if (kind === "getter") {
@@ -132,10 +163,10 @@ export function serialize(key) {
                 .ensure(t => !t.static, "property should not be static");
             const fieldInfo = {
                 name: context.name.toString(),
-                value,
-                key: inputKey?.trim()
+                target,
+                key
             };
-            const fieldsKey = Utilities.fetchSerializableFieldsKey();
+            const fieldsKey = this._fetchSerializableFieldsKey();
             const existingFields = context.metadata[fieldsKey] ?? [];
             context.metadata[fieldsKey] = [
                 ...existingFields.where(t => t.name !== context.name), // filtering out any info that might have been overridden
@@ -144,44 +175,23 @@ export function serialize(key) {
             context.addInitializer(function () {
                 const className = this.constructor.name;
                 given(className, "className")
-                    .ensure(t => this.constructor[Symbol.metadata][Utilities.fetchSerializableClassKey(t)] === true, `class '${className}' does not have the serialize decorator`);
+                    .ensure(t => this.constructor[Symbol.metadata][Utilities._fetchSerializableClassKey(t)] === true, `class '${className}' does not have the serialize decorator`);
             });
         }
         else {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            given(inputKey, "inputKey").ensure(t => t == null, "can't put a key when decorator is used on a class");
-            given(value, "value")
+            given(target, "target")
                 .ensure(t => t.prototype instanceof Serializable, `class '${context.name}' decorated with serialize must extend Serializable`);
-            Deserializer.registerType(value);
-            const key = Utilities.fetchSerializableClassKey(context.name);
+            Deserializer.registerType(target);
+            const key = Utilities._fetchSerializableClassKey(context.name);
             context.metadata[key] = true;
         }
-    };
-    return decorator;
-}
-class Utilities {
-    static fetchSerializableClassKey(className) {
+    }
+    static _fetchSerializableClassKey(className) {
         given(className, "className").ensureHasValue().ensureIsString();
         return Symbol.for(`@nivinjoseph/n-util/serializable/${className}/isSerializable`);
     }
-    static fetchSerializableFieldsKey() {
+    static _fetchSerializableFieldsKey() {
         return Symbol.for("@nivinjoseph/n-util/serializable/fields");
-    }
-    static fetchSerializableFieldsForObject(val) {
-        const meta = val.constructor[Symbol.metadata];
-        if (meta == null)
-            return [];
-        const fields = meta[this.fetchSerializableFieldsKey()];
-        if (fields == null || fields.isEmpty)
-            return [];
-        const className = val.constructor.name;
-        given(className, className)
-            .ensure(t => {
-            const key = this.fetchSerializableClassKey(t);
-            const isSerializable = val.constructor[Symbol.metadata][key];
-            return isSerializable === true;
-        }, `class '${className}' should have the serialize decorator`);
-        return fields;
     }
 }
 //# sourceMappingURL=serializable.js.map
