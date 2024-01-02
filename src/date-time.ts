@@ -5,7 +5,7 @@ import { Duration } from "./duration.js";
 import { Schema } from "./utility-types.js";
 import { TypeHelper } from "./type-helper.js";
 
-@serialize()
+@serialize
 export class DateTime extends Serializable<DateTimeSchema>
 {
 
@@ -27,10 +27,10 @@ export class DateTime extends Serializable<DateTimeSchema>
     public static get currentZone(): string { return LuxonDateTime.local().zoneName; }
 
 
-    @serialize()
+    @serialize
     public get value(): string { return this._value; }
 
-    @serialize()
+    @serialize
     public get zone(): string { return this._zone; }
 
     public get timestamp(): number { return this._timestamp; }

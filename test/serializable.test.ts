@@ -8,13 +8,13 @@ type AddressSchema = {
     street: string;
     locality: string;
 };
-@serialize()
+@serialize
 class Address extends Serializable<AddressSchema>
 {
     private readonly _street: string;
     private readonly _city: string;
 
-    @serialize()
+    @serialize
     public get street(): string { return this._street; }
 
     @serialize("locality")
@@ -50,7 +50,7 @@ interface FullName
     lastName: string;
 }
 
-@serialize()
+@serialize
 class Dummy extends Serializable
 {
     public constructor()
@@ -64,7 +64,7 @@ class Dummy extends Serializable
     }
 }
 
-@serialize()
+@serialize
 class Employee extends Serializable
 {
     private readonly _id: string;
@@ -72,16 +72,16 @@ class Employee extends Serializable
     private readonly _address: Address;
     private readonly _dummy: Dummy;
 
-    @serialize()
+    @serialize
     public get id(): string { return this._id; }
 
-    @serialize()
+    @serialize
     public get name(): FullName { return this._name; }
 
-    @serialize()
+    @serialize
     public get address(): Address { return this._address; }
 
-    @serialize()
+    @serialize
     public get dummy(): Dummy { return this._dummy; }
 
 
@@ -106,16 +106,16 @@ class Employee extends Serializable
 }
 
 
-@serialize()
+@serialize
 class Dummy2 extends Dummy
 {
-    @serialize()
+    @serialize
     public get field1(): string { return "Dummy2 Field 1"; }
 
     @serialize("field2Key")
     public get field2(): string { return "Dummy2 Field 2"; }
 
-    @serialize()
+    @serialize
     public get field3(): string { return "Dummy2 Field 3"; }
 
     public constructor()
@@ -131,16 +131,16 @@ class Dummy2 extends Dummy
 
 
 
-@serialize()
+@serialize
 class Dummy3 extends Dummy2
 {
-    @serialize()
+    @serialize
     public override get field1(): string { return "Dummy3 Field 1"; }
 
     @serialize("newKeyForField2")
     public override get field2(): string { return "Dummy3 Field 2"; }
 
-    @serialize()
+    @serialize
     public get field4(): string { return "Dummy3 Field 4"; }
 }
 
