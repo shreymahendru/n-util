@@ -10,7 +10,7 @@ export function throttle<
     Args extends Array<any>,
     Return extends Promise<void> | void>(
         delay: Duration
-    ): ThrottleClassMethodDecorator<This, Args, Return>;
+    ): ThrottleMethodDecorator<This, Args, Return>;
 export function throttle<
     This,
     Args extends Array<any>,
@@ -25,7 +25,7 @@ export function throttle<
     Return extends Promise<void> | void>(
         delayOrTarget: Duration | DecoratorTargetMethod<This, Args, Return>,
         context?: MethodDecoratorContext<This, Args, Return>
-    ): ThrottleClassMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
+    ): ThrottleMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -33,7 +33,7 @@ export function throttle<
         given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
             .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        const decorator: ThrottleClassMethodDecorator<This, Args, Return> = function (target, context)
+        const decorator: ThrottleMethodDecorator<This, Args, Return> = function (target, context)
         {
             return createReplacementMethod(target, context, delay);
         };
@@ -104,7 +104,7 @@ function createReplacementMethod<
 
 
 
-export type ThrottleClassMethodDecorator<
+export type ThrottleMethodDecorator<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void

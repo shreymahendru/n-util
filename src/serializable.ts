@@ -190,21 +190,21 @@ export function serialize<Class extends Serializable, T>(
 ): void;
 export function serialize<Class extends Serializable, T>(
     key: string
-): SerializeClassGetterDecorator<Class, T>;
+): SerializeGetterDecorator<Class, T>;
 export function serialize<
     Class extends Serializable,
     T
 >(
     keyOrTarget: string | SerializableClass<Class> | SerializableClassGetter<Class, T>,
     context?: ClassDecoratorContext<SerializableClass<Class>> | ClassGetterDecoratorContext<Class, T>
-): SerializeClassGetterDecorator<Class, T> | void // eslint-disable-line @typescript-eslint/no-invalid-void-type
+): SerializeGetterDecorator<Class, T> | void // eslint-disable-line @typescript-eslint/no-invalid-void-type
 {
     if (typeof keyOrTarget === "string")
     {
         const key = keyOrTarget;
         given(key, "key").ensureHasValue().ensureIsString();
 
-        const decorator: SerializeClassGetterDecorator<Class, T> = function (target, context): void
+        const decorator: SerializeGetterDecorator<Class, T> = function (target, context): void
         {
             Utilities.configureMetaOnContext(context, target, key);
         };
@@ -322,7 +322,7 @@ export type SerializableClassGetter<This extends Serializable, T> = (this: This)
 
 
 
-export type SerializeClassGetterDecorator<Class extends Serializable, T> = (
+export type SerializeGetterDecorator<Class extends Serializable, T> = (
     target: SerializableClassGetter<Class, T>,
     context: ClassGetterDecoratorContext<Class, T>
 ) => void;

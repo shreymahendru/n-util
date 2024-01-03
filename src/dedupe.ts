@@ -10,7 +10,7 @@ export function dedupe<
     Return extends Promise<void> | void
 >(
     delay: Duration
-): DedupeClassMethodDecorator<This, Args, Return>;
+): DedupeMethodDecorator<This, Args, Return>;
 export function dedupe<
     This,
     Args extends Array<any>,
@@ -26,7 +26,7 @@ export function dedupe<
 >(
     delayOrTarget: Duration | DecoratorTargetMethod<This, Args, Return>,
     context?: MethodDecoratorContext<This, Args, Return>
-): DedupeClassMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
+): DedupeMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -34,7 +34,7 @@ export function dedupe<
         given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
             .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        const decorator: DedupeClassMethodDecorator<This, Args, Return> = function (target, context)
+        const decorator: DedupeMethodDecorator<This, Args, Return> = function (target, context)
         {
             return createReplacementMethod(target, context, delay);
         };
@@ -94,7 +94,7 @@ function createReplacementMethod<
 
 
 
-export type DedupeClassMethodDecorator<
+export type DedupeMethodDecorator<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void

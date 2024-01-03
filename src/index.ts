@@ -19,19 +19,19 @@ export { HtmlSanitizer } from "./html-sanitizer.js";
 export
 {
     Serializable, serialize, Deserializer,
-    SerializableClass, SerializableClassGetter, SerializeClassGetterDecorator
+    SerializableClass, SerializableClassGetter, SerializeGetterDecorator
 } from "./serializable.js";
 export { DtoFactory } from "./dto-factory.js";
 export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types.js";
 export { Observer, Observable, Subscription } from "./observer.js";
-export { debounce, DebounceClassMethodDecorator } from "./debounce.js";
-export { dedupe, DedupeClassMethodDecorator } from "./dedupe.js";
+export { debounce, DebounceMethodDecorator } from "./debounce.js";
+export { dedupe, DedupeMethodDecorator  } from "./dedupe.js";
 export
 {
-    synchronize, SynchronizeClassMethodDecorator, SynchronizeDecoratorContext, SynchronizeDecoratorReplacementMethod,
+    synchronize, SynchronizeMethodDecorator, SynchronizeDecoratorContext, SynchronizeDecoratorReplacementMethod,
     SynchronizeDecoratorTargetMethod
 } from "./synchronize.js";
-export { throttle, ThrottleClassMethodDecorator } from "./throttle.js";
+export { throttle, ThrottleMethodDecorator } from "./throttle.js";
 export { DecoratorTargetMethod, DecoratorReplacementMethod, MethodDecoratorContext } from "./decorator-helpers.js";
 export { DateTime, DateTimeSchema } from "./date-time.js";
 

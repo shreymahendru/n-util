@@ -10,7 +10,7 @@ export function synchronize<
     Args extends Array<any>
 >(
     delay: Duration
-): SynchronizeClassMethodDecorator<This, Args>;
+): SynchronizeMethodDecorator<This, Args>;
 export function synchronize<
     This,
     Args extends Array<any>
@@ -24,7 +24,7 @@ export function synchronize<
 >(
     delayOrTarget: Duration | SynchronizeDecoratorTargetMethod<This, Args>,
     context?: SynchronizeDecoratorContext<This, Args>
-): SynchronizeClassMethodDecorator<This, Args> | SynchronizeDecoratorReplacementMethod<This, Args>
+): SynchronizeMethodDecorator<This, Args> | SynchronizeDecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -32,7 +32,7 @@ export function synchronize<
         given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
             .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        const decorator: SynchronizeClassMethodDecorator<This, Args> = function (target, context)
+        const decorator: SynchronizeMethodDecorator<This, Args> = function (target, context)
         {
             return createReplacementMethod(target, context, delay);
         };
@@ -106,7 +106,7 @@ export type SynchronizeDecoratorContext<
 > = ClassMethodDecoratorContext<This, SynchronizeDecoratorTargetMethod<This, Args>>;
 
 
-export type SynchronizeClassMethodDecorator<
+export type SynchronizeMethodDecorator<
     This,
     Args extends Array<any>
 > = (

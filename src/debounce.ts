@@ -10,7 +10,7 @@ export function debounce<
     Args extends Array<any>,
     Return extends Promise<void> | void>(
         delay: Duration
-    ): DebounceClassMethodDecorator<This, Args, Return>;
+    ): DebounceMethodDecorator<This, Args, Return>;
 export function debounce<
     This,
     Args extends Array<any>,
@@ -25,7 +25,7 @@ export function debounce<
     Return extends Promise<void> | void>(
         delayOrTarget: Duration | DecoratorTargetMethod<This, Args, Return>,
         context?: MethodDecoratorContext<This, Args, Return>
-    ): DebounceClassMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
+    ): DebounceMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -33,7 +33,7 @@ export function debounce<
         given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
             .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        const decorator: DebounceClassMethodDecorator<This, Args, Return> = function (target, context)
+        const decorator: DebounceMethodDecorator<This, Args, Return> = function (target, context)
         {
             return createReplacementMethod(target, context, delay);
         };
@@ -97,7 +97,7 @@ function createReplacementMethod<
 
 
 
-export type DebounceClassMethodDecorator<
+export type DebounceMethodDecorator<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void
