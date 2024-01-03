@@ -2,6 +2,7 @@ import { given } from "@nivinjoseph/n-defensive";
 import { Duration } from "./duration.js";
 import { Delay } from "./delay.js";
 import { ApplicationException } from "@nivinjoseph/n-exception";
+import { DecoratorReplacementMethod, DecoratorTargetMethod, MethodDecoratorContext } from "./decorator-helpers.js";
 
 export function dedupe<
     This,
@@ -15,17 +16,17 @@ export function dedupe<
     Args extends Array<any>,
     Return extends Promise<void> | void
 >(
-    target: TargetFunction<This, Args, Return>,
-    context: Context<This, Args, Return>
-): ReplacementFunction<This, Args>;
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>
+): DecoratorReplacementMethod<This, Args>;
 export function dedupe<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void
 >(
-    delayOrTarget: Duration | TargetFunction<This, Args, Return>,
-    context?: Context<This, Args, Return>
-): DedupeClassMethodDecorator<This, Args, Return> | ReplacementFunction<This, Args>
+    delayOrTarget: Duration | DecoratorTargetMethod<This, Args, Return>,
+    context?: MethodDecoratorContext<This, Args, Return>
+): DedupeClassMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -35,7 +36,7 @@ export function dedupe<
 
         const decorator: DedupeClassMethodDecorator<This, Args, Return> = function (target, context)
         {
-            return createReplacementFunction(target, context, delay);
+            return createReplacementMethod(target, context, delay);
         };
 
         return decorator;
@@ -45,23 +46,23 @@ export function dedupe<
     if (context == null)
         throw new ApplicationException("Context should not be null or undefined");
 
-    return createReplacementFunction(target, context, null);
+    return createReplacementMethod(target, context, null);
 }
 
 
-function createReplacementFunction<
+function createReplacementMethod<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void
 >(
-    target: TargetFunction<This, Args, Return>,
-    context: Context<This, Args, Return>,
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>,
     delay: Duration | null
-): ReplacementFunction<This, Args>
+): DecoratorReplacementMethod<This, Args>
 {
 
     const { name, kind } = context;
-    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
+    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method", "dedupe decorator can only be used on a method");
 
     const activeKey = Symbol.for(`@nivinjoseph/n-util/dedupe/${String(name)}/isActive`);
     // setting value to false on initialization.
@@ -92,28 +93,12 @@ function createReplacementFunction<
 }
 
 
-type TargetFunction<
-    This,
-    Args extends Array<any>,
-    Return extends Promise<void> | void
-> = (this: This, ...args: Args) => Return;
 
-type ReplacementFunction<
-    This,
-    Args extends Array<any>
-> = (this: This, ...args: Args) => Promise<void>;
-
-type Context<
-    This,
-    Args extends Array<any>,
-    Return extends Promise<void> | void
-> = ClassMethodDecoratorContext<This, TargetFunction<This, Args, Return>>;
-
-type DedupeClassMethodDecorator<
+export type DedupeClassMethodDecorator<
     This,
     Args extends Array<any>,
     Return extends Promise<void> | void
 > = (
-    target: TargetFunction<This, Args, Return>,
-    context: Context<This, Args, Return>
-) => ReplacementFunction<This, Args>;
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>
+) => DecoratorReplacementMethod<This, Args>;

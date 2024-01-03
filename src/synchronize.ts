@@ -15,16 +15,16 @@ export function synchronize<
     This,
     Args extends Array<any>
 >(
-    target: TargetFunction<This, Args>,
-    context: Context<This, Args>
-): ReplacementFunction<This, Args>;
+    target: SynchronizeDecoratorTargetMethod<This, Args>,
+    context: SynchronizeDecoratorContext<This, Args>
+): SynchronizeDecoratorReplacementMethod<This, Args>;
 export function synchronize<
     This,
     Args extends Array<any>
 >(
-    delayOrTarget: Duration | TargetFunction<This, Args>,
-    context?: Context<This, Args>
-): SynchronizeClassMethodDecorator<This, Args> | ReplacementFunction<This, Args>
+    delayOrTarget: Duration | SynchronizeDecoratorTargetMethod<This, Args>,
+    context?: SynchronizeDecoratorContext<This, Args>
+): SynchronizeClassMethodDecorator<This, Args> | SynchronizeDecoratorReplacementMethod<This, Args>
 {
     if (delayOrTarget instanceof Duration)
     {
@@ -34,7 +34,7 @@ export function synchronize<
 
         const decorator: SynchronizeClassMethodDecorator<This, Args> = function (target, context)
         {
-            return createReplacementFunction(target, context, delay);
+            return createReplacementMethod(target, context, delay);
         };
 
         return decorator;
@@ -44,21 +44,21 @@ export function synchronize<
     if (context == null)
         throw new ApplicationException("Context should not be null or undefined");
 
-    return createReplacementFunction(target, context, null);
+    return createReplacementMethod(target, context, null);
 }
 
 
-function createReplacementFunction<
+function createReplacementMethod<
     This,
     Args extends Array<any>
 >(
-    target: TargetFunction<This, Args>,
-    context: Context<This, Args>,
+    target: SynchronizeDecoratorTargetMethod<This, Args>,
+    context: SynchronizeDecoratorContext<This, Args>,
     delay: Duration | null
-): ReplacementFunction<This, Args>
+): SynchronizeDecoratorReplacementMethod<This, Args>
 {
     const { name, kind } = context;
-    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method");
+    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method", "synchronize decorated can only be used on a method");
 
     const mutexKey = Symbol.for(`@nivinjoseph/n-util/synchronize/${String(name)}/mutex`);
 
@@ -90,26 +90,26 @@ function createReplacementFunction<
 
 
 
-type TargetFunction<
+export type SynchronizeDecoratorTargetMethod<
     This,
     Args extends Array<any>
 > = (this: This, ...args: Args) => any;
 
-type ReplacementFunction<
+export type SynchronizeDecoratorReplacementMethod<
     This,
     Args extends Array<any>
 > = (this: This, ...args: Args) => Promise<any>;
 
-type Context<
+export type SynchronizeDecoratorContext<
     This,
     Args extends Array<any>
-> = ClassMethodDecoratorContext<This, TargetFunction<This, Args>>;
+> = ClassMethodDecoratorContext<This, SynchronizeDecoratorTargetMethod<This, Args>>;
 
 
-type SynchronizeClassMethodDecorator<
+export type SynchronizeClassMethodDecorator<
     This,
     Args extends Array<any>
 > = (
-    value: TargetFunction<This, Args>,
-    context: Context<This, Args>
-) => ReplacementFunction<This, Args>;
+    value: SynchronizeDecoratorTargetMethod<This, Args>,
+    context: SynchronizeDecoratorContext<This, Args>
+) => SynchronizeDecoratorReplacementMethod<This, Args>;

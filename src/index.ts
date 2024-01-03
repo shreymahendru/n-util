@@ -16,14 +16,23 @@ export { Version } from "./version.js";
 export { Profiler, ProfilerTrace } from "./profiler.js";
 export { Templator } from "./templator.js";
 export { HtmlSanitizer } from "./html-sanitizer.js";
-export { Serializable, serialize, Deserializer } from "./serializable.js";
+export
+{
+    Serializable, serialize, Deserializer,
+    SerializableClass, SerializableClassGetter, SerializeClassGetterDecorator
+} from "./serializable.js";
 export { DtoFactory } from "./dto-factory.js";
 export { PartialPick, Schema, PartialSchema, ClassDefinition, ClassHierarchy } from "./utility-types.js";
 export { Observer, Observable, Subscription } from "./observer.js";
-export { debounce } from "./debounce.js";
-export { dedupe } from "./dedupe.js";
-export { synchronize } from "./synchronize.js";
-export { throttle } from "./throttle.js";
+export { debounce, DebounceClassMethodDecorator } from "./debounce.js";
+export { dedupe, DedupeClassMethodDecorator } from "./dedupe.js";
+export
+{
+    synchronize, SynchronizeClassMethodDecorator, SynchronizeDecoratorContext, SynchronizeDecoratorReplacementMethod,
+    SynchronizeDecoratorTargetMethod
+} from "./synchronize.js";
+export { throttle, ThrottleClassMethodDecorator } from "./throttle.js";
+export { DecoratorTargetMethod, DecoratorReplacementMethod, MethodDecoratorContext } from "./decorator-helpers.js";
 export { DateTime, DateTimeSchema } from "./date-time.js";
 
 

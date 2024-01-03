@@ -317,12 +317,12 @@ class Utilities
 }
 
 
-type SerializableClass<This extends Serializable> = ClassDefinition<This>;
-type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
+export type SerializableClass<This extends Serializable> = ClassDefinition<This>;
+export type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
 
 
 
-type SerializeClassGetterDecorator<Class extends Serializable, T> = (
+export type SerializeClassGetterDecorator<Class extends Serializable, T> = (
     target: SerializableClassGetter<Class, T>,
     context: ClassGetterDecoratorContext<Class, T>
 ) => void;
