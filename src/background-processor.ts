@@ -1,6 +1,6 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Delay } from "./delay";
-import { Disposable } from "./disposable";
+import { Delay } from "./delay.js";
+import { Disposable } from "./disposable.js";
 import { ObjectDisposedException } from "@nivinjoseph/n-exception";
 
 // public

@@ -1,19 +1,18 @@
-import * as Assert from "assert";
-import { DateTime } from "../../src/date-time";
-import { Duration } from "../../src";
 import { given } from "@nivinjoseph/n-defensive";
-import { IANAZone } from "luxon";
 import { ArgumentException } from "@nivinjoseph/n-exception";
+import assert from "node:assert";
+import { describe, test } from "node:test";
+import { DateTime, Duration } from "../../src/index.js";
 
 
-suite("DateTime Comparison", () =>
+await describe("DateTime Comparison", async () =>
 {
 
-    function testDifferentSetOfValues(compareFunction: (minValue: string, maxValue: string, diff: string,
-        timeDiff: Duration, daysDiff: number) => void): void
+    async function testDifferentSetOfValues(compareFunction: (minValue: string, maxValue: string, diff: string,
+        timeDiff: Duration, daysDiff: number) => Promise<void>): Promise<void>
     {
         // Compare different minutes in same zone
-        compareFunction(
+        await compareFunction(
             "2024-01-01 10:00",
             "2024-01-01 10:01",
             "1 minute",
@@ -22,7 +21,7 @@ suite("DateTime Comparison", () =>
         );
 
         // Compare different hours in same zone
-        compareFunction(
+        await compareFunction(
             "2024-01-01 10:00",
             "2024-01-01 11:00",
             "1 hour",
@@ -31,7 +30,7 @@ suite("DateTime Comparison", () =>
         );
 
         // Compare different days in same zone
-        compareFunction(
+        await compareFunction(
             "2024-01-01 10:00",
             "2024-01-02 10:00",
             "1 day",
@@ -40,7 +39,7 @@ suite("DateTime Comparison", () =>
         );
 
         // Compare different months in same zone
-        compareFunction(
+        await compareFunction(
             "2024-01-01 10:00",
             "2024-02-01 10:00",
             "1 month",
@@ -49,7 +48,7 @@ suite("DateTime Comparison", () =>
         );
 
         // Compare different years in same zone
-        compareFunction(
+        await compareFunction(
             "2023-01-01 10:00",
             "2024-01-01 10:00",
             "1 year",
@@ -58,7 +57,7 @@ suite("DateTime Comparison", () =>
         );
 
         // Compare different years (leap year) in same zone
-        compareFunction(
+        await compareFunction(
             "2024-01-01 10:00",
             "2025-01-01 10:00",
             "1 year",
@@ -68,14 +67,12 @@ suite("DateTime Comparison", () =>
     }
 
 
-    function testDifferentZones(compareFunction: (value: string, behindZone: string, aheadZone: string, diff: string,
-        timeDiff: Duration, daysDiff: number) => void): void
+    async function testDifferentZones(compareFunction: (value: string, behindZone: string, aheadZone: string, diff: string,
+        timeDiff: Duration, daysDiff: number) => Promise<void>): Promise<void>
     {
-        const value = "2024-01-01 10:00";
-
         // Compare same value but different zones utc and IST (UTC+5:30)
-        compareFunction(
-            value,
+        await compareFunction(
+            "2024-01-01 10:00",
             "utc",
             "UTC+5:30",
             "5 hour 30 minute",
@@ -85,68 +82,73 @@ suite("DateTime Comparison", () =>
 
         // Compare same value but different zones America/Los_Angeles and utc
         // could be 7 or 8 based on Daylight savings
-        const diffHourInDstToUtc = Math.abs(Number.parseInt(
-            IANAZone.create("America/Los_Angeles").formatOffset(Date.now(), "narrow")));
-        compareFunction(
-            value,
+        await compareFunction(
+            "2024-01-01 10:00",
             "America/Los_Angeles",
             "utc",
-            `${diffHourInDstToUtc} hours`,
-            Duration.fromHours(diffHourInDstToUtc),
+            `8 hours`,
+            Duration.fromHours(8),
             0
         );
 
         // Compare same value but different zones America/Los_Angeles and IST(UTC+5:30)
         // could be 12.5 or 13.5 based on Daylight savings
-        const diffHourInDstToIst = Math.abs(Number.parseInt(
-            IANAZone.create("America/Los_Angeles").formatOffset(Date.now(), "narrow"))) + 5.5;
-        compareFunction(
-            value,
+        await compareFunction(
+            "2024-01-01 10:00",
             "America/Los_Angeles",
             "UTC+5:30",
-            `${diffHourInDstToIst} hours`,
-            Duration.fromHours(diffHourInDstToIst),
+            `13 hours 30 minutes`,
+            Duration.fromHours(13.5),
+            0
+        );
+
+        await compareFunction(
+            "2024-06-01 10:00",
+            "America/Los_Angeles",
+            "UTC+5:30",
+            `12 hours 30 minutes`,
+            Duration.fromHours(12.5),
             0
         );
     }
 
 
-    function testSameTimestampDifferentValueAndZone(compareFunction: (dateTime1: DateTime, dateTime2: DateTime) => void): void
+    async function testSameTimestampDifferentValueAndZone(compareFunction: (dateTime1: DateTime, dateTime2: DateTime) => Promise<void>): Promise<void>
     {
         const utcDateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
         // Compare different value and zones utc and IST but represent same time
-        compareFunction(
+        await compareFunction(
             utcDateTime,
             utcDateTime.convertToZone("UTC+5:30")
         );
 
         // Compare different value and zones America/Los_Angeles and utc but represent same time
-        compareFunction(
+        await compareFunction(
             utcDateTime,
             utcDateTime.convertToZone("America/Los_Angeles")
         );
 
         // Compare different value and zones America/Los_Angeles and utc but represent same time
-        compareFunction(
+        await compareFunction(
             utcDateTime.convertToZone("UTC+5:30"),
             utcDateTime.convertToZone("America/Los_Angeles")
         );
     }
 
-    suite("DateTime.min", () =>
+    await describe("DateTime.min", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's compared with DateTime.min 
         then it should return the min DateTime object`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.strictEqual(DateTime.min(dateTime, dateTime), dateTime); // return second arg when same
+                assert.strictEqual(DateTime.min(dateTime, dateTime), dateTime); // return second arg when same
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's compared with DateTime.min 
         then it should return the second dateTime that's passed in`,
             () =>
@@ -154,12 +156,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(DateTime.min(dateTime1, dateTime2), dateTime2); // return second arg when same
-                Assert.strictEqual(DateTime.min(dateTime2, dateTime1), dateTime1); // return second arg when same
+                assert.strictEqual(DateTime.min(dateTime1, dateTime2), dateTime2); // return second arg when same
+                assert.strictEqual(DateTime.min(dateTime2, dateTime1), dateTime1); // return second arg when same
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -170,20 +172,20 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's compared with DateTime.min 
             then it should return the one with value ${minValue}`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.min(min, max), min);
-                    Assert.strictEqual(DateTime.min(max, min), min);
+                    assert.strictEqual(DateTime.min(min, max), min);
+                    assert.strictEqual(DateTime.min(max, min), min);
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -199,52 +201,52 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
             when it's compared with DateTime.min 
             then it should return the one with zone ${aheadZone}`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.min(min, max), min);
-                    Assert.strictEqual(DateTime.min(max, min), min);
+                    assert.strictEqual(DateTime.min(min, max), min);
+                    assert.strictEqual(DateTime.min(max, min), min);
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
             when it's compared with DateTime.min 
             then it should return the second dateTime that's passed in`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.min(dateTime1, dateTime2), dateTime2); // return second arg when same
-                    Assert.strictEqual(DateTime.min(dateTime2, dateTime1), dateTime1); // return second arg when same
+                    assert.strictEqual(DateTime.min(dateTime1, dateTime2), dateTime2); // return second arg when same
+                    assert.strictEqual(DateTime.min(dateTime2, dateTime1), dateTime1); // return second arg when same
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime.max", () =>
+    await describe("DateTime.max", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's compared with DateTime.max 
         then it should return the max DateTime object`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.strictEqual(DateTime.max(dateTime, dateTime), dateTime); // return second arg when same
+                assert.strictEqual(DateTime.max(dateTime, dateTime), dateTime); // return second arg when same
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's compared with DateTime.max 
         then it should return the second dateTime that's passed in`,
             () =>
@@ -252,13 +254,13 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(DateTime.max(dateTime1, dateTime2), dateTime2); // return second arg when same
-                Assert.strictEqual(DateTime.max(dateTime2, dateTime1), dateTime1); // return second arg when same
+                assert.strictEqual(DateTime.max(dateTime1, dateTime2), dateTime2); // return second arg when same
+                assert.strictEqual(DateTime.max(dateTime2, dateTime1), dateTime1); // return second arg when same
             }
         );
 
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -269,20 +271,20 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's compared with DateTime.max 
             then it should return the one with value ${maxValue}`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.max(min, max), max);
-                    Assert.strictEqual(DateTime.max(max, min), max);
+                    assert.strictEqual(DateTime.max(min, max), max);
+                    assert.strictEqual(DateTime.max(max, min), max);
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -298,52 +300,52 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
             when it's compared with DateTime.max 
             then it should return the one with zone ${aheadZone}`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.max(min, max), max);
-                    Assert.strictEqual(DateTime.max(max, min), max);
+                    assert.strictEqual(DateTime.max(min, max), max);
+                    assert.strictEqual(DateTime.max(max, min), max);
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
             when it's compared with DateTime.max 
             then it should return the second dateTime that's passed in`,
                 () =>
                 {
-                    Assert.strictEqual(DateTime.max(dateTime1, dateTime2), dateTime2); // return second arg when same
-                    Assert.strictEqual(DateTime.max(dateTime2, dateTime1), dateTime1); // return second arg when same
+                    assert.strictEqual(DateTime.max(dateTime1, dateTime2), dateTime2); // return second arg when same
+                    assert.strictEqual(DateTime.max(dateTime2, dateTime1), dateTime1); // return second arg when same
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Same", () =>
+    await describe("DateTime Is Same", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one is same as the other
         then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(dateTime.isSame(dateTime));
+                assert.ok(dateTime.isSame(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one is same as the other
         then it should return true`,
             () =>
@@ -351,12 +353,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime1.isSame(dateTime2));
-                Assert.ok(dateTime2.isSame(dateTime1));
+                assert.ok(dateTime1.isSame(dateTime2));
+                assert.ok(dateTime2.isSame(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -367,20 +369,20 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked one is same as the other
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isSame(max));
-                    Assert.ok(!max.isSame(min));
+                    assert.ok(!min.isSame(max));
+                    assert.ok(!max.isSame(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -396,52 +398,52 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
             when it's checked one is same as the other
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isSame(max));
-                    Assert.ok(!max.isSame(min));
+                    assert.ok(!min.isSame(max));
+                    assert.ok(!max.isSame(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
             when it's checked one is same as the other
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime1.isSame(dateTime2));
-                    Assert.ok(dateTime2.isSame(dateTime1));
+                    assert.ok(dateTime1.isSame(dateTime2));
+                    assert.ok(dateTime2.isSame(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Same Day", () =>
+    await describe("DateTime Is Same Day", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when checking if they are on the same day
         then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(dateTime.isSameDay(dateTime));
+                assert.ok(dateTime.isSameDay(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when checking if they are on the same day
         then it should return true`,
             () =>
@@ -449,13 +451,13 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime1.isSameDay(dateTime2));
-                Assert.ok(dateTime2.isSameDay(dateTime1));
+                assert.ok(dateTime1.isSameDay(dateTime2));
+                assert.ok(dateTime2.isSameDay(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string,
-            _: Duration, daysDiff: number): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string,
+            _: Duration, daysDiff: number): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -467,21 +469,21 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when checking if they are on the same day
             then it should return ${daysDiff > 0}`,
                 () =>
                 {
-                    Assert.ok(daysDiff > 0 ? !min.isSameDay(max) : min.isSameDay(max));
-                    Assert.ok(daysDiff > 0 ? !max.isSameDay(min) : max.isSameDay(min));
+                    assert.ok(daysDiff > 0 ? !min.isSameDay(max) : min.isSameDay(max));
+                    assert.ok(daysDiff > 0 ? !max.isSameDay(min) : max.isSameDay(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string,
-            _: Duration, daysDiff: number): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string,
+            _: Duration, daysDiff: number): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -498,52 +500,52 @@ suite("DateTime Comparison", () =>
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when checking if they are on the same day
                 then it should return ${daysDiff > 0}`,
                 () =>
                 {
-                    Assert.ok(daysDiff > 0 ? !min.isSameDay(max) : min.isSameDay(max));
-                    Assert.ok(daysDiff > 0 ? !max.isSameDay(min) : max.isSameDay(min));
+                    assert.ok(daysDiff > 0 ? !min.isSameDay(max) : min.isSameDay(max));
+                    assert.ok(daysDiff > 0 ? !max.isSameDay(min) : max.isSameDay(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when checking if they are on the same day
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime1.isSameDay(dateTime2));
-                    Assert.ok(dateTime2.isSameDay(dateTime1));
+                    assert.ok(dateTime1.isSameDay(dateTime2));
+                    assert.ok(dateTime2.isSameDay(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Equals", () =>
+    await describe("DateTime Is Equals", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one equals the other
         then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(dateTime.equals(dateTime));
+                assert.ok(dateTime.equals(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one equals the other
         then it should return true`,
             () =>
@@ -551,12 +553,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime1.equals(dateTime2));
-                Assert.ok(dateTime2.equals(dateTime1));
+                assert.ok(dateTime1.equals(dateTime2));
+                assert.ok(dateTime2.equals(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -567,20 +569,20 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked one equals the other
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.equals(max));
-                    Assert.ok(!max.equals(min));
+                    assert.ok(!min.equals(max));
+                    assert.ok(!max.equals(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -596,52 +598,52 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked one equals the other
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.equals(max));
-                    Assert.ok(!max.equals(min));
+                    assert.ok(!min.equals(max));
+                    assert.ok(!max.equals(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when it's checked one equals the other
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!dateTime1.equals(dateTime2));
-                    Assert.ok(!dateTime2.equals(dateTime1));
+                    assert.ok(!dateTime1.equals(dateTime2));
+                    assert.ok(!dateTime2.equals(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Before", () =>
+    await describe("DateTime Is Before", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one is before the other
         then it should return false`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(!dateTime.isBefore(dateTime));
+                assert.ok(!dateTime.isBefore(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one is before the other
         then it should return false`,
             () =>
@@ -649,12 +651,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(!dateTime1.isBefore(dateTime2));
-                Assert.ok(!dateTime2.isBefore(dateTime1));
+                assert.ok(!dateTime1.isBefore(dateTime2));
+                assert.ok(!dateTime2.isBefore(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -665,28 +667,28 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${minValue} is before the dateTime with value ${maxValue}
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(min.isBefore(max));
+                    assert.ok(min.isBefore(max));
                 }
             );
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${maxValue} is before the dateTime with value ${minValue}
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!max.isBefore(min));
+                    assert.ok(!max.isBefore(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -702,60 +704,60 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${aheadZone} is before the dateTime with zone ${behindZone}
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(min.isBefore(max));
+                    assert.ok(min.isBefore(max));
                 }
             );
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
             when it's checked dateTime with zone ${behindZone} is before the dateTime with zone ${aheadZone}
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!max.isBefore(min));
+                    assert.ok(!max.isBefore(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when it's checked one is before the other
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!dateTime1.isBefore(dateTime2));
-                    Assert.ok(!dateTime2.isBefore(dateTime1));
+                    assert.ok(!dateTime1.isBefore(dateTime2));
+                    assert.ok(!dateTime2.isBefore(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Same or Before", () =>
+    await describe("DateTime Is Same or Before", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one is same or before the other
         then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(dateTime.isSameOrBefore(dateTime));
+                assert.ok(dateTime.isSameOrBefore(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one is same or before the other
         then it should return true`,
             () =>
@@ -763,12 +765,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime1.isSameOrBefore(dateTime2));
-                Assert.ok(dateTime2.isSameOrBefore(dateTime1));
+                assert.ok(dateTime1.isSameOrBefore(dateTime2));
+                assert.ok(dateTime2.isSameOrBefore(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -779,28 +781,28 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${minValue} is same or before the dateTime with value ${maxValue}
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(min.isSameOrBefore(max));
+                    assert.ok(min.isSameOrBefore(max));
                 }
             );
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${maxValue} is same or before the dateTime with value ${minValue}
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!max.isSameOrBefore(min));
+                    assert.ok(!max.isSameOrBefore(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -816,60 +818,60 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${aheadZone} is same or before the dateTime with zone ${behindZone}
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(min.isSameOrBefore(max));
+                    assert.ok(min.isSameOrBefore(max));
                 }
             );
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${behindZone} is same or before the dateTime with zone ${aheadZone}
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!max.isSameOrBefore(min));
+                    assert.ok(!max.isSameOrBefore(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when it's checked one is same or before the other
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime1.isSameOrBefore(dateTime2));
-                    Assert.ok(dateTime2.isSameOrBefore(dateTime1));
+                    assert.ok(dateTime1.isSameOrBefore(dateTime2));
+                    assert.ok(dateTime2.isSameOrBefore(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is After", () =>
+    await describe("DateTime Is After", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one is after the other
         then it should return false`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(!dateTime.isAfter(dateTime));
+                assert.ok(!dateTime.isAfter(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one is after the other
         then it should return false`,
             () =>
@@ -877,12 +879,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(!dateTime1.isAfter(dateTime2));
-                Assert.ok(!dateTime2.isAfter(dateTime1));
+                assert.ok(!dateTime1.isAfter(dateTime2));
+                assert.ok(!dateTime2.isAfter(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -893,28 +895,28 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${minValue} is after the dateTime with value ${maxValue}
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isAfter(max));
+                    assert.ok(!min.isAfter(max));
                 }
             );
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${maxValue} is after the dateTime with value ${minValue}
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(max.isAfter(min));
+                    assert.ok(max.isAfter(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -930,60 +932,60 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${aheadZone} is after the dateTime with zone ${behindZone}
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isAfter(max));
+                    assert.ok(!min.isAfter(max));
                 }
             );
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${behindZone} is after the dateTime with zone ${aheadZone}
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(max.isAfter(min));
+                    assert.ok(max.isAfter(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when it's checked one is after the other
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!dateTime1.isAfter(dateTime2));
-                    Assert.ok(!dateTime2.isAfter(dateTime1));
+                    assert.ok(!dateTime1.isAfter(dateTime2));
+                    assert.ok(!dateTime2.isAfter(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Is Same or After", () =>
+    await describe("DateTime Is Same or After", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when it's checked one is same or after the other
         then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
-                Assert.ok(dateTime.isSameOrAfter(dateTime));
+                assert.ok(dateTime.isSameOrAfter(dateTime));
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when it's checked one is same or after the other
         then it should return true`,
             () =>
@@ -991,12 +993,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime1.isSameOrAfter(dateTime2));
-                Assert.ok(dateTime2.isSameOrAfter(dateTime1));
+                assert.ok(dateTime1.isSameOrAfter(dateTime2));
+                assert.ok(dateTime2.isSameOrAfter(dateTime1));
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1007,29 +1009,29 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${minValue} is same or after the dateTime with value ${maxValue}
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isAfter(max));
-                    Assert.ok(!min.isSameOrAfter(max));
+                    assert.ok(!min.isAfter(max));
+                    assert.ok(!min.isSameOrAfter(max));
                 }
             );
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when it's checked dateTime with value ${maxValue} is same or after the dateTime with value ${minValue}
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(max.isSameOrAfter(min));
+                    assert.ok(max.isSameOrAfter(min));
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1045,61 +1047,61 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${aheadZone} is same or after the dateTime with zone ${behindZone}
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!min.isSameOrAfter(max));
+                    assert.ok(!min.isSameOrAfter(max));
                 }
             );
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when it's checked dateTime with zone ${behindZone} is same or after the dateTime with zone ${aheadZone}
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(max.isSameOrAfter(min));
+                    assert.ok(max.isSameOrAfter(min));
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when it's checked one is same or after the other
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime1.isSameOrAfter(dateTime2));
-                    Assert.ok(dateTime2.isSameOrAfter(dateTime1));
+                    assert.ok(dateTime1.isSameOrAfter(dateTime2));
+                    assert.ok(dateTime2.isSameOrAfter(dateTime1));
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Time Difference", () =>
+    await describe("DateTime Time Difference", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when checking the time difference between them
         then it should return Duration of 0 milliseconds`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(dateTime.timeDiff(dateTime).toMilliSeconds(), 0);
+                assert.strictEqual(dateTime.timeDiff(dateTime).toMilliSeconds(), 0);
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when checking the time difference between them
         then it should return Duration of 0 milliseconds`,
             () =>
@@ -1107,12 +1109,12 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(dateTime1.timeDiff(dateTime2).toMilliSeconds(), 0);
-                Assert.strictEqual(dateTime2.timeDiff(dateTime1).toMilliSeconds(), 0);
+                assert.strictEqual(dateTime1.timeDiff(dateTime2).toMilliSeconds(), 0);
+                assert.strictEqual(dateTime2.timeDiff(dateTime1).toMilliSeconds(), 0);
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string, timeDiff: Duration): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string, timeDiff: Duration): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1124,20 +1126,20 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when checking the time difference between them
             then it should return Duration of ${diff}`,
                 () =>
                 {
-                    Assert.strictEqual(min.timeDiff(max).toMilliSeconds(), timeDiff.toMilliSeconds());
-                    Assert.strictEqual(max.timeDiff(min).toMilliSeconds(), timeDiff.toMilliSeconds());
+                    assert.strictEqual(min.timeDiff(max).toMilliSeconds(), timeDiff.toMilliSeconds());
+                    assert.strictEqual(max.timeDiff(min).toMilliSeconds(), timeDiff.toMilliSeconds());
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string, timeDiff: Duration): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string, timeDiff: Duration): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1154,53 +1156,53 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when checking the time difference between them
                 then it should return Duration of ${diff}`,
                 () =>
                 {
-                    Assert.strictEqual(min.timeDiff(max).toMilliSeconds(), timeDiff.toMilliSeconds());
-                    Assert.strictEqual(max.timeDiff(min).toMilliSeconds(), timeDiff.toMilliSeconds());
+                    assert.strictEqual(min.timeDiff(max).toMilliSeconds(), timeDiff.toMilliSeconds());
+                    assert.strictEqual(max.timeDiff(min).toMilliSeconds(), timeDiff.toMilliSeconds());
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when checking the time difference between them
                 then it should return Duration of 0 milliseconds`,
                 () =>
                 {
-                    Assert.strictEqual(dateTime1.timeDiff(dateTime2).toMilliSeconds(), 0);
-                    Assert.strictEqual(dateTime2.timeDiff(dateTime1).toMilliSeconds(), 0);
+                    assert.strictEqual(dateTime1.timeDiff(dateTime2).toMilliSeconds(), 0);
+                    assert.strictEqual(dateTime2.timeDiff(dateTime1).toMilliSeconds(), 0);
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("DateTime Days Difference", () =>
+    await describe("DateTime Days Difference", async () =>
     {
-        test(`Given the same DateTime object
+        await test(`Given the same DateTime object
         when checking the difference between them in calendar days
         then it should return 0`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(dateTime.daysDiff(dateTime), 0);
+                assert.strictEqual(dateTime.daysDiff(dateTime), 0);
             }
         );
 
-        test(`Given two DateTime object with same value and zone
+        await test(`Given two DateTime object with same value and zone
         when checking the difference between them in calendar days
         then it should return 0`,
             () =>
@@ -1208,13 +1210,13 @@ suite("DateTime Comparison", () =>
                 const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
                 const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.strictEqual(dateTime1.daysDiff(dateTime2), 0);
-                Assert.strictEqual(dateTime2.daysDiff(dateTime1), 0);
+                assert.strictEqual(dateTime1.daysDiff(dateTime2), 0);
+                assert.strictEqual(dateTime2.daysDiff(dateTime1), 0);
             }
         );
 
-        function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string,
-            _: Duration, daysDiff: number): void
+        async function compareDateTimeWithDifferentValues(minValue: string, maxValue: string, diff: string,
+            _: Duration, daysDiff: number): Promise<void>
         {
             given(minValue, "minValue").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1226,21 +1228,21 @@ suite("DateTime Comparison", () =>
             const min = new DateTime({ value: minValue, zone: "utc" });
             const max = new DateTime({ value: maxValue, zone: "utc" });
 
-            test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
+            await test(`Given two DateTime objects ${minValue} and ${maxValue}, ${diff} apart in the same zone
             when checking the difference between them in calendar days
             then it should return ${daysDiff}`,
                 () =>
                 {
-                    Assert.strictEqual(min.daysDiff(max), daysDiff);
-                    Assert.strictEqual(max.daysDiff(min), daysDiff);
+                    assert.strictEqual(min.daysDiff(max), daysDiff);
+                    assert.strictEqual(max.daysDiff(min), daysDiff);
                 }
             );
         }
 
-        testDifferentSetOfValues(compareDateTimeWithDifferentValues);
+        await testDifferentSetOfValues(compareDateTimeWithDifferentValues);
 
-        function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string,
-            _: Duration, daysDiff: number): void
+        async function compareDateTimeWithDifferentZones(value: string, behindZone: string, aheadZone: string, diff: string,
+            _: Duration, daysDiff: number): Promise<void>
         {
             given(value, "value").ensureHasValue().ensureIsString()
                 .ensure(t => DateTime.validateDateTimeFormat(t));
@@ -1257,97 +1259,97 @@ suite("DateTime Comparison", () =>
             given(min, "min").ensure(t => t.timestamp < max.timestamp,
                 `zone ${aheadZone} is not ahead of ${behindZone}`);
 
-            test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
+            await test(`Given two DateTime object with same value and zones ${behindZone} and ${aheadZone} with difference ${diff}
                 when checking the difference between them in calendar days
                 then it should return ${daysDiff}`,
                 () =>
                 {
-                    Assert.strictEqual(min.daysDiff(max), daysDiff);
-                    Assert.strictEqual(max.daysDiff(min), daysDiff);
+                    assert.strictEqual(min.daysDiff(max), daysDiff);
+                    assert.strictEqual(max.daysDiff(min), daysDiff);
                 }
             );
         }
 
-        testDifferentZones(compareDateTimeWithDifferentZones);
+        await testDifferentZones(compareDateTimeWithDifferentZones);
 
-        function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): void
+        async function compareDateTimeWithSameTimestamp(dateTime1: DateTime, dateTime2: DateTime): Promise<void>
         {
             given(dateTime1, "dateTime1").ensureHasValue().ensureIsType(DateTime);
             given(dateTime2, "dateTime2").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.timestamp === dateTime1.timestamp, "Timestamps are different");
 
-            test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
+            await test(`Given two DateTime object with different value and zones (${dateTime1.toString()} and ${dateTime2.toString()}) but represents same time
                 when checking the difference between them in calendar days
                 then it should return 0`,
                 () =>
                 {
-                    Assert.strictEqual(dateTime1.daysDiff(dateTime2), 0);
-                    Assert.strictEqual(dateTime2.daysDiff(dateTime1), 0);
+                    assert.strictEqual(dateTime1.daysDiff(dateTime2), 0);
+                    assert.strictEqual(dateTime2.daysDiff(dateTime1), 0);
                 }
             );
         }
 
-        testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
+        await testSameTimestampDifferentValueAndZone(compareDateTimeWithSameTimestamp);
     });
 
-    suite("Compare three date time Is Between", () =>
+    await describe("Compare three date time Is Between", async () =>
     {
-        function checkIsInvalidParams(dateTime: DateTime, start: DateTime, end: DateTime): void
+        async function checkIsInvalidParams(dateTime: DateTime, start: DateTime, end: DateTime): Promise<void>
         {
-            test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
+            await test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
             when start DateTime timeStamp is after end DateTime timeStamp
             then it should throw a validation error`,
                 () =>
                 {
-                    Assert.throws(() => dateTime.isBetween(start, end), ArgumentException);
+                    assert.throws(() => dateTime.isBetween(start, end), ArgumentException);
                 }
             );
         }
 
-        function checkIsCorrect(dateTime: DateTime, start: DateTime, end: DateTime): void
+        async function checkIsCorrect(dateTime: DateTime, start: DateTime, end: DateTime): Promise<void>
         {
             given(dateTime, "dateTime").ensureHasValue().ensureIsType(DateTime);
             given(start, "start").ensureHasValue().ensureIsType(DateTime);
             given(end, "end").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.isSameOrAfter(start), "must be same or after start");
 
-            test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
+            await test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
             when dateTime is in between start and end
             then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime.isBetween(start, end));
+                    assert.ok(dateTime.isBetween(start, end));
                 }
             );
         }
 
-        function checkIsFalse(dateTime: DateTime, start: DateTime, end: DateTime): void
+        async function checkIsFalse(dateTime: DateTime, start: DateTime, end: DateTime): Promise<void>
         {
             given(dateTime, "dateTime").ensureHasValue().ensureIsType(DateTime);
             given(start, "start").ensureHasValue().ensureIsType(DateTime);
             given(end, "end").ensureHasValue().ensureIsType(DateTime)
                 .ensure(t => t.isSameOrAfter(start), "must be same or after start");
 
-            test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
+            await test(`Given a DateTime (${dateTime.toString()}), and a start (${start.toString()}) and end (${end.toString()}) DateTime
             when dateTime is not in between start and end
             then it should return false`,
                 () =>
                 {
-                    Assert.ok(!dateTime.isBetween(start, end));
+                    assert.ok(!dateTime.isBetween(start, end));
                 }
             );
         }
 
-        test(`Given dateTime start and end as the same DateTime object
+        await test(`Given dateTime start and end as the same DateTime object
         when it's checked it's between the same DateTime
         then it should return true`, () =>
         {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-            Assert.ok(dateTime.isBetween(dateTime, dateTime));
+            assert.ok(dateTime.isBetween(dateTime, dateTime));
         });
 
-        test(`Given dateTime start and end with same value and zone
+        await test(`Given dateTime start and end with same value and zone
         when it's compared isBetween
         then it should return true`, () =>
         {
@@ -1355,221 +1357,221 @@ suite("DateTime Comparison", () =>
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-            Assert.ok(dateTime1.isBetween(dateTime2, dateTime3));
-            Assert.ok(dateTime2.isBetween(dateTime1, dateTime3));
-            Assert.ok(dateTime3.isBetween(dateTime1, dateTime2));
+            assert.ok(dateTime1.isBetween(dateTime2, dateTime3));
+            assert.ok(dateTime2.isBetween(dateTime1, dateTime3));
+            assert.ok(dateTime3.isBetween(dateTime1, dateTime2));
         });
 
-        suite("Compare different minutes", () =>
+        await describe("Compare different minutes", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:01", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:02", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        suite("Compare different hours", () =>
+        await describe("Compare different hours", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 11:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 12:00", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        suite("Compare different days", () =>
+        await describe("Compare different days", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-02 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-03 10:00", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        suite("Compare different months", () =>
+        await describe("Compare different months", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-02-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-03-01 10:00", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        suite("Compare different years", () =>
+        await describe("Compare different years", async () =>
         {
             const dateTime1 = new DateTime({ value: "2023-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2025-01-01 10:00", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
 
-        suite("Compare different zones", () =>
+        await describe("Compare different zones", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "UTC+5:30" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:00", zone: "America/Los_Angeles" });
 
-            checkIsFalse(dateTime1, dateTime2, dateTime3);
-            checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
+            await checkIsFalse(dateTime1, dateTime2, dateTime3);
+            await checkIsInvalidParams(dateTime1, dateTime3, dateTime2);
 
-            checkIsCorrect(dateTime2, dateTime1, dateTime3);
-            checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
+            await checkIsCorrect(dateTime2, dateTime1, dateTime3);
+            await checkIsInvalidParams(dateTime2, dateTime3, dateTime1);
 
-            checkIsFalse(dateTime3, dateTime1, dateTime2);
-            checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
+            await checkIsFalse(dateTime3, dateTime1, dateTime2);
+            await checkIsInvalidParams(dateTime3, dateTime2, dateTime1);
         });
     });
 
-    suite("Compare DateTime is within time range", () =>
+    await describe("Compare DateTime is within time range", async () =>
     {
-        function checkIsInvalidParams(dateTime: DateTime, startTimeCode: string, endTimeCode: string, reason: string): void
+        async function checkIsInvalidParams(dateTime: DateTime, startTimeCode: string, endTimeCode: string, reason: string): Promise<void>
         {
-            test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode})
+            await test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode})
             when ${reason}
             then it should throw a validation error`,
                 () =>
                 {
-                    Assert.throws(() => dateTime.isWithinTimeRange(startTimeCode, endTimeCode), ArgumentException);
+                    assert.throws(() => dateTime.isWithinTimeRange(startTimeCode, endTimeCode), ArgumentException);
                 }
             );
         }
 
-        function checkIsCorrect(dateTime: DateTime, startTimeCode: string, endTimeCode: string): void
+        async function checkIsCorrect(dateTime: DateTime, startTimeCode: string, endTimeCode: string): Promise<void>
         {
             given(dateTime, "dateTime").ensureHasValue().ensureIsType(DateTime);
             given(startTimeCode, "startTimeCode").ensureHasValue().ensureIsString();
             given(endTimeCode, "startTimeCode").ensureHasValue().ensureIsString();
 
-            test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode})
+            await test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode})
                 when dateTime is within start and end time
                 then it should return true`,
                 () =>
                 {
-                    Assert.ok(dateTime.isWithinTimeRange(startTimeCode, endTimeCode));
+                    assert.ok(dateTime.isWithinTimeRange(startTimeCode, endTimeCode));
                 }
             );
         }
 
-        function checkIsFalse(dateTime: DateTime, startTimeCode: string, endTimeCode: string): void
+        async function checkIsFalse(dateTime: DateTime, startTimeCode: string, endTimeCode: string): Promise<void>
         {
             given(dateTime, "dateTime").ensureHasValue().ensureIsType(DateTime);
             given(startTimeCode, "startTimeCode").ensureHasValue().ensureIsString();
             given(endTimeCode, "startTimeCode").ensureHasValue().ensureIsString();
 
-            test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode}) 
+            await test(`Given a DateTime (${dateTime.toString()}), and a startTimeCode (${startTimeCode}) and endTimeCode (${endTimeCode}) 
                 when dateTime is not within start and end time
                 then it should return false`,
                 () =>
                 {
-                    Assert.ok(!dateTime.isWithinTimeRange(startTimeCode, endTimeCode));
+                    assert.ok(!dateTime.isWithinTimeRange(startTimeCode, endTimeCode));
                 }
             );
         }
 
-        test(`Given a DateTime, start and end time same as that dateTime
+        await test(`Given a DateTime, start and end time same as that dateTime
             when dateTime is checked to be within start and end time
             then it should return true`,
             () =>
             {
                 const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-                Assert.ok(dateTime.isWithinTimeRange(dateTime.timeCode, dateTime.timeCode));
+                assert.ok(dateTime.isWithinTimeRange(dateTime.timeCode, dateTime.timeCode));
             });
 
-        suite("Compare to Invalid start time code", () =>
+        await describe("Compare to Invalid start time code", async () =>
         {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-            checkIsInvalidParams(dateTime, "", "1000", "start time code is invalid");
-            checkIsInvalidParams(dateTime, "11", "1000", "start time code is invalid");
-            checkIsInvalidParams(dateTime, "10:00", "1000", "start time code is invalid");
-            checkIsInvalidParams(dateTime, "2400", "1000", "start time code is invalid");
-            checkIsInvalidParams(dateTime, "10000", "1000", "start time code is invalid");
+            await checkIsInvalidParams(dateTime, "", "1000", "start time code is invalid");
+            await checkIsInvalidParams(dateTime, "11", "1000", "start time code is invalid");
+            await checkIsInvalidParams(dateTime, "10:00", "1000", "start time code is invalid");
+            await checkIsInvalidParams(dateTime, "2400", "1000", "start time code is invalid");
+            await checkIsInvalidParams(dateTime, "10000", "1000", "start time code is invalid");
         });
 
-        suite("Compare to Invalid end time code", () =>
+        await describe("Compare to Invalid end time code", async () =>
         {
             const dateTime = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
 
-            checkIsInvalidParams(dateTime, "1000", "", "end time code is invalid");
-            checkIsInvalidParams(dateTime, "1000", "11", "end time code is invalid");
-            checkIsInvalidParams(dateTime, "1000", "10:00", "end time code is invalid");
-            checkIsInvalidParams(dateTime, "1000", "2400", "end time code is invalid");
-            checkIsInvalidParams(dateTime, "1000", "10000", "end time code is invalid");
+            await checkIsInvalidParams(dateTime, "1000", "", "end time code is invalid");
+            await checkIsInvalidParams(dateTime, "1000", "11", "end time code is invalid");
+            await checkIsInvalidParams(dateTime, "1000", "10:00", "end time code is invalid");
+            await checkIsInvalidParams(dateTime, "1000", "2400", "end time code is invalid");
+            await checkIsInvalidParams(dateTime, "1000", "10000", "end time code is invalid");
         });
 
-        suite("Compare different minutes", () =>
+        await describe("Compare different minutes", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 10:01", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 10:02", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2.timeCode, dateTime3.timeCode);
-            checkIsInvalidParams(dateTime1, dateTime3.timeCode, dateTime2.timeCode,
+            await checkIsFalse(dateTime1, dateTime2.timeCode, dateTime3.timeCode);
+            await checkIsInvalidParams(dateTime1, dateTime3.timeCode, dateTime2.timeCode,
                 "start time is greater than end time");
 
-            checkIsCorrect(dateTime2, dateTime1.timeCode, dateTime3.timeCode);
-            checkIsInvalidParams(dateTime2, dateTime3.timeCode, dateTime1.timeCode,
+            await checkIsCorrect(dateTime2, dateTime1.timeCode, dateTime3.timeCode);
+            await checkIsInvalidParams(dateTime2, dateTime3.timeCode, dateTime1.timeCode,
                 "start time is greater than end time");
 
-            checkIsFalse(dateTime3, dateTime1.timeCode, dateTime2.timeCode);
-            checkIsInvalidParams(dateTime3, dateTime2.timeCode, dateTime1.timeCode,
+            await checkIsFalse(dateTime3, dateTime1.timeCode, dateTime2.timeCode);
+            await checkIsInvalidParams(dateTime3, dateTime2.timeCode, dateTime1.timeCode,
                 "start time is greater than end time");
         });
 
-        suite("Compare different hours", () =>
+        await describe("Compare different hours", async () =>
         {
             const dateTime1 = new DateTime({ value: "2024-01-01 10:00", zone: "utc" });
             const dateTime2 = new DateTime({ value: "2024-01-01 11:00", zone: "utc" });
             const dateTime3 = new DateTime({ value: "2024-01-01 12:00", zone: "utc" });
 
-            checkIsFalse(dateTime1, dateTime2.timeCode, dateTime3.timeCode);
-            checkIsInvalidParams(dateTime1, dateTime3.timeCode, dateTime2.timeCode,
+            await checkIsFalse(dateTime1, dateTime2.timeCode, dateTime3.timeCode);
+            await checkIsInvalidParams(dateTime1, dateTime3.timeCode, dateTime2.timeCode,
                 "start time is greater than end time");
 
-            checkIsCorrect(dateTime2, dateTime1.timeCode, dateTime3.timeCode);
-            checkIsInvalidParams(dateTime2, dateTime3.timeCode, dateTime1.timeCode,
+            await checkIsCorrect(dateTime2, dateTime1.timeCode, dateTime3.timeCode);
+            await checkIsInvalidParams(dateTime2, dateTime3.timeCode, dateTime1.timeCode,
                 "start time is greater than end time");
 
-            checkIsFalse(dateTime3, dateTime1.timeCode, dateTime2.timeCode);
-            checkIsInvalidParams(dateTime3, dateTime2.timeCode, dateTime1.timeCode,
+            await checkIsFalse(dateTime3, dateTime1.timeCode, dateTime2.timeCode);
+            await checkIsInvalidParams(dateTime3, dateTime2.timeCode, dateTime1.timeCode,
                 "start time is greater than end time");
         });
     });

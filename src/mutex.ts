@@ -1,4 +1,4 @@
-import { Deferred } from "./deferred";
+import { Deferred } from "./deferred.js";
 
 
 export class Mutex

@@ -1,91 +1,114 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Delay } from "./delay";
-import { Duration } from "./duration";
+import { Duration } from "./duration.js";
+import { Delay } from "./delay.js";
+import { ApplicationException } from "@nivinjoseph/n-exception";
+import { DecoratorReplacementMethod, DecoratorTargetMethod, MethodDecoratorContext } from "./decorator-helpers.js";
 
-// public
-/**
- * @description Only apply to methods that return void or Promise<void>; Cares about first and last states including intermediary
- */
-export function throttle(delay: Duration): Function;
-export function throttle(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function throttle(delayOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+
+export function throttle<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void>(
+        delay: Duration
+    ): ThrottleMethodDecorator<This, Args, Return>;
+export function throttle<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void
+>(
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>
+): DecoratorReplacementMethod<This, Args>;
+export function throttle<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void>(
+        delayOrTarget: Duration | DecoratorTargetMethod<This, Args, Return>,
+        context?: MethodDecoratorContext<This, Args, Return>
+    ): ThrottleMethodDecorator<This, Args, Return> | DecoratorReplacementMethod<This, Args>
 {
-    given(delayOrTarget as object, "delayMsOrTarget").ensureHasValue().ensureIsObject();
     if (delayOrTarget instanceof Duration)
     {
-        const delayMs = delayOrTarget.toMilliSeconds();
+        const delay = delayOrTarget;
+        given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+            .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
 
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
+        const decorator: ThrottleMethodDecorator<This, Args, Return> = function (target, context)
         {
-            given(target as object, "target").ensureHasValue().ensureIsObject();
-            given(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            given(descriptor, "descriptor").ensureHasValue().ensureIsObject();
-
-            const original = descriptor.value;
-            const activeKey = Symbol.for(`__$_${propertyKey}_throttleIsActive`);
-            const scheduledCallKey = Symbol.for(`__$_${propertyKey}_throttleScheduledCall`);
-
-            descriptor.value = async function (...params: Array<any>): Promise<void>
-            {
-                (<any>this)[scheduledCallKey] = async (): Promise<void> =>
-                {
-                    await (original as Function).call(this, ...params);
-                };
-
-                if ((<any>this)[activeKey])
-                    return;
-
-                while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
-                {
-                    (<any>this)[activeKey] = true;
-                    const currentCall = (<any>this)[scheduledCallKey];
-                    (<any>this)[scheduledCallKey] = null;
-                    try
-                    {
-                        await (currentCall as Function)();
-                    }
-                    finally
-                    {
-                        await Delay.milliseconds(delayMs);
-                        (<any>this)[activeKey] = false;
-                    }
-                }
-            };
+            return createReplacementMethod(target, context, delay);
         };
+
+        return decorator;
     }
-    else
-    {
-        given(propertyKey as string, "propertyKey").ensureHasValue().ensureIsString();
-        given(descriptor as object, "descriptor").ensureHasValue().ensureIsObject();
 
-        const original = descriptor!.value;
-        const activeKey = Symbol.for(`__$_${propertyKey}_throttleIsActive`);
-        const scheduledCallKey = Symbol.for(`__$_${propertyKey}_throttleScheduledCall`);
+    const target = delayOrTarget;
+    if (context == null)
+        throw new ApplicationException("Context should not be null or undefined");
 
-        descriptor!.value = async function (...params: Array<any>): Promise<void>
-        {
-            (<any>this)[scheduledCallKey] = async (): Promise<void> =>
-            {
-                await (original as Function).call(this, ...params);
-            };
-
-            if ((<any>this)[activeKey])
-                return;
-
-            while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
-            {
-                (<any>this)[activeKey] = true;
-                const currentCall = (<any>this)[scheduledCallKey];
-                (<any>this)[scheduledCallKey] = null;
-                try
-                {
-                    await (currentCall as Function)();
-                }
-                finally
-                {
-                    (<any>this)[activeKey] = false;
-                }
-            }
-        };
-    }
+    return createReplacementMethod(target, context, null);
 }
+
+
+function createReplacementMethod<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void
+>(
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>,
+    delay: Duration | null
+): DecoratorReplacementMethod<This, Args>
+{
+    const { name, kind } = context;
+    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method", "throttle decorator can only be used on a method");
+
+    const activeKey = Symbol.for(`@nivinjoseph/n-util/throttle/${String(name)}/isActive`);
+    const scheduledCallKey = Symbol.for(`@nivinjoseph/n-util/throttle/${String(name)}/scheduledCall`);
+
+    context.addInitializer(function (this)
+    {
+        (<any>this)[activeKey] = false;
+        (<any>this)[scheduledCallKey] = null;
+    });
+
+    return async function (this: This, ...args: Args): Promise<void>
+    {
+        (<any>this)[scheduledCallKey] = async (): Promise<void> =>
+        {
+            await target.call(this, ...args);
+        };
+
+        if ((<any>this)[activeKey])
+            return;
+
+        while ((<any>this)[scheduledCallKey] != null && !(<any>this)[activeKey])
+        {
+            (<any>this)[activeKey] = true;
+            const currentCall: () => Promise<void> = (<any>this)[scheduledCallKey];
+            (<any>this)[scheduledCallKey] = null;
+            try
+            {
+                await currentCall();
+            }
+            finally
+            {
+                if (delay != null)
+                    await Delay.milliseconds(delay.toMilliSeconds());
+
+                (<any>this)[activeKey] = false;
+            }
+        }
+    };
+}
+
+
+
+
+export type ThrottleMethodDecorator<
+    This,
+    Args extends Array<any>,
+    Return extends Promise<void> | void
+> = (
+    target: DecoratorTargetMethod<This, Args, Return>,
+    context: MethodDecoratorContext<This, Args, Return>
+) => DecoratorReplacementMethod<This, Args>;

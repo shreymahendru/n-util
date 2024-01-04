@@ -1,5 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Serializable } from "./serializable";
+import { Serializable } from "./serializable.js";
 
 
 export class DtoFactory

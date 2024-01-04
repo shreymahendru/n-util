@@ -1,4 +1,4 @@
-import * as Mustache from "mustache";
+import Mustache from "mustache";
 import { given } from "@nivinjoseph/n-defensive";
 
 

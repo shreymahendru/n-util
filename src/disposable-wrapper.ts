@@ -1,5 +1,5 @@
 import { given } from "@nivinjoseph/n-defensive";
-import { Disposable } from "./disposable";
+import { Disposable } from "./disposable.js";
 
 // public
 export class DisposableWrapper implements Disposable

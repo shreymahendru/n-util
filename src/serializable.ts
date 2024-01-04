@@ -1,6 +1,9 @@
-import { ApplicationException, ArgumentException } from "@nivinjoseph/n-exception";
+import { ApplicationException } from "@nivinjoseph/n-exception";
 import { given } from "@nivinjoseph/n-defensive";
+import { ClassDefinition } from "./utility-types.js";
 
+//@ts-expect-error polyfill to use metadata object
+Symbol.metadata ??= Symbol("Symbol.metadata");
 
 export abstract class Serializable<TData extends object = {}>
 {
@@ -8,30 +11,32 @@ export abstract class Serializable<TData extends object = {}>
     {
         given(data, "data").ensureHasValue().ensureIsObject();
     }
-    
-    
+
+
     public serialize(): TData
     {
         const typeName = (<Object>this).getTypeName();
-        const propertyInfos = Utilities.getPropertyInfos(this, typeName);
-        
-        const serialized = propertyInfos.reduce<Record<string, any>>((acc, propInfo) =>
+
+        const fields = Utilities.fetchSerializableFieldsForObject(this);
+        const serialized = fields.reduce<Record<string, any>>((acc, field) =>
         {
-            const val = (this as any)[propInfo.name];
+            const val = field.target.call(this);
+            const serializationKey = field.key ?? field.name;
+
             if (val == null)
             {
-                acc[propInfo.serializationKey] = null;
+                acc[serializationKey] = null;
                 return acc;
             }
-            
+
             if (typeof val === "object")
             {
                 if (Array.isArray(val))
-                    acc[propInfo.serializationKey] = val.map((v) =>
+                    acc[serializationKey] = val.map((v) =>
                     {
                         if (v == null)
                             return null;
-                        
+
                         if (typeof v === "object")
                         {
                             if (v instanceof Serializable)
@@ -39,23 +44,23 @@ export abstract class Serializable<TData extends object = {}>
                             else
                                 return JSON.parse(JSON.stringify(v)) as unknown;
                         }
-                        
+
                         return v as unknown;
                     });
                 else
-                    acc[propInfo.serializationKey] = val instanceof Serializable
-                        ? val.serialize() : JSON.parse(JSON.stringify(val));   
+                    acc[serializationKey] = val instanceof Serializable
+                        ? val.serialize() : JSON.parse(JSON.stringify(val));
             }
             else
             {
-                acc[propInfo.serializationKey] = val;    
+                acc[serializationKey] = val;
             }
-            
+
             return acc;
         }, {});
-        
+
         serialized.$typename = typeName;
-        
+
         return serialized as TData;
     }
 }
@@ -65,13 +70,13 @@ export abstract class Serializable<TData extends object = {}>
 export class Deserializer
 {
     private static readonly _typeCache = new Map<string, object>();
-    
+
     /**
      * @static
      */
     private constructor() { }
 
-    
+
     public static hasType(typeName: string): boolean
     {
         // this is postel's law compliant
@@ -79,19 +84,19 @@ export class Deserializer
         if (typeName == null || typeof typeName !== "string" || typeName.isEmptyOrWhiteSpace()
             || !this._typeCache.has(typeName.trim()))
             return false;
-        
+
         return true;
     }
 
     public static registerType(type: object | Function): void
     {
         given(type, "type").ensureHasValue();
-        
+
         const typeName = (type as Object).getTypeName();
         if (!this._typeCache.has(typeName))
             this._typeCache.set(typeName, type);
     }
-    
+
     public static deserialize<T>(serialized: object): T
     {
         given(serialized, "serialized").ensureHasValue().ensureIsObject()
@@ -107,7 +112,7 @@ export class Deserializer
 
         if (typeof type === "object")
             type = type.constructor;
-        
+
         if (type.deserialize && typeof type.deserialize === "function")
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             return type.deserialize(serialized) as T;
@@ -160,149 +165,172 @@ export class Deserializer
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         return new type(serialized) as T;
     }
-    
+
     private static _getType(typeName: string): object | null
     {
         given(typeName, "typeName").ensureHasValue().ensureIsString();
         typeName = typeName.trim();
-        
+
         if (this._typeCache.has(typeName))
             return this._typeCache.get(typeName)!;
-        
+
         return null;
     }
 }
 
-// export function serialize(key?: string): Function
-// {
-//     given(key, "key").ensureIsString();
 
-//     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-//     { 
-//         given(target, "target").ensureHasValue().ensureIsObject()
-//             .ensure(t => t instanceof Serializable,
-//                 "serialize decorator must only be used on properties in subclasses of Serializable");
-        
-//         Deserializer.registerType(target);
 
-//         if (!descriptor.get)
-//             throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
-
-//         (descriptor.get as any).serializable = true;
-//         if (key && !key.isEmptyOrWhiteSpace())
-//             (descriptor.get as any).serializationKey = key.trim();
-//     };
-// }
-
-export function serialize(key: string): Function;
-export function serialize(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
-export function serialize(keyOrTarget?: unknown, propertyKey?: string, descriptor?: PropertyDescriptor): any
+export function serialize<Class extends Serializable>(
+    target: SerializableClass<Class>,
+    context: ClassDecoratorContext<SerializableClass<Class>>
+): void;
+export function serialize<Class extends Serializable, T>(
+    target: SerializableClassGetter<Class, T>,
+    context: ClassGetterDecoratorContext<Class, T>
+): void;
+export function serialize<Class extends Serializable, T>(
+    key: string
+): SerializeGetterDecorator<Class, T>;
+export function serialize<
+    Class extends Serializable,
+    T
+>(
+    keyOrTarget: string | SerializableClass<Class> | SerializableClassGetter<Class, T>,
+    context?: ClassDecoratorContext<SerializableClass<Class>> | ClassGetterDecoratorContext<Class, T>
+): SerializeGetterDecorator<Class, T> | void // eslint-disable-line @typescript-eslint/no-invalid-void-type
 {
-    if (keyOrTarget != null && typeof keyOrTarget === "object")
+    if (typeof keyOrTarget === "string")
     {
-        const target = keyOrTarget;
-        given(target, "target").ensureHasValue().ensureIsObject()
-            .ensure(t => t instanceof Serializable,
-                "serialize decorator must only be used on properties in subclasses of Serializable");
+        const key = keyOrTarget;
+        given(key, "key").ensureHasValue().ensureIsString();
 
-        Deserializer.registerType(target);
+        const decorator: SerializeGetterDecorator<Class, T> = function (target, context): void
+        {
+            Utilities.configureMetaOnContext(context, target, key);
+        };
 
-        if (!descriptor!.get)
-            throw new ArgumentException(propertyKey!, "serialize decorator must only be applied to getters");
-
-        (descriptor!.get as any).serializable = true;
+        return decorator;
     }
     else
     {
-        const key = keyOrTarget as string | null;
-        given(key as string, "key").ensureIsString();
-        
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-        {
-            given(target as object, "target").ensureHasValue().ensureIsObject()
-                .ensure(t => t instanceof Serializable,
-                    "serialize decorator must only be used on properties in subclasses of Serializable");
-
-            Deserializer.registerType(target);
-
-            if (!descriptor.get)
-                throw new ArgumentException(propertyKey, "serialize decorator must only be applied to getters");
-
-            (descriptor.get as any).serializable = true;
-            if (key != null && key.isNotEmptyOrWhiteSpace())
-                (descriptor.get as any).serializationKey = key.trim();
-        };
+        given(context, "context").ensureHasValue().ensureIsObject();
+        Utilities.configureMetaOnContext(context!, keyOrTarget);
     }
 }
 
-export function deserialize(target: Function): void
-{
-    given(target, "target").ensureHasValue().ensureIsFunction();
-    
-    Deserializer.registerType(target);
-}
 
 
 class Utilities
 {
-    private static readonly _typeCache = new Map<string, ReadonlyArray<PropertyInfo>>();
-    
-    private static readonly _internal: Array<string> = [];
-
-    private static readonly _forbidden = ["do", "if", "for", "let", "new", "try", "var", "case", "else", "with", "await", "break",
-        "catch", "class", "const", "super", "throw", "while", "yield", "delete", "export", "import", "return",
-        "switch", "default", "extends", "finally", "continue", "debugger", "function", "arguments", "typeof", "void"];
-    
-    public static getPropertyInfos(val: any, typeName: string): ReadonlyArray<PropertyInfo>
+    public static fetchSerializableFieldsForObject(val: Object): ReadonlyArray<SerializableFieldInfo>
     {
-        given(val as object, "val").ensureHasValue().ensureIsObject();
-        given(typeName, "typeName").ensureHasValue().ensureIsString();
-        
-        if (!Utilities._typeCache.has(typeName))
-            Utilities._typeCache.set(typeName, Utilities._getPropertyInfosInternal(val));
-        
-        return Utilities._typeCache.get(typeName)!;
+        const meta = val.constructor[Symbol.metadata];
+        if (meta == null)
+            return [];
+
+        const fields = meta[this._fetchSerializableFieldsKey()] as Array<SerializableFieldInfo> | undefined;
+        if (fields == null || fields.isEmpty)
+            return [];
+
+        const className = val.constructor.name;
+        given(className, className)
+            .ensure(
+                t =>
+                {
+                    const key = this._fetchSerializableClassKey(t);
+                    const isSerializable = val.constructor[Symbol.metadata]![key];
+                    return isSerializable === true;
+                },
+                `class '${className}' should have the serialize decorator`
+            );
+
+        return fields;
     }
-    
-    
-    private static _getPropertyInfosInternal(val: any): Array<PropertyInfo>
+
+    public static configureMetaOnContext<Class extends Serializable, T>(
+        context: ClassDecoratorContext<SerializableClass<Class>>
+            | ClassGetterDecoratorContext<Class, T>,
+        target: SerializableClass<Class> | SerializableClassGetter<Class, T>,
+        key?: string
+    ): void
     {
-        const propertyInfos = new Array<PropertyInfo>();
-        const prototype = Object.getPrototypeOf(val);
-        if (prototype === undefined || prototype === null)  // we are dealing with Object
-            return propertyInfos;
+        given(context, "context").ensureHasValue().ensureIsObject();
+        given(target, "target").ensureHasValue().ensureIsFunction();
+        given(key, "key").ensureIsString();
 
-        propertyInfos.push(...Utilities._getPropertyInfosInternal(prototype));
+        const kind = context.kind;
+        given(kind, "kind").ensure(t => ["getter", "class"].contains(t), "serialize can only be used on getters or class");
 
-        const propertyNames = Object.getOwnPropertyNames(val);
-        for (let name of propertyNames)
+        if (kind === "getter")
         {
-            name = name.trim();
-            if (name === "constructor" || name.startsWith("_") || name.startsWith("$") || Utilities._internal.some(t => t === name))
-                continue;
+            given(context, "context")
+                .ensure(t => !t.private, "property should not be private")
+                .ensure(t => !t.static, "property should not be static");
 
-            if (Utilities._forbidden.some(t => t === name))
-                throw new ApplicationException(`Class ${(<Object>val).getTypeName()} has a member with the forbidden name '${name}'. The following names are forbidden: ${Utilities._forbidden}.`);
+            const fieldInfo: SerializableFieldInfo = {
+                name: context.name.toString(),
+                target,
+                key
+            };
 
-            const descriptor = Object.getOwnPropertyDescriptor(val, name);
-            if (descriptor!.get && (descriptor!.get as any).serializable)
+            const fieldsKey = this._fetchSerializableFieldsKey();
+            const existingFields = context.metadata[fieldsKey] as ReadonlyArray<SerializableFieldInfo> | undefined ?? [];
+
+            context.metadata[fieldsKey] = [
+                ...existingFields.where(t => t.name !== context.name), // filtering out any info that might have been overridden
+                fieldInfo
+            ];
+
+            context.addInitializer(function (this: Class): void
             {
-                propertyInfos.push({
-                    name,
-                    descriptor: descriptor!,
-                    serializationKey: (descriptor!.get as any).serializationKey ?? name
-                });
-            }
+                const className = this.constructor.name;
+                given(className, "className")
+                    .ensure(
+                        t => this.constructor[Symbol.metadata]![Utilities._fetchSerializableClassKey(t)] === true,
+                        `class '${className}' does not have the serialize decorator`
+                    );
+            });
         }
+        else
+        {
+            given(target, "target")
+                .ensure(t => t.prototype instanceof Serializable, `class '${context.name}' decorated with serialize must extend Serializable`);
 
-        return propertyInfos;
+            Deserializer.registerType(target);
+
+            const key = Utilities._fetchSerializableClassKey(context.name!);
+            context.metadata[key] = true;
+        }
+    }
+
+
+    private static _fetchSerializableClassKey(className: string): symbol
+    {
+        given(className, "className").ensureHasValue().ensureIsString();
+        return Symbol.for(`@nivinjoseph/n-util/serializable/${className}/isSerializable`);
+    }
+
+    private static _fetchSerializableFieldsKey(): symbol
+    {
+        return Symbol.for("@nivinjoseph/n-util/serializable/fields");
     }
 }
 
 
-interface PropertyInfo
+export type SerializableClass<This extends Serializable> = ClassDefinition<This>;
+export type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
+
+
+
+export type SerializeGetterDecorator<Class extends Serializable, T> = (
+    target: SerializableClassGetter<Class, T>,
+    context: ClassGetterDecoratorContext<Class, T>
+) => void;
+
+
+interface SerializableFieldInfo
 {
+    target: Function;
     name: string;
-    descriptor: PropertyDescriptor;
-    serializationKey: string;
+    key?: string;
 }

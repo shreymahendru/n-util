@@ -1,4 +1,4 @@
-import * as SanitizeHtml from "sanitize-html";
+import SanitizeHtml from "sanitize-html";
 import { given } from "@nivinjoseph/n-defensive";
 
 
