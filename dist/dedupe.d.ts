@@ -1,6 +1,6 @@
-import { Duration } from "./duration";
-/**
- * @description Only apply to methods that return void or Promise<void>; Only cares about first state
- */
-export declare function dedupe(delay: Duration): Function;
-export declare function dedupe(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
+import { Duration } from "./duration.js";
+import { DecoratorReplacementMethod, DecoratorTargetMethod, MethodDecoratorContext } from "./decorator-helpers.js";
+export declare function dedupe<This, Args extends Array<any>, Return extends Promise<void> | void>(delay: Duration): DedupeMethodDecorator<This, Args, Return>;
+export declare function dedupe<This, Args extends Array<any>, Return extends Promise<void> | void>(target: DecoratorTargetMethod<This, Args, Return>, context: MethodDecoratorContext<This, Args, Return>): DecoratorReplacementMethod<This, Args>;
+export type DedupeMethodDecorator<This, Args extends Array<any>, Return extends Promise<void> | void> = (target: DecoratorTargetMethod<This, Args, Return>, context: MethodDecoratorContext<This, Args, Return>) => DecoratorReplacementMethod<This, Args>;
+//# sourceMappingURL=dedupe.d.ts.map

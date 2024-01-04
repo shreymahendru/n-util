@@ -1,13 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Uuid = void 0;
-const uuid = require("uuid");
+import * as uuid from "uuid";
 // public
-class Uuid {
+export class Uuid {
     constructor() { }
     static create() {
         return uuid.v4();
     }
 }
-exports.Uuid = Uuid;
 //# sourceMappingURL=uuid.js.map

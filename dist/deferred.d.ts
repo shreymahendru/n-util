@@ -7,3 +7,4 @@ export declare class Deferred<T> {
     resolve(value: T): void;
     reject(reason?: any): void;
 }
+//# sourceMappingURL=deferred.d.ts.map

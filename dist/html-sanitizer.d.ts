@@ -6,3 +6,4 @@ export declare class HtmlSanitizer {
     static sanitize(html: string): string;
     private static _createOptions;
 }
+//# sourceMappingURL=html-sanitizer.d.ts.map

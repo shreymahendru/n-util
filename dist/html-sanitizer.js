@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.HtmlSanitizer = void 0;
-const SanitizeHtml = require("sanitize-html");
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-class HtmlSanitizer {
+import SanitizeHtml from "sanitize-html";
+import { given } from "@nivinjoseph/n-defensive";
+export class HtmlSanitizer {
     /**
      * @static
      */
     constructor() { }
     static sanitize(html) {
-        (0, n_defensive_1.given)(html, "html").ensureHasValue().ensureIsString();
+        given(html, "html").ensureHasValue().ensureIsString();
         const sanitized = SanitizeHtml(html, this._createOptions());
         return sanitized;
     }
@@ -25,5 +22,4 @@ class HtmlSanitizer {
         };
     }
 }
-exports.HtmlSanitizer = HtmlSanitizer;
 //# sourceMappingURL=html-sanitizer.js.map

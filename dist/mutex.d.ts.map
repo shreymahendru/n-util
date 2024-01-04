@@ -1,0 +1,1 @@
+{"version":3,"file":"mutex.d.ts","sourceRoot":"","sources":["../src/mutex.ts"],"names":[],"mappings":"AAGA,qBAAa,KAAK;IAEd,OAAO,CAAC,QAAQ,CAAC,UAAU,CAAwB;IACnD,OAAO,CAAC,gBAAgB,CAAwB;;IAUzC,IAAI,IAAI,OAAO,CAAC,IAAI,CAAC;IAarB,OAAO,IAAI,IAAI;CAWzB"}

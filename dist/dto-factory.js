@@ -1,20 +1,16 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DtoFactory = void 0;
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const serializable_1 = require("./serializable");
-class DtoFactory {
+import { given } from "@nivinjoseph/n-defensive";
+import { Serializable } from "./serializable.js";
+export class DtoFactory {
     /**
      * @static
      */
     constructor() { }
     static create(value, keys) {
-        var _a;
-        (0, n_defensive_1.given)(value, "value").ensureHasValue().ensureIsObject();
-        (0, n_defensive_1.given)(keys, "keys").ensureHasValue().ensureIsArray();
-        const typename = (_a = value.$typename) !== null && _a !== void 0 ? _a : value.getTypeName();
+        given(value, "value").ensureHasValue().ensureIsObject();
+        given(keys, "keys").ensureHasValue().ensureIsArray();
+        const typename = value.$typename ?? value.getTypeName();
         let dto;
-        if (value instanceof serializable_1.Serializable) {
+        if (value instanceof Serializable) {
             const serialized = value.serialize();
             dto = keys.reduce((acc, k) => {
                 if (typeof k === "object") {
@@ -57,7 +53,7 @@ class DtoFactory {
                     if (typeof val === "function")
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                         return acc;
-                    if (val instanceof serializable_1.Serializable)
+                    if (val instanceof Serializable)
                         val = val.serialize();
                     acc[k] = val;
                     if (acc[k] == null)
@@ -71,5 +67,4 @@ class DtoFactory {
         return dto;
     }
 }
-exports.DtoFactory = DtoFactory;
 //# sourceMappingURL=dto-factory.js.map

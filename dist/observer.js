@@ -1,19 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Observer = void 0;
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const uuid_1 = require("./uuid");
-class Observer {
-    constructor(event) {
-        this._subMap = new Map();
-        (0, n_defensive_1.given)(event, "event").ensureHasValue().ensureIsString();
-        this._event = event.trim();
-    }
+import { given } from "@nivinjoseph/n-defensive";
+import { Uuid } from "./uuid.js";
+export class Observer {
+    _event;
+    _subMap = new Map();
     get event() { return this._event; }
     get hasSubscriptions() { return this._subMap.size > 0; }
+    constructor(event) {
+        given(event, "event").ensureHasValue().ensureIsString();
+        this._event = event.trim();
+    }
     subscribe(callback) {
-        (0, n_defensive_1.given)(callback, "callback").ensureHasValue().ensureIsFunction();
-        const key = uuid_1.Uuid.create();
+        given(callback, "callback").ensureHasValue().ensureIsFunction();
+        const key = Uuid.create();
         const subscription = {
             event: this._event,
             isUnsubscribed: false,
@@ -57,5 +55,4 @@ class Observer {
         this._subMap.delete(key);
     }
 }
-exports.Observer = Observer;
 //# sourceMappingURL=observer.js.map

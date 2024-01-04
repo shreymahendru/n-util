@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TypeHelper = void 0;
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const n_exception_1 = require("@nivinjoseph/n-exception");
-class TypeHelper {
+import { given } from "@nivinjoseph/n-defensive";
+import { ApplicationException } from "@nivinjoseph/n-exception";
+export class TypeHelper {
     /**
      * @static
      */
@@ -34,11 +31,11 @@ class TypeHelper {
         return null;
     }
     static enumTypeToTuples(enumClass) {
-        (0, n_defensive_1.given)(enumClass, "enumClass").ensureHasValue().ensureIsObject();
+        given(enumClass, "enumClass").ensureHasValue().ensureIsObject();
         return this._getEnumTuples(enumClass);
     }
     static impossible(_value, message) {
-        throw new n_exception_1.ApplicationException(message !== null && message !== void 0 ? message : `Invalid value: ${_value}`);
+        throw new ApplicationException(message ?? `Invalid value: ${_value}`);
     }
     static _getEnumTuples(enumType) {
         const keys = Object.keys(enumType);
@@ -58,7 +55,6 @@ class TypeHelper {
         return !isNaN(parsed) && isFinite(parsed);
     }
 }
-exports.TypeHelper = TypeHelper;
 // enum Foo
 // {
 //     bar = "BAR",

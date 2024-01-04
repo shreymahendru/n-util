@@ -19,3 +19,4 @@ export declare abstract class Make {
     static randomTextCode(numChars: number, caseInsensitive?: boolean): string;
     static randomNumericCode(numChars: number): string;
 }
+//# sourceMappingURL=make.d.ts.map

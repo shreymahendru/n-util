@@ -11,3 +11,4 @@ export interface ProfilerTrace {
     readonly message: string;
     readonly diffMs: number;
 }
+//# sourceMappingURL=profiler.d.ts.map

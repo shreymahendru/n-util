@@ -1,4 +1,4 @@
-import { Disposable } from "./disposable";
+import { Disposable } from "./disposable.js";
 export declare class BackgroundProcessor implements Disposable {
     private readonly _defaultErrorHandler;
     private readonly _breakIntervalMilliseconds;
@@ -13,3 +13,4 @@ export declare class BackgroundProcessor implements Disposable {
     dispose(killQueue?: boolean): Promise<void>;
     private _initiateBackgroundProcessing;
 }
+//# sourceMappingURL=background-processor.d.ts.map

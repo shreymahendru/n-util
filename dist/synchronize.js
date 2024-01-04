@@ -1,61 +1,43 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.synchronize = void 0;
-const tslib_1 = require("tslib");
-/* eslint-disable @typescript-eslint/return-await */
-const n_defensive_1 = require("@nivinjoseph/n-defensive");
-const delay_1 = require("./delay");
-const duration_1 = require("./duration");
-const mutex_1 = require("./mutex");
-function synchronize(delayOrTarget, propertyKey, descriptor) {
-    (0, n_defensive_1.given)(delayOrTarget, "delayOrTarget").ensureHasValue().ensureIsObject();
-    if (delayOrTarget instanceof duration_1.Duration) {
-        const delayMs = delayOrTarget.toMilliSeconds();
-        return function (target, propertyKey, descriptor) {
-            (0, n_defensive_1.given)(target, "target").ensureHasValue().ensureIsObject();
-            (0, n_defensive_1.given)(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-            (0, n_defensive_1.given)(descriptor, "descriptor").ensureHasValue().ensureIsObject();
-            const original = descriptor.value;
-            const mutexKey = Symbol.for(`__$_${propertyKey}_synchronizeMutex`);
-            descriptor.value = function (...params) {
-                var _a;
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    const mutex = (_a = this[mutexKey]) !== null && _a !== void 0 ? _a : new mutex_1.Mutex();
-                    this[mutexKey] = mutex;
-                    yield mutex.lock();
-                    try {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                        return yield original.call(this, ...params);
-                    }
-                    finally {
-                        yield delay_1.Delay.milliseconds(delayMs);
-                        mutex.release();
-                    }
-                });
-            };
+import { given } from "@nivinjoseph/n-defensive";
+import { Duration } from "./duration.js";
+import { Delay } from "./delay.js";
+import { Mutex } from "./mutex.js";
+import { ApplicationException } from "@nivinjoseph/n-exception";
+export function synchronize(delayOrTarget, context) {
+    if (delayOrTarget instanceof Duration) {
+        const delay = delayOrTarget;
+        given(delay, "delay").ensureIsObject().ensureIsInstanceOf(Duration)
+            .ensure(t => t.toMilliSeconds() > 0, "delay should be greater than 0ms");
+        const decorator = function (target, context) {
+            return createReplacementMethod(target, context, delay);
         };
+        return decorator;
     }
-    else {
-        (0, n_defensive_1.given)(propertyKey, "propertyKey").ensureHasValue().ensureIsString();
-        (0, n_defensive_1.given)(descriptor, "descriptor").ensureHasValue().ensureIsObject();
-        const original = descriptor.value;
-        const mutexKey = Symbol.for(`__$_${propertyKey}_synchronizeMutex`);
-        descriptor.value = function (...params) {
-            var _a;
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const mutex = (_a = this[mutexKey]) !== null && _a !== void 0 ? _a : new mutex_1.Mutex();
-                this[mutexKey] = mutex;
-                yield mutex.lock();
-                try {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                    return yield original.call(this, ...params);
-                }
-                finally {
-                    mutex.release();
-                }
-            });
-        };
-    }
+    const target = delayOrTarget;
+    if (context == null)
+        throw new ApplicationException("Context should not be null or undefined");
+    return createReplacementMethod(target, context, null);
 }
-exports.synchronize = synchronize;
+function createReplacementMethod(target, context, delay) {
+    const { name, kind } = context;
+    given(kind, "kind").ensureHasValue().ensureIsString().ensure(t => t === "method", "synchronize decorated can only be used on a method");
+    const mutexKey = Symbol.for(`@nivinjoseph/n-util/synchronize/${String(name)}/mutex`);
+    context.addInitializer(function () {
+        this[mutexKey] = new Mutex();
+    });
+    return async function (...args) {
+        const mutex = this[mutexKey];
+        await mutex.lock();
+        try {
+            const result = await target.call(this, ...args);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return result;
+        }
+        finally {
+            if (delay != null)
+                await Delay.milliseconds(delay.toMilliSeconds());
+            mutex.release();
+        }
+    };
+}
 //# sourceMappingURL=synchronize.js.map

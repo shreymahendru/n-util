@@ -1,4 +1,5 @@
-/// <reference types="node" />
+/// <reference types="node" resolution-mode="require"/>
+import { Buffer } from "buffer";
 export declare class ImageHelper {
     /**
      * @static
@@ -6,3 +7,4 @@ export declare class ImageHelper {
     private constructor();
     static dataUrlToBuffer(dataUrl: string): Buffer;
 }
+//# sourceMappingURL=image-helper.d.ts.map

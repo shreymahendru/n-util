@@ -4,6 +4,7 @@ export declare abstract class Delay {
     static seconds(value: number, canceller?: DelayCanceller): Promise<void>;
     static milliseconds(value: number, canceller?: DelayCanceller): Promise<void>;
 }
-export declare type DelayCanceller = {
+export type DelayCanceller = {
     cancel?(): void;
 };
+//# sourceMappingURL=delay.d.ts.map

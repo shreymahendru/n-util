@@ -17,3 +17,4 @@ export declare class Observer<T> implements Observable<T> {
     cancel(): void;
     private _cancel;
 }
+//# sourceMappingURL=observer.d.ts.map

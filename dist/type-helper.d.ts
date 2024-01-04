@@ -10,3 +10,4 @@ export declare class TypeHelper {
     private static _getEnumTuples;
     private static _isNumber;
 }
+//# sourceMappingURL=type-helper.d.ts.map

@@ -1,6 +1,6 @@
-import { Duration } from "./duration";
-/**
- * @description Only apply to methods that return void or Promise<void>; Cares about first and last states including intermediary
- */
-export declare function throttle(delay: Duration): Function;
-export declare function throttle(target: any, propertyKey: string, descriptor: PropertyDescriptor): void;
+import { Duration } from "./duration.js";
+import { DecoratorReplacementMethod, DecoratorTargetMethod, MethodDecoratorContext } from "./decorator-helpers.js";
+export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(delay: Duration): ThrottleMethodDecorator<This, Args, Return>;
+export declare function throttle<This, Args extends Array<any>, Return extends Promise<void> | void>(target: DecoratorTargetMethod<This, Args, Return>, context: MethodDecoratorContext<This, Args, Return>): DecoratorReplacementMethod<This, Args>;
+export type ThrottleMethodDecorator<This, Args extends Array<any>, Return extends Promise<void> | void> = (target: DecoratorTargetMethod<This, Args, Return>, context: MethodDecoratorContext<This, Args, Return>) => DecoratorReplacementMethod<This, Args>;
+//# sourceMappingURL=throttle.d.ts.map

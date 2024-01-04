@@ -6,3 +6,4 @@ export declare class Time {
     static isPast(time: number): boolean;
     static isFuture(time: number): boolean;
 }
+//# sourceMappingURL=time.d.ts.map
