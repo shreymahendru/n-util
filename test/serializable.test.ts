@@ -129,6 +129,29 @@ class Dummy2 extends Dummy
     }
 }
 
+@serialize("TEST")
+class SerializePrefix extends Serializable
+{
+    @serialize
+    public get field1(): string { return "SerializePrefix Field 1"; }
+
+    @serialize("newKeyForField2")
+    public get field2(): string { return "SerializePrefix Field 2"; }
+}
+
+@serialize
+class SerializePrefixChildNoPrefix extends SerializePrefix
+{
+    @serialize
+    public get field3(): string { return "SerializePrefixChildNoPrefix Field 3"; }
+}
+
+@serialize("PREFIX")
+class SerializePrefixChildWithPrefix extends SerializePrefix
+{
+    @serialize
+    public get field3(): string { return "SerializePrefixChildWithPrefix Field 3"; }
+}
 
 
 @serialize
@@ -145,7 +168,7 @@ class Dummy3 extends Dummy2
 }
 
 
-await describe("Serializable", async () =>
+await describe.only("Serializable", async () =>
 {
     await describe("serialize", async () =>
     {
@@ -262,5 +285,55 @@ await describe("Serializable", async () =>
             const deserializedDummy3 = Deserializer.deserialize<Dummy3>(serializedDummy3);
             assert.ok(deserializedDummy3 instanceof Dummy3);
         });
+    });
+
+    await test("with prefix", () =>
+    {
+        const newName = new SerializePrefix({});
+        const newNameSerialized = newName.serialize();
+
+        assert.deepStrictEqual(newNameSerialized, {
+            "field1": "SerializePrefix Field 1",
+            "newKeyForField2": "SerializePrefix Field 2",
+            "$typename": "TEST.SerializePrefix"
+        });
+
+        const deserialized = Deserializer.deserialize(newNameSerialized);
+
+        assert.ok(deserialized instanceof SerializePrefix);
+    });
+
+    await test("prefixed child with no prefix", () =>
+    {
+        const newName = new SerializePrefixChildNoPrefix({});
+        const newNameSerialized = newName.serialize();
+
+        assert.deepStrictEqual(newNameSerialized, {
+            "field1": "SerializePrefix Field 1",
+            "newKeyForField2": "SerializePrefix Field 2",
+            "field3": "SerializePrefixChildNoPrefix Field 3",
+            "$typename": "SerializePrefixChildNoPrefix"
+        });
+
+        const deserialized = Deserializer.deserialize(newNameSerialized);
+
+        assert.ok(deserialized instanceof SerializePrefixChildNoPrefix);
+    });
+
+    await test("prefixed child with prefix", () =>
+    {
+        const newName = new SerializePrefixChildWithPrefix({});
+        const newNameSerialized = newName.serialize();
+
+        assert.deepStrictEqual(newNameSerialized, {
+            "field1": "SerializePrefix Field 1",
+            "newKeyForField2": "SerializePrefix Field 2",
+            "field3": "SerializePrefixChildWithPrefix Field 3",
+            "$typename": "PREFIX.SerializePrefixChildWithPrefix"
+        });
+
+        const deserialized = Deserializer.deserialize(newNameSerialized);
+
+        assert.ok(deserialized instanceof SerializePrefixChildWithPrefix);
     });
 });

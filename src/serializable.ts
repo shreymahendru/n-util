@@ -89,14 +89,15 @@ export class Deserializer
         return true;
     }
 
-    public static registerType(type: SerializableClass<any>): void
+    public static registerType(type: SerializableClass<any>, serializeInfo?: SerializableClassInfo): void
     {
         given(type, "type").ensureHasValue()
             .ensure(t => t.prototype instanceof Serializable, "type does not extend Serializable");
+        given(serializeInfo, "serializeInfo").ensureIsObject();
 
-        const info = Utilities.fetchSerializableInfoForClass(type);
+        serializeInfo ??= Utilities.fetchSerializableInfoForClass(type);
 
-        const typeName = info.typeName;
+        const typeName = serializeInfo.typeName;
         if (!this._typeCache.has(typeName))
             this._typeCache.set(typeName, type);
     }
@@ -273,7 +274,6 @@ class Utilities
     {
         given(target, "target").ensureHasValue().ensureIsFunction();
 
-        console.log(target);
         const meta = target[Symbol.metadata];
         if (meta == null)
             throw new ApplicationException(`no metadata found on class ${target.getTypeName()}`);
@@ -337,14 +337,16 @@ class Utilities
 
             const prefix = key;
 
-            const serializeKey = this._fetchSerializableClassKey(context.name!);
-            context.metadata[serializeKey] = {
+            const info: SerializableClassInfo = {
                 className: target.getTypeName(),
                 prefix,
                 typeName: prefix != null && prefix.isNotEmptyOrWhiteSpace() ? `${prefix}.${context.name}` : target.getTypeName()
             };
 
-            Deserializer.registerType(target as SerializableClass<Class>);
+            const serializeKey = this._fetchSerializableClassKey(context.name!);
+            context.metadata[serializeKey] = info;
+
+            Deserializer.registerType(target as SerializableClass<Class>, info);
         }
     }
 
@@ -396,7 +398,7 @@ interface SerializableFieldInfo
 
 interface SerializableClassInfo
 {
-    name: string;
+    className: string;
     prefix?: string;
     typeName: string;
 }
