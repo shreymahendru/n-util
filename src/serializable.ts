@@ -184,21 +184,12 @@ export class Deserializer
 }
 
 
-
-
-export function serialize<Class extends Serializable>(
-    target: SerializableClass<Class>,
-    context: ClassDecoratorContext<SerializableClass<Class>>
-): void;
 export function serialize<Class extends Serializable, T>(
     target: SerializableClassGetter<Class, T>,
     context: ClassGetterDecoratorContext<Class, T>
 ): void;
-// export function serialize<Class extends Serializable>(
-//     prefix: string
-// ): SerializeClassDecorator<Class>;
-export function serialize<Class extends Serializable, T>(
-    key: string
+export function serialize<Class extends Serializable, T, K extends string>(
+    key: K extends "" ? never : K
 ): UniversalSerializeDecorator<Class, T>;
 export function serialize<
     Class extends Serializable,
@@ -335,12 +326,14 @@ class Utilities
             given(target, "target")
                 .ensure(t => t.prototype instanceof Serializable, `class '${context.name}' decorated with serialize must extend Serializable`);
 
-            const prefix = key;
+            const prefix = key!;
+
+            given(prefix, "prefix").ensureHasValue().ensureIsString();
 
             const info: SerializableClassInfo = {
                 className: target.getTypeName(),
                 prefix,
-                typeName: prefix != null && prefix.isNotEmptyOrWhiteSpace() ? `${prefix}.${context.name}` : target.getTypeName()
+                typeName: `${prefix}.${context.name}`
             };
 
             const serializeKey = this._fetchSerializableClassKey(context.name!);
@@ -367,15 +360,7 @@ class Utilities
 export type SerializableClass<This extends Serializable> = ClassDefinition<This>;
 export type SerializableClassGetter<This extends Serializable, T> = (this: This) => T;
 
-// export function serialize<Class extends Serializable>(
-//     target: SerializableClass<Class>,
-//     context: ClassDecoratorContext<SerializableClass<Class>>
-// ): void;
 
-// export type SerializeClassDecorator<Class extends Serializable> = (
-//     target: SerializableClass<Class>,
-//     context: ClassDecoratorContext<SerializableClass<Class>>
-// ) =>  void;
 
 export type SerializeClassDecorator<Class extends Serializable> = (
     target: SerializableClass<Class>,
